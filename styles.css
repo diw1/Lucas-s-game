@@ -265,6 +265,14 @@ h3 {
   background: var(--sun);
 }
 
+.play-picker label.is-unavailable span {
+  color: #7c8780;
+  background: #e4e8e1;
+  cursor: not-allowed;
+  opacity: 0.58;
+  box-shadow: none;
+}
+
 .primary-action {
   min-width: 140px;
   padding: 12px 24px;

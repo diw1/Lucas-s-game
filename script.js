@@ -784,6 +784,11 @@ const homeButton = document.querySelector("#homeButton");
 const roundPopup = document.querySelector("#roundPopup");
 const popupTitle = document.querySelector("#popupTitle");
 const popupDetail = document.querySelector("#popupDetail");
+const modeRadios = Array.from(document.querySelectorAll('[name="mode"]'));
+const recipeModeInputs = Array.from(document.querySelectorAll('[name="playMode"][value="fusion"], [name="playMode"][value="diffusion"]'));
+
+modeRadios.forEach(input => input.addEventListener("change", syncRecipeModeAvailability));
+syncRecipeModeAvailability();
 
 startForm.addEventListener("submit", event => {
   event.preventDefault();
@@ -792,6 +797,7 @@ startForm.addEventListener("submit", event => {
   state.difficulty = formData.get("difficulty") || "easy";
   state.mode = formData.get("mode") || "plant";
   state.playMode = formData.get("playMode") || "shape";
+  if (state.mode === "zombie" && isRecipePlayMode(state.playMode)) state.playMode = "shape";
   if (isRecipeMode()) state.mode = "plant";
   state.round = 1;
   state.score = Number(localStorage.getItem("plantGuessStars") || "0");
@@ -822,6 +828,7 @@ if (launchParams.get("autostart") === "1") {
   if (difficultyInput) difficultyInput.checked = true;
   if (modeInput) modeInput.checked = true;
   if (playModeInput) playModeInput.checked = true;
+  syncRecipeModeAvailability();
   requestAnimationFrame(() => startForm.requestSubmit());
 }
 
@@ -1017,7 +1024,26 @@ function currentSettings() {
 }
 
 function isRecipeMode() {
-  return state.playMode === "fusion" || state.playMode === "diffusion";
+  return isRecipePlayMode(state.playMode);
+}
+
+function isRecipePlayMode(playMode) {
+  return playMode === "fusion" || playMode === "diffusion";
+}
+
+function syncRecipeModeAvailability() {
+  const selectedMode = document.querySelector('[name="mode"]:checked')?.value || "plant";
+  const isZombie = selectedMode === "zombie";
+  recipeModeInputs.forEach(input => {
+    const label = input.closest("label");
+    input.disabled = isZombie;
+    label?.classList.toggle("is-unavailable", isZombie);
+    label?.setAttribute("aria-disabled", String(isZombie));
+  });
+  if (isZombie && recipeModeInputs.some(input => input.checked)) {
+    const shapeInput = document.querySelector('[name="playMode"][value="shape"]');
+    if (shapeInput) shapeInput.checked = true;
+  }
 }
 
 function activeCharacters() {
