@@ -1,0 +1,323 @@
+{
+  "sources": [
+    {
+      "name": "Peashooter",
+      "file": "Peashooter1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/85/Peashooter1.png/revision/latest?cb=20230804102104",
+      "local": "assets/characters/peashooter.png"
+    },
+    {
+      "name": "Sunflower",
+      "file": "Sunflower1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/e/e2/Sunflower1.png/revision/latest?cb=20090521221033",
+      "local": "assets/characters/sunflower.png"
+    },
+    {
+      "name": "Cherry Bomb",
+      "file": "CherryBomb1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/e/e2/CherryBomb1.png/revision/latest?cb=20090520000629",
+      "local": "assets/characters/cherry-bomb.png"
+    },
+    {
+      "name": "Wall-nut",
+      "file": "Wall-nut1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/c0/Wall-nut1.png/revision/latest?cb=20090521221605",
+      "local": "assets/characters/wall-nut.png"
+    },
+    {
+      "name": "Potato Mine",
+      "file": "Potato Mine1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/f/f2/Potato_Mine1.png/revision/latest?cb=20090521220546",
+      "local": "assets/characters/potato-mine.png"
+    },
+    {
+      "name": "Snow Pea",
+      "file": "SnowPea1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/6/6a/SnowPea1.png/revision/latest?cb=20090520000717",
+      "local": "assets/characters/snow-pea.png"
+    },
+    {
+      "name": "Chomper",
+      "file": "Chomper1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/a/a3/Chomper1.png/revision/latest?cb=20090521220057",
+      "local": "assets/characters/chomper.png"
+    },
+    {
+      "name": "Repeater",
+      "file": "Repeater1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/9c/Repeater1.png/revision/latest?cb=20090521220801",
+      "local": "assets/characters/repeater.png"
+    },
+    {
+      "name": "Puff-shroom",
+      "file": "Puff-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/d/d7/Puff-shroom1.png/revision/latest?cb=20090521220734",
+      "local": "assets/characters/puff-shroom.png"
+    },
+    {
+      "name": "Sun-shroom",
+      "file": "Sun-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/a/a6/Sun-shroom1.png/revision/latest?cb=20090521221047",
+      "local": "assets/characters/sun-shroom.png"
+    },
+    {
+      "name": "Fume-shroom",
+      "file": "Fume-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/89/Fume-shroom1.png/revision/latest?cb=20090521220200",
+      "local": "assets/characters/fume-shroom.png"
+    },
+    {
+      "name": "Hypno-shroom",
+      "file": "Hypno-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/99/Hypno-shroom1.png/revision/latest?cb=20090521220315",
+      "local": "assets/characters/hypno-shroom.png"
+    },
+    {
+      "name": "Ice-shroom",
+      "file": "Ice-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/92/Ice-shroom1.png/revision/latest?cb=20090521220336",
+      "local": "assets/characters/ice-shroom.png"
+    },
+    {
+      "name": "Doom-shroom",
+      "file": "Doom-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/e/e1/Doom-shroom1.png/revision/latest?cb=20090521220131",
+      "local": "assets/characters/doom-shroom.png"
+    },
+    {
+      "name": "Lily Pad",
+      "file": "LilyPad1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/1/11/LilyPad1.png/revision/latest?cb=20090520005928",
+      "local": "assets/characters/lily-pad.png"
+    },
+    {
+      "name": "Squash",
+      "file": "Squash1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/1/10/Squash1.png/revision/latest?cb=20090521221004",
+      "local": "assets/characters/squash.png"
+    },
+    {
+      "name": "Threepeater",
+      "file": "Threepeater1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/5/52/Threepeater1.png/revision/latest?cb=20090521221134",
+      "local": "assets/characters/threepeater.png"
+    },
+    {
+      "name": "Tangle Kelp",
+      "file": "TangleKelp1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/6/6d/TangleKelp1.png/revision/latest?cb=20120711194531",
+      "local": "assets/characters/tangle-kelp.png"
+    },
+    {
+      "name": "Jalapeno",
+      "file": "Jalapeno1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/8b/Jalapeno1.png/revision/latest?cb=20090521220347",
+      "local": "assets/characters/jalapeno.png"
+    },
+    {
+      "name": "Spikeweed",
+      "file": "Spikeweed1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/b/bf/Spikeweed1.png/revision/latest?cb=20090521220940",
+      "local": "assets/characters/spikeweed.png"
+    },
+    {
+      "name": "Torchwood",
+      "file": "Torchwood1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/a/a4/Torchwood1.png/revision/latest?cb=20090521221152",
+      "local": "assets/characters/torchwood.png"
+    },
+    {
+      "name": "Tall-nut",
+      "file": "Tall-nut1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/2/29/Tall-nut1.png/revision/latest?cb=20181031052432",
+      "local": "assets/characters/tall-nut.png"
+    },
+    {
+      "name": "Cactus",
+      "file": "Cactus1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/35/Cactus1.png/revision/latest?cb=20090521213129",
+      "local": "assets/characters/cactus.png"
+    },
+    {
+      "name": "Blover",
+      "file": "Blover1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/cb/Blover1.png/revision/latest?cb=20090521213035",
+      "local": "assets/characters/blover.png"
+    },
+    {
+      "name": "Split Pea",
+      "file": "SplitPea1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/9b/SplitPea1.png/revision/latest?cb=20090520010147",
+      "local": "assets/characters/split-pea.png"
+    },
+    {
+      "name": "Starfruit",
+      "file": "Starfruit1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/c3/Starfruit1.png/revision/latest?cb=20090521221018",
+      "local": "assets/characters/starfruit.png"
+    },
+    {
+      "name": "Pumpkin",
+      "file": "Pumpkin1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/35/Pumpkin1.png/revision/latest?cb=20090521220749",
+      "local": "assets/characters/pumpkin.png"
+    },
+    {
+      "name": "Magnet-shroom",
+      "file": "Magnet-shroom1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/4/4c/Magnet-shroom1.png/revision/latest?cb=20090521220424",
+      "local": "assets/characters/magnet-shroom.png"
+    },
+    {
+      "name": "Cabbage-pult",
+      "file": "Cabbage-pult1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/2/23/Cabbage-pult1.png/revision/latest?cb=20090521213104",
+      "local": "assets/characters/cabbage-pult.png"
+    },
+    {
+      "name": "Kernel-pult",
+      "file": "Kernel-pult1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/c4/Kernel-pult1.png/revision/latest?cb=20090521220358",
+      "local": "assets/characters/kernel-pult.png"
+    },
+    {
+      "name": "Garlic",
+      "file": "Garlic1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/39/Garlic1.png/revision/latest?cb=20090521220220",
+      "local": "assets/characters/garlic.png"
+    },
+    {
+      "name": "Umbrella Leaf",
+      "file": "Umbrella Leaf1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/92/Umbrella_Leaf1.png/revision/latest?cb=20090521221505",
+      "local": "assets/characters/umbrella-leaf.png"
+    },
+    {
+      "name": "Melon-pult",
+      "file": "Melon-pult1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/87/Melon-pult1.png/revision/latest?cb=20090521220449",
+      "local": "assets/characters/melon-pult.png"
+    },
+    {
+      "name": "Zombie",
+      "file": "Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/5/54/Zombie1.png/revision/latest?cb=20230830191507",
+      "local": "assets/characters/zombie.png"
+    },
+    {
+      "name": "Flag Zombie",
+      "file": "Flag Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/0/0d/Flag_Zombie1.png/revision/latest?cb=20230830191505",
+      "local": "assets/characters/flag-zombie.png"
+    },
+    {
+      "name": "Conehead Zombie",
+      "file": "Conehead Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/c2/Conehead_Zombie1.png/revision/latest?cb=20230830191504",
+      "local": "assets/characters/conehead-zombie.png"
+    },
+    {
+      "name": "Buckethead Zombie",
+      "file": "Buckethead Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/c/c7/Buckethead_Zombie1.png/revision/latest?cb=20230830190441",
+      "local": "assets/characters/buckethead-zombie.png"
+    },
+    {
+      "name": "Newspaper Zombie",
+      "file": "Newspaper Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/e/eb/Newspaper_Zombie1.png/revision/latest?cb=20230830191501",
+      "local": "assets/characters/newspaper-zombie.png"
+    },
+    {
+      "name": "Screen Door Zombie",
+      "file": "Screen Door Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/6/63/Screen_Door_Zombie1.png/revision/latest?cb=20240925082937",
+      "local": "assets/characters/screen-door-zombie.png"
+    },
+    {
+      "name": "Football Zombie",
+      "file": "FootballZombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/33/FootballZombie1.png/revision/latest?cb=20151226133814",
+      "local": "assets/characters/football-zombie.png"
+    },
+    {
+      "name": "Pole Vaulting Zombie",
+      "file": "Pole Vaulting Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/f/fe/Pole_Vaulting_Zombie1.png/revision/latest?cb=20230830191502",
+      "local": "assets/characters/pole-vaulting-zombie.png"
+    },
+    {
+      "name": "Dancing Zombie",
+      "file": "Dancing Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/b/b6/Dancing_Zombie1.png/revision/latest?cb=20240924114121",
+      "local": "assets/characters/dancing-zombie.png"
+    },
+    {
+      "name": "Ducky Tube Zombie",
+      "file": "Ducky Tube Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/f/fc/Ducky_Tube_Zombie1.png/revision/latest?cb=20230830191417",
+      "local": "assets/characters/ducky-tube-zombie.png"
+    },
+    {
+      "name": "Snorkel Zombie",
+      "file": "Snorkel Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/7/7d/Snorkel_Zombie1.png/revision/latest?cb=20230830191416",
+      "local": "assets/characters/snorkel-zombie.png"
+    },
+    {
+      "name": "Zomboni",
+      "file": "Zomboni1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/1/16/Zomboni1.png/revision/latest?cb=20250305115710",
+      "local": "assets/characters/zomboni.png"
+    },
+    {
+      "name": "Dolphin Rider Zombie",
+      "file": "Dolphin Rider Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/37/Dolphin_Rider_Zombie1.png/revision/latest?cb=20230830191313",
+      "local": "assets/characters/dolphin-rider-zombie.png"
+    },
+    {
+      "name": "Jack-in-the-Box Zombie",
+      "file": "Jack-in-the-Box Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/9/90/Jack-in-the-Box_Zombie1.png/revision/latest?cb=20230830191306",
+      "local": "assets/characters/jack-in-the-box-zombie.png"
+    },
+    {
+      "name": "Balloon Zombie",
+      "file": "Balloon Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/6/68/Balloon_Zombie1.png/revision/latest?cb=20230830191308",
+      "local": "assets/characters/balloon-zombie.png"
+    },
+    {
+      "name": "Digger Zombie",
+      "file": "Digger Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/d/dc/Digger_Zombie1.png/revision/latest?cb=20230830191309",
+      "local": "assets/characters/digger-zombie.png"
+    },
+    {
+      "name": "Pogo Zombie",
+      "file": "Pogo Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/82/Pogo_Zombie1.png/revision/latest?cb=20230830191310",
+      "local": "assets/characters/pogo-zombie.png"
+    },
+    {
+      "name": "Bungee Zombie",
+      "file": "Bungee Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/3/33/Bungee_Zombie1.png/revision/latest?cb=20230830191305",
+      "local": "assets/characters/bungee-zombie.png"
+    },
+    {
+      "name": "Ladder Zombie",
+      "file": "Ladder Zombie1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/2/25/Ladder_Zombie1.png/revision/latest?cb=20230830191304",
+      "local": "assets/characters/ladder-zombie.png"
+    },
+    {
+      "name": "Gargantuar",
+      "file": "Gargantuar1.png",
+      "url": "https://static.wikia.nocookie.net/plantsvszombies/images/8/89/Gargantuar1.png/revision/latest?cb=20240925054023",
+      "local": "assets/characters/gargantuar.png"
+    }
+  ],
+  "failures": []
+}
