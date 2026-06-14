@@ -753,6 +753,7 @@ const state = {
   fusionRecipe: null,
   pool: [],
   choices: [],
+  diffusionSelection: [],
   cluesLeft: 0,
   lives: 0,
   cluesUsed: 0,
@@ -854,7 +855,7 @@ function startRound() {
     state.pool = fusionRecipes.filter(recipe => recipe.exists).slice(0, fusionPoolSize());
     state.fusionRecipe = nextFusionRecipe(state.pool);
     state.target = diffusionAnswerChoice(state.fusionRecipe);
-    state.choices = buildDiffusionChoices(state.target, state.pool, settings.choices);
+    state.choices = buildDiffusionPlantChoices(state.fusionRecipe, state.pool, settings.choices);
   } else {
     state.pool = activeCharacters().slice(0, settings.poolSize);
     state.fusionRecipe = null;
@@ -865,6 +866,7 @@ function startRound() {
   state.lives = settings.lives;
   state.cluesUsed = 0;
   state.finished = false;
+  state.diffusionSelection = [];
 
   greeting.textContent = isRecipeMode() ? `${state.player}, guess the ${state.playMode}.` : `${state.player}, guess the ${state.mode}.`;
   roundLabel.textContent = `Round ${state.round} · ${capitalize(state.difficulty)} · ${capitalize(state.mode)} · ${capitalize(state.playMode)}`;
@@ -903,8 +905,9 @@ function renderPlantGrid() {
   state.choices.forEach(plant => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "plant-card";
+    card.className = state.playMode === "diffusion" ? "plant-card diffusion-plant-card" : "plant-card";
     card.dataset.name = plant.name;
+    card.dataset.choiceId = plant.choiceId || plant.name;
     card.innerHTML = `${renderChoiceImage(plant)}<span class="plant-name">${plant.name}</span>`;
     card.addEventListener("click", () => guessPlant(plant));
     plantGrid.append(card);
@@ -913,6 +916,10 @@ function renderPlantGrid() {
 
 function guessPlant(plant) {
   if (state.finished) return;
+  if (state.playMode === "diffusion") {
+    guessDiffusionPlant(plant);
+    return;
+  }
   const card = plantGrid.querySelector(`[data-name="${cssEscape(plant.name)}"]`);
 
   if (plant.name === state.target.name) {
@@ -954,6 +961,72 @@ function guessPlant(plant) {
   }
 }
 
+function guessDiffusionPlant(plant) {
+  const choiceId = plant.choiceId || plant.name;
+  const alreadySelected = state.diffusionSelection.findIndex(choice => choice.choiceId === choiceId);
+  if (alreadySelected >= 0) {
+    state.diffusionSelection.splice(alreadySelected, 1);
+    renderDiffusionBoard();
+    syncDiffusionSelectionCards();
+    setMessage("Pick two plants that make this fusion.");
+    return;
+  }
+  if (state.diffusionSelection.length >= 2) return;
+
+  state.diffusionSelection.push(plant);
+  renderDiffusionBoard();
+  syncDiffusionSelectionCards();
+
+  if (state.diffusionSelection.length < 2) {
+    setMessage("Pick one more plant.");
+    return;
+  }
+
+  const selectedNames = state.diffusionSelection.map(choice => choice.name);
+  if (samePlantSet(selectedNames, state.target.inputs)) {
+    state.finished = true;
+    state.score += Math.max(1, state.lives + state.cluesLeft);
+    localStorage.setItem("plantGuessStars", String(state.score));
+    revealAnswer();
+    setMessage(`Correct! ${state.target.name} makes it.`, "win");
+    markCorrectCard();
+    disableRoundControls();
+    updateHud();
+    showRoundPopup("Correct!", `${state.target.name} · next round...`);
+    window.setTimeout(() => {
+      state.round += 1;
+      startRound();
+    }, 1500);
+    return;
+  }
+
+  state.lives -= 1;
+  markDiffusionSelection("is-wrong");
+  setMessage(`${selectedNames.join(" + ")} is not the recipe.`, "miss");
+  updateHud();
+
+  if (state.lives <= 0) {
+    state.finished = true;
+    revealAnswer();
+    setMessage(`The answer was ${state.target.name}.`, "miss");
+    markCorrectCard();
+    disableRoundControls();
+    showRoundPopup("Out of hearts!", `${state.target.name} · next round...`);
+    window.setTimeout(() => {
+      state.round += 1;
+      startRound();
+    }, 2300);
+    return;
+  }
+
+  window.setTimeout(() => {
+    state.diffusionSelection = [];
+    renderDiffusionBoard();
+    syncDiffusionSelectionCards();
+    setMessage("Try another pair.");
+  }, 800);
+}
+
 function revealAnswer() {
   mysteryArt.classList.toggle("is-hidden", isRecipeMode());
   hintStack.classList.remove("show");
@@ -966,6 +1039,13 @@ function revealAnswer() {
 }
 
 function disableRoundControls() {
+  if (state.playMode === "diffusion") {
+    plantGrid.querySelectorAll("button").forEach(button => {
+      button.disabled = true;
+    });
+    clueButton.disabled = true;
+    return;
+  }
   plantGrid.querySelectorAll("button").forEach(button => {
     if (button.dataset.name !== state.target.name) button.disabled = true;
   });
@@ -973,6 +1053,18 @@ function disableRoundControls() {
 }
 
 function markCorrectCard() {
+  if (state.playMode === "diffusion") {
+    const remaining = plantNameCounts(state.target.inputs);
+    plantGrid.querySelectorAll("button").forEach(button => {
+      const name = button.dataset.name;
+      if (remaining.get(name) > 0) {
+        button.classList.remove("is-selected", "is-wrong");
+        button.classList.add("is-correct");
+        remaining.set(name, remaining.get(name) - 1);
+      }
+    });
+    return;
+  }
   const card = plantGrid.querySelector(`[data-name="${cssEscape(state.target.name)}"]`);
   if (card) card.classList.add("is-correct");
 }
@@ -1111,11 +1203,21 @@ function buildFusionChoices(target, count) {
   return shuffle([target, ...others]);
 }
 
-function buildDiffusionChoices(target, pool, count) {
-  const allChoices = pool.map(diffusionAnswerChoice);
-  const choiceCount = Math.min(count, allChoices.length);
-  const others = shuffle(allChoices.filter(choice => choice.recipeKey !== target.recipeKey)).slice(0, choiceCount - 1);
-  return shuffle([target, ...others]);
+function buildDiffusionPlantChoices(recipe, pool, count) {
+  const requiredNames = recipe.inputs;
+  const requiredCounts = plantNameCounts(requiredNames);
+  const candidateNames = uniqueNames(pool.flatMap(item => item.inputs))
+    .filter(name => plants.some(plant => plant.name === name))
+    .filter(name => !requiredCounts.has(name));
+  const choiceCount = Math.max(requiredNames.length, count);
+  const names = shuffle([
+    ...requiredNames,
+    ...shuffle(candidateNames).slice(0, Math.max(0, choiceCount - requiredNames.length))
+  ]);
+  return names.map((name, index) => ({
+    ...findPlantByName(name),
+    choiceId: `diffusion-${index}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
+  }));
 }
 
 function uniqueChoices(choices) {
@@ -1145,6 +1247,7 @@ function renderFusionBoard(revealed = false) {
 function renderDiffusionBoard(revealed = false) {
   const result = fusionResultChoice(state.fusionRecipe);
   const [first, second] = state.fusionRecipe.inputs.map(findPlantByName);
+  const [selectedFirst, selectedSecond] = state.diffusionSelection;
   fusionBoard.innerHTML = `
     <div class="fusion-card fusion-result-card">
       ${renderFusionChoiceImage(result)}
@@ -1152,14 +1255,25 @@ function renderDiffusionBoard(revealed = false) {
     </div>
     <div class="fusion-op">=</div>
     <div class="fusion-card">
-      ${revealed ? renderCharacterImage(first) : '<div class="fusion-question">?</div>'}
-      <span>${revealed ? first.name : "First plant"}</span>
+      ${renderDiffusionSlot(revealed ? first : selectedFirst, "First plant")}
     </div>
     <div class="fusion-op">+</div>
     <div class="fusion-card">
-      ${revealed ? renderCharacterImage(second) : '<div class="fusion-question">?</div>'}
-      <span>${revealed ? second.name : "Second plant"}</span>
+      ${renderDiffusionSlot(revealed ? second : selectedSecond, "Second plant")}
     </div>
+  `;
+}
+
+function renderDiffusionSlot(plant, fallbackLabel) {
+  if (!plant) {
+    return `
+      <div class="fusion-question">?</div>
+      <span>${fallbackLabel}</span>
+    `;
+  }
+  return `
+    ${renderCharacterImage(plant)}
+    <span>${plant.name}</span>
   `;
 }
 
@@ -1211,6 +1325,38 @@ function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5);
 }
 
+function uniqueNames(names) {
+  return [...new Set(names)];
+}
+
+function plantNameCounts(names) {
+  const counts = new Map();
+  names.forEach(name => counts.set(name, (counts.get(name) || 0) + 1));
+  return counts;
+}
+
+function samePlantSet(selectedNames, targetNames) {
+  if (selectedNames.length !== targetNames.length) return false;
+  const counts = plantNameCounts(targetNames);
+  selectedNames.forEach(name => counts.set(name, (counts.get(name) || 0) - 1));
+  return [...counts.values()].every(count => count === 0);
+}
+
+function syncDiffusionSelectionCards() {
+  const selectedIds = new Set(state.diffusionSelection.map(choice => choice.choiceId));
+  plantGrid.querySelectorAll("button").forEach(button => {
+    button.classList.toggle("is-selected", selectedIds.has(button.dataset.choiceId));
+    button.classList.remove("is-wrong");
+  });
+}
+
+function markDiffusionSelection(className) {
+  const selectedIds = new Set(state.diffusionSelection.map(choice => choice.choiceId));
+  plantGrid.querySelectorAll("button").forEach(button => {
+    if (selectedIds.has(button.dataset.choiceId)) button.classList.add(className);
+  });
+}
+
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -1221,20 +1367,8 @@ function cssEscape(value) {
 }
 
 function renderChoiceImage(choice) {
-  if (choice.diffusion) return renderDiffusionChoiceImage(choice);
   if (choice.fusion) return renderFusionChoiceImage(choice);
   return renderCharacterImage(choice);
-}
-
-function renderDiffusionChoiceImage(choice) {
-  const [first, second] = choice.inputs.map(findPlantByName);
-  return `
-    <div class="diffusion-pair-art">
-      ${renderCharacterImage(first)}
-      <span class="diffusion-mini-plus">+</span>
-      ${renderCharacterImage(second)}
-    </div>
-  `;
 }
 
 function renderFusionChoiceImage(choice) {
