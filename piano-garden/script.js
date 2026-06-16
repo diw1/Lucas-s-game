@@ -2,12 +2,18 @@ const LANES = 3;
 const NOTES = [
   { note: "C", key: "a", solfege: "Do", lane: 0, plant: "peashooter", image: "../assets/characters/peashooter.png" },
   { note: "D", key: "s", solfege: "Re", lane: 1, plant: "sunflower", image: "../assets/characters/sunflower.png" },
+  { note: "Eb", key: "w", solfege: "Me", lane: 1, plant: "snowpea", image: "../assets/characters/snow-pea.png" },
   { note: "E", key: "d", solfege: "Mi", lane: 2, plant: "wallnut", image: "../assets/characters/wall-nut.png" },
   { note: "F", key: "f", solfege: "Fa", lane: 0, plant: "snowpea", image: "../assets/characters/snow-pea.png" },
+  { note: "F#", key: "t", solfege: "Fi", lane: 0, plant: "starfruit", image: "../assets/characters/starfruit.png" },
   { note: "G", key: "g", solfege: "Sol", lane: 1, plant: "repeater", image: "../assets/characters/repeater.png" },
   { note: "A", key: "h", solfege: "La", lane: 2, plant: "starfruit", image: "../assets/characters/starfruit.png" },
+  { note: "Bb", key: "u", solfege: "Te", lane: 2, plant: "snowpea", image: "../assets/characters/snow-pea.png" },
   { note: "B", key: "j", solfege: "Ti", lane: 0, plant: "cabbage", image: "../assets/characters/cabbage-pult.png" },
-  { note: "C2", key: "k", solfege: "Do", lane: 1, plant: "cherry", image: "../assets/characters/cherry-bomb.png" }
+  { note: "C2", key: "k", solfege: "Do", lane: 1, plant: "cherry", image: "../assets/characters/cherry-bomb.png" },
+  { note: "D2", key: "l", solfege: "Re", lane: 1, plant: "cabbage", image: "../assets/characters/cabbage-pult.png" },
+  { note: "Eb2", key: ";", solfege: "Me", lane: 2, plant: "snowpea", image: "../assets/characters/snow-pea.png" },
+  { note: "F2", key: "'", solfege: "Fa", lane: 0, plant: "cherry", image: "../assets/characters/cherry-bomb.png" }
 ];
 
 const SONGS = [
@@ -333,6 +339,83 @@ const SONGS = [
       ["C", "D", "E", "G", "A", "B", "C2", "B"],
       ["C2", "G", "E", "C", "G", "E", "C"]
     ]
+  },
+  {
+    title: "Pokemon Theme - Lead Sheet",
+    shortTitle: "Pokemon Lead",
+    tempo: "Theme 4/4",
+    hard: true,
+    measures: [
+      ["A", "A", "A", "A", "A"],
+      ["G", "E", "C", "C"],
+      ["A", "A", "G", "F"],
+      ["G"],
+      ["F", "Bb", "Bb", "Bb"],
+      ["A", "G", "F", "F"],
+      ["A", "A", "G", "F"],
+      ["A"]
+    ]
+  },
+  {
+    title: "Pokemon Theme - Piano Page 1",
+    shortTitle: "Pokemon Piano",
+    tempo: "Theme 4/4",
+    hard: true,
+    measures: [
+      ["A", "A", "A", "A", "A"],
+      ["G", "E", "C", "C"],
+      ["A", "A", "G", "F"],
+      ["G"],
+      ["F", "Bb", "Bb", "Bb"],
+      ["A", "G", "F", "F"],
+      ["A", "A", "G", "F"],
+      ["A"],
+      ["A", "A", "A", "A", "A"],
+      ["G", "E", "C", "C"],
+      ["A", "A", "G", "F"],
+      ["G"],
+      ["C", "C", "C", "C", "A"],
+      ["G", "F", "F"],
+      ["A", "Bb", "A", "G", "F", "A"],
+      ["G", "C", "D", "E"]
+    ]
+  },
+  {
+    title: "Plants vs Zombies Theme - Right Hand",
+    shortTitle: "PVZ Theme",
+    tempo: "Theme 4/4",
+    hard: true,
+    measures: [
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["G", "A", "Bb", "C2", "Bb", "A", "G", "F#"],
+      ["F#", "G", "A", "Bb", "C2", "D2", "Eb2"],
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["G", "A", "Bb", "C2", "Bb", "A", "G", "F#"],
+      ["F#", "G", "A", "Bb", "C2", "D2", "Eb2"],
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["Bb", "C2", "Bb", "D2", "Bb", "G"],
+      ["Bb", "G", "D2", "G"],
+      ["D2", "Bb", "C2", "A", "G"],
+      ["F2", "D2", "C2", "Bb"],
+      ["D2", "Bb", "F#", "G"],
+      ["F2", "D2", "C2", "Bb"],
+      ["D2", "Bb", "G"],
+      ["D2", "Eb2", "D2", "C2", "Bb", "A", "G", "F#"],
+      ["F#", "G", "A", "Bb", "C2", "D2", "Eb2", "D2"],
+      ["F2", "Eb2", "D2", "C2", "Bb"],
+      ["D2", "C2", "Bb", "A", "G"],
+      ["G"],
+      ["G", "A", "Bb", "C2", "D2"],
+      ["Eb2", "D2", "C2", "Bb", "D2", "C2", "G"]
+    ]
   }
 ];
 
@@ -588,8 +671,17 @@ function parseCustomSongInput(value) {
   const measures = sourceMeasures
     .map((measure) => measure
       .toUpperCase()
+      .replace(/D[\s-]*2/g, "D2")
+      .replace(/E[\s-]*(B|♭)[\s-]*2/g, "Eb2")
+      .replace(/F[\s-]*2/g, "F2")
       .replace(/C[\s-]*2/g, "C2")
-      .match(/\bC2\b|\b[ABCDEFG]\b/g) || [])
+      .replace(/E[\s-]*(B|♭)/g, "Eb")
+      .replace(/D[\s-]*#/g, "Eb")
+      .replace(/F[\s-]*#/g, "F#")
+      .replace(/G[\s-]*(B|♭)/g, "F#")
+      .replace(/A[\s-]*#/g, "Bb")
+      .replace(/B[\s-]*(B|♭)/g, "Bb")
+      .match(/Eb2|D2|F2|C2|Bb|Eb|F#|[ABCDEFG]/g) || [])
     .filter((measure) => measure.length > 0)
     .map((measure) => measure.filter((note) => VALID_NOTE_NAMES.has(note)));
 
@@ -611,7 +703,7 @@ function parseCustomSongInput(value) {
 function loadCustomSong() {
   const song = parseCustomSongInput(dom.customSongInput.value);
   if (!song) {
-    setMessage("Paste notes like C D E F | G A B C2.");
+    setMessage("Paste notes like C D Eb F# | G A Bb C2 D2.");
     dom.customSongInput.focus();
     return;
   }
@@ -1076,7 +1168,22 @@ function ensureAudio() {
 function playPianoTone(noteName) {
   if (!state.soundOn) return;
   ensureAudio();
-  const frequencies = { C: 261.63, D: 293.66, E: 329.63, F: 349.23, G: 392, A: 440, B: 493.88, C2: 523.25 };
+  const frequencies = {
+    C: 261.63,
+    D: 293.66,
+    Eb: 311.13,
+    E: 329.63,
+    F: 349.23,
+    "F#": 369.99,
+    G: 392,
+    A: 440,
+    Bb: 466.16,
+    B: 493.88,
+    C2: 523.25,
+    D2: 587.33,
+    Eb2: 622.25,
+    F2: 698.46
+  };
   const ctx = state.audioContext;
   const frequency = frequencies[noteName] || 261.63;
   const output = ctx.createGain();

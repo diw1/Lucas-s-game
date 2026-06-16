@@ -205,6 +205,10 @@ h1 {
   background: #e7ebff;
 }
 
+.licensed-song {
+  background: #ffe6f0;
+}
+
 .theme-tools {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(280px, 0.9fr);
@@ -601,7 +605,7 @@ h1 {
 .keyboard {
   min-height: 116px;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
   gap: 6px;
 }
 
