@@ -333,92 +333,11 @@ const SONGS = [
       ["C", "D", "E", "G", "A", "B", "C2", "B"],
       ["C2", "G", "E", "C", "G", "E", "C"]
     ]
-  },
-  {
-    title: "Lawn Groove",
-    shortTitle: "Lawn Groove",
-    tempo: "PVZ-style 4/4",
-    hard: true,
-    measures: [
-      ["C", "E", "G", "E", "D", "F", "A", "F"],
-      ["E", "G", "B", "G", "F", "A", "C2", "A"],
-      ["G", "E", "C", "D", "E", "G", "A", "G"],
-      ["F", "D", "C", "E", "F", "A", "G", "E"],
-      ["C", "E", "G", "C2", "B", "A", "G", "E"],
-      ["D", "F", "A", "G", "E", "D", "C"]
-    ]
-  },
-  {
-    title: "Zombie Waltz",
-    shortTitle: "Zombie Waltz",
-    tempo: "PVZ-style 3/4",
-    hard: true,
-    measures: [
-      ["E", "G", "E", "C", "E", "G"],
-      ["F", "A", "F", "D", "F", "A"],
-      ["G", "B", "G", "E", "G", "B"],
-      ["A", "C2", "A", "F", "A", "C2"],
-      ["B", "G", "E", "F", "G", "A"],
-      ["G", "E", "C", "D", "E", "C"]
-    ]
-  },
-  {
-    title: "Pocket Battle",
-    shortTitle: "Pocket Battle",
-    tempo: "Pokemon-style 4/4",
-    hard: true,
-    measures: [
-      ["G", "G", "A", "B", "C2", "B", "A", "G"],
-      ["E", "G", "A", "C2", "B", "A", "G", "E"],
-      ["F", "F", "G", "A", "B", "A", "G", "F"],
-      ["D", "F", "G", "B", "A", "G", "F", "D"],
-      ["E", "G", "B", "C2", "B", "G", "E", "D"],
-      ["C", "D", "E", "G", "A", "G", "E", "C"]
-    ]
-  },
-  {
-    title: "Monster Route",
-    shortTitle: "Monster Route",
-    tempo: "Pokemon-style 4/4",
-    hard: true,
-    measures: [
-      ["C", "D", "E", "G", "E", "D", "C", "D"],
-      ["E", "F", "G", "A", "G", "F", "E", "G"],
-      ["A", "G", "F", "E", "D", "E", "F", "G"],
-      ["E", "G", "A", "C2", "A", "G", "E", "D"],
-      ["C", "E", "G", "B", "C2", "B", "G", "E"],
-      ["D", "F", "A", "C2", "A", "F", "D", "C"]
-    ]
-  },
-  {
-    title: "Block Lullaby",
-    shortTitle: "Block Lullaby",
-    tempo: "Minecraft-style 4/4",
-    hard: true,
-    measures: [
-      ["C", "E", "G", "E", "C", "D", "E", "G"],
-      ["A", "G", "E", "D", "C", "D", "E", "C"],
-      ["F", "A", "C2", "A", "F", "E", "D", "C"],
-      ["E", "G", "B", "G", "E", "D", "C", "D"],
-      ["C", "E", "G", "A", "G", "E", "D", "C"],
-      ["F", "E", "D", "C", "E", "G", "C2"]
-    ]
-  },
-  {
-    title: "Minecart Echo",
-    shortTitle: "Minecart Echo",
-    tempo: "Minecraft-style 6/8",
-    hard: true,
-    measures: [
-      ["C", "G", "E", "G", "C2", "G"],
-      ["D", "A", "F", "A", "C2", "A"],
-      ["E", "B", "G", "B", "C2", "B"],
-      ["F", "A", "C2", "A", "F", "D"],
-      ["G", "E", "C", "E", "G", "C2"],
-      ["C2", "B", "G", "E", "D", "C"]
-    ]
   }
 ];
+
+const CUSTOM_SONG_INDEX = SONGS.length;
+const VALID_NOTE_NAMES = new Set(NOTES.map((item) => item.note));
 
 const DIFFICULTIES = {
   practice: {
@@ -458,6 +377,10 @@ const dom = {
   fxLayer: document.querySelector("#fxLayer"),
   keyboard: document.querySelector("#keyboard"),
   songButtons: Array.from(document.querySelectorAll("[data-song]")),
+  customSongButton: document.querySelector("#customSongButton"),
+  customSongInput: document.querySelector("#customSongInput"),
+  loadCustomButton: document.querySelector("#loadCustomButton"),
+  clearCustomButton: document.querySelector("#clearCustomButton"),
   difficultyButtons: Array.from(document.querySelectorAll("[data-difficulty]")),
   songLabel: document.querySelector("#songLabel"),
   sheetMusic: document.querySelector("#sheetMusic"),
@@ -499,13 +422,39 @@ const state = {
   plants: [],
   nextZombieAt: 0,
   lastFrameAt: performance.now(),
+  customSong: null,
   audioContext: null
 };
 
 let stageWidth = 0;
 
 function currentSong() {
-  return SONGS[state.songIndex];
+  if (state.songIndex === CUSTOM_SONG_INDEX) {
+    return state.customSong || SONGS[0];
+  }
+  return SONGS[state.songIndex] || SONGS[0];
+}
+
+function songByIndex(index) {
+  if (index === CUSTOM_SONG_INDEX) return state.customSong;
+  return SONGS[index] || null;
+}
+
+function refreshSongButtons() {
+  dom.songButtons.forEach((button) => {
+    button.classList.toggle("is-selected", Number(button.dataset.song) === state.songIndex);
+  });
+  dom.customSongButton.disabled = !state.customSong;
+  dom.customSongButton.textContent = state.customSong
+    ? `Imported (${state.customSong.measures.length})`
+    : "Imported Theme";
+}
+
+function selectSong(index) {
+  if (!songByIndex(index)) return;
+  state.songIndex = index;
+  refreshSongButtons();
+  resetGame();
 }
 
 function currentMeasure() {
@@ -629,6 +578,61 @@ function setMessage(text) {
   dom.message.textContent = text;
 }
 
+function parseCustomSongInput(value) {
+  const lines = value
+    .trim()
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const sourceMeasures = lines.length > 1 ? lines : value.split("|");
+  const measures = sourceMeasures
+    .map((measure) => measure
+      .toUpperCase()
+      .replace(/C[\s-]*2/g, "C2")
+      .match(/\bC2\b|\b[ABCDEFG]\b/g) || [])
+    .filter((measure) => measure.length > 0)
+    .map((measure) => measure.filter((note) => VALID_NOTE_NAMES.has(note)));
+
+  const validMeasures = measures.filter((measure) => measure.length > 0);
+  const totalNotes = validMeasures.reduce((total, measure) => total + measure.length, 0);
+  if (totalNotes < 4) {
+    return null;
+  }
+
+  return {
+    title: "Imported Theme Practice",
+    shortTitle: "Imported",
+    tempo: "Custom",
+    hard: totalNotes >= 28,
+    measures: validMeasures.map((measure) => measure.slice(0, 12)).slice(0, 16)
+  };
+}
+
+function loadCustomSong() {
+  const song = parseCustomSongInput(dom.customSongInput.value);
+  if (!song) {
+    setMessage("Paste notes like C D E F | G A B C2.");
+    dom.customSongInput.focus();
+    return;
+  }
+  state.customSong = song;
+  state.songIndex = CUSTOM_SONG_INDEX;
+  refreshSongButtons();
+  resetGame();
+  setMessage(`Imported ${song.measures.length} measures. Press Demo or Start.`);
+}
+
+function clearCustomSong() {
+  state.customSong = null;
+  dom.customSongInput.value = "";
+  if (state.songIndex === CUSTOM_SONG_INDEX) {
+    state.songIndex = 0;
+  }
+  refreshSongButtons();
+  resetGame();
+  setMessage("Imported song cleared.");
+}
+
 function startGame() {
   if (state.demoing) {
     stopDemo({ message: false, render: false });
@@ -663,6 +667,7 @@ function resetGame() {
   dom.endOverlay.classList.add("is-hidden");
   dom.startButton.textContent = "Start";
   setMessage(`Press Start for ${currentSong().title}.`);
+  refreshSongButtons();
   renderLesson();
   refreshHud();
   refreshDifficultyButtons();
@@ -1150,12 +1155,12 @@ dom.playAgainButton.addEventListener("click", resetGame);
 dom.songButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const nextSongIndex = Number(button.dataset.song);
-    if (!Number.isInteger(nextSongIndex) || !SONGS[nextSongIndex]) return;
-    state.songIndex = nextSongIndex;
-    dom.songButtons.forEach((item) => item.classList.toggle("is-selected", item === button));
-    resetGame();
+    if (!Number.isInteger(nextSongIndex)) return;
+    selectSong(nextSongIndex);
   });
 });
+dom.loadCustomButton.addEventListener("click", loadCustomSong);
+dom.clearCustomButton.addEventListener("click", clearCustomSong);
 dom.difficultyButtons.forEach((button) => {
   button.addEventListener("click", () => {
     if (!DIFFICULTIES[button.dataset.difficulty]) return;

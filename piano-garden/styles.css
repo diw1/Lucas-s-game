@@ -182,6 +182,11 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.song-button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
 .song-button.is-selected,
 .difficulty-button.is-selected {
   background: #fff0b0;
@@ -196,8 +201,70 @@ h1 {
   background: #e8f6da;
 }
 
-.themed-song {
+.custom-song {
   background: #e7ebff;
+}
+
+.theme-tools {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 0.9fr);
+  gap: 10px;
+  padding: 8px;
+}
+
+.theme-sources,
+.custom-loader {
+  min-width: 0;
+  border: 3px solid var(--outline);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 244, 0.88);
+  padding: 8px;
+}
+
+.theme-sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-sources span {
+  font-weight: 950;
+}
+
+.theme-sources a {
+  min-height: 34px;
+  display: inline-grid;
+  place-items: center;
+  padding: 5px 9px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius);
+  background: #e8f6da;
+  color: var(--ink);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.custom-loader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.custom-loader textarea {
+  min-width: 0;
+  min-height: 44px;
+  max-height: 96px;
+  resize: vertical;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius);
+  background: #fffdf4;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 7px 9px;
 }
 
 .difficulty-button[data-difficulty="rush"] {
@@ -675,6 +742,7 @@ h1 {
   .hud,
   .song-picker,
   .difficulty-picker,
+  .theme-tools,
   .lesson-bar {
     grid-template-columns: 1fr auto;
   }
@@ -694,6 +762,16 @@ h1 {
 
   .difficulty-picker {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .theme-tools,
+  .custom-loader {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-loader .primary-button,
+  .custom-loader .icon-button {
+    width: 100%;
   }
 
   .stage {
