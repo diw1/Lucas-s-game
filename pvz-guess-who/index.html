@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lucas's PvZ Guess Who</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="startScreen" class="start-screen" aria-labelledby="gameTitle">
+        <div class="brand-lockup">
+          <div class="seed-badge" aria-hidden="true">
+            <span></span>
+          </div>
+          <div>
+            <p class="kicker">PvZ classics + Fusion</p>
+            <h1 id="gameTitle">Lucas's PvZ Guess Who</h1>
+          </div>
+        </div>
+
+        <form id="startForm" class="start-panel">
+          <label class="name-field" for="playerName">
+            <span>Name</span>
+            <input id="playerName" name="playerName" autocomplete="given-name" value="Lucas" maxlength="16" />
+          </label>
+
+          <fieldset class="difficulty-picker" aria-label="Choose difficulty">
+            <legend>Difficulty</legend>
+            <label>
+              <input type="radio" name="difficulty" value="easy" checked />
+              <span>Easy</span>
+            </label>
+            <label>
+              <input type="radio" name="difficulty" value="medium" />
+              <span>Medium</span>
+            </label>
+            <label>
+              <input type="radio" name="difficulty" value="hard" />
+              <span>Hard</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="mode-picker" aria-label="Choose what to guess">
+            <legend>Guess</legend>
+            <label>
+              <input type="radio" name="mode" value="plant" checked />
+              <span>Plant</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="zombie" />
+              <span>Zombie</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="play-picker" aria-label="Choose game mode">
+            <legend>Mode</legend>
+            <label>
+              <input type="radio" name="playMode" value="shape" checked />
+              <span>Shape</span>
+            </label>
+            <label>
+              <input type="radio" name="playMode" value="hints" />
+              <span>Hints</span>
+            </label>
+            <label>
+              <input type="radio" name="playMode" value="fusion" />
+              <span>Fusion</span>
+            </label>
+            <label>
+              <input type="radio" name="playMode" value="diffusion" />
+              <span>Diffusion</span>
+            </label>
+          </fieldset>
+
+          <button class="primary-action" type="submit">Start</button>
+        </form>
+      </section>
+
+      <section id="gameScreen" class="game-screen is-hidden" aria-live="polite">
+        <header class="top-bar">
+          <div>
+            <p id="roundLabel" class="kicker">Round 1</p>
+            <h2 id="greeting">Who am I?</h2>
+          </div>
+          <div class="top-actions">
+            <button id="newPlantButton" class="icon-text-button" type="button" title="New plant">
+              <span aria-hidden="true">↻</span>
+              <span>New</span>
+            </button>
+            <button id="homeButton" class="icon-button" type="button" title="Home" aria-label="Home">⌂</button>
+          </div>
+        </header>
+
+        <section class="mystery-strip">
+          <div class="mystery-portrait" aria-hidden="true">
+            <div id="mysteryArt" class="mystery-art"></div>
+            <div class="big-question">?</div>
+            <div id="fusionBoard" class="fusion-board"></div>
+            <div id="hintStack" class="hint-stack"></div>
+            <div id="answerReveal" class="answer-reveal"></div>
+          </div>
+          <div class="scoreboard" aria-label="Round status">
+            <div>
+              <span class="score-label">Clues</span>
+              <strong id="questionsLeft">0</strong>
+            </div>
+            <div>
+              <span class="score-label">Hearts</span>
+              <strong id="livesLeft">0</strong>
+            </div>
+            <div>
+              <span class="score-label">Stars</span>
+              <strong id="scoreValue">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="choice-board" aria-label="Character choices">
+          <div class="choice-bar">
+            <div id="messageBanner" class="message-banner">Guess the shape.</div>
+            <button id="clueButton" class="small-action" type="button">Clue</button>
+          </div>
+          <div id="answerLog" class="answer-log" aria-label="Clues"></div>
+          <div id="plantGrid" class="plant-grid"></div>
+        </section>
+      </section>
+
+      <div id="roundPopup" class="round-popup is-hidden" role="status" aria-live="polite">
+        <div class="round-popup-card">
+          <p id="popupTitle">Correct!</p>
+          <span id="popupDetail">Next round...</span>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

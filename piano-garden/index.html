@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lucas's Piano Garden vs Zombies</title>
+    <link rel="stylesheet" href="styles.css?v=franchise-style-20260616" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="hud">
+        <div class="title-lockup">
+          <p class="eyebrow">Piano practice prototype</p>
+          <h1>Piano Garden vs Zombies</h1>
+        </div>
+
+        <section class="stats" aria-label="Game stats">
+          <div>
+            <span>Garden</span>
+            <strong id="gardenHealth">5</strong>
+          </div>
+          <div>
+            <span>Combo</span>
+            <strong id="comboCount">0</strong>
+          </div>
+          <div>
+            <span>Stars</span>
+            <strong id="starCount">0</strong>
+          </div>
+        </section>
+
+        <button id="restartButton" class="icon-button" type="button" title="Restart" aria-label="Restart">↻</button>
+      </header>
+
+      <section class="song-picker" aria-label="Choose song">
+        <button class="song-button mid-song is-selected" type="button" data-song="0">Jingle Bells</button>
+        <button class="song-button mid-song" type="button" data-song="1">Saints</button>
+        <button class="song-button mid-song" type="button" data-song="2">Yankee</button>
+        <button class="song-button danger-song" type="button" data-song="3">Scale Sprint</button>
+        <button class="song-button danger-song" type="button" data-song="4">Arpeggio Storm</button>
+        <button class="song-button danger-song" type="button" data-song="5">Boss Ode</button>
+        <button class="song-button danger-song" type="button" data-song="6">Canon Run</button>
+        <button class="song-button danger-song" type="button" data-song="7">Broken Chords</button>
+        <button class="song-button danger-song" type="button" data-song="8">Volcano Scale</button>
+        <button class="song-button danger-song" type="button" data-song="9">Garden Chase</button>
+        <button class="song-button danger-song" type="button" data-song="10">Thunder Steps</button>
+        <button class="song-button danger-song" type="button" data-song="11">Final Boss</button>
+        <button class="song-button danger-song" type="button" data-song="12">Ninja Scale</button>
+        <button class="song-button danger-song" type="button" data-song="13">Moon Run</button>
+        <button class="song-button danger-song" type="button" data-song="14">Pirate Jig</button>
+        <button class="song-button danger-song" type="button" data-song="15">Robot March</button>
+        <button class="song-button danger-song" type="button" data-song="16">Dragon Etude</button>
+        <button class="song-button danger-song" type="button" data-song="17">Saints Rush</button>
+        <button class="song-button danger-song" type="button" data-song="18">Minor Maze</button>
+        <button class="song-button danger-song" type="button" data-song="19">Bells Remix</button>
+        <button class="song-button danger-song" type="button" data-song="20">Sky Ladder</button>
+        <button class="song-button danger-song" type="button" data-song="21">Zombie Finale</button>
+        <button class="song-button themed-song" type="button" data-song="22">Lawn Groove</button>
+        <button class="song-button themed-song" type="button" data-song="23">Zombie Waltz</button>
+        <button class="song-button themed-song" type="button" data-song="24">Pocket Battle</button>
+        <button class="song-button themed-song" type="button" data-song="25">Monster Route</button>
+        <button class="song-button themed-song" type="button" data-song="26">Block Lullaby</button>
+        <button class="song-button themed-song" type="button" data-song="27">Minecart Echo</button>
+      </section>
+
+      <section class="difficulty-picker" aria-label="Choose difficulty">
+        <button class="difficulty-button is-selected" type="button" data-difficulty="practice">Practice</button>
+        <button class="difficulty-button" type="button" data-difficulty="rush">Zombie Rush</button>
+        <button class="difficulty-button" type="button" data-difficulty="boss">Boss Mode</button>
+      </section>
+
+      <section class="lesson-bar" aria-label="Piano target">
+        <div class="plant-meter">
+          <img src="../assets/characters/sunflower.png" alt="" />
+          <div>
+            <span>Plant Power</span>
+            <div class="meter-track">
+              <div id="plantPower" class="meter-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="target-panel">
+          <span id="songLabel">Jingle Bells</span>
+          <div id="sheetMusic" class="sheet-music"></div>
+          <div id="notePattern" class="note-pattern"></div>
+        </div>
+
+        <div class="lesson-actions">
+          <button id="soundButton" class="icon-button" type="button" title="Sound" aria-label="Sound">♪</button>
+          <button id="demoButton" class="primary-button secondary-button" type="button">Demo</button>
+          <button id="startButton" class="primary-button" type="button">Start</button>
+        </div>
+      </section>
+
+      <section class="stage" aria-label="Piano garden battlefield">
+        <div class="lane-labels" aria-hidden="true">
+          <span>Melody</span>
+          <span>Rhythm</span>
+          <span>Chord</span>
+        </div>
+        <div id="battlefield" class="battlefield"></div>
+        <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
+      </section>
+
+      <section class="piano-zone" aria-label="Piano keyboard">
+        <p id="message" class="message">Press Start, then play the glowing notes.</p>
+        <div id="keyboard" class="keyboard"></div>
+      </section>
+
+      <div id="endOverlay" class="end-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+        <div class="end-card">
+          <p id="endKicker">Victory</p>
+          <h2 id="endTitle">The garden is safe.</h2>
+          <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js?v=franchise-style-20260616"></script>
+  </body>
+</html>

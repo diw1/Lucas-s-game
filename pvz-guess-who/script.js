@@ -1373,7 +1373,7 @@ function renderChoiceImage(choice) {
 
 function renderFusionChoiceImage(choice) {
   if (choice.blank) return '<div class="blank-square" aria-hidden="true"></div>';
-  if (choice.image) return `<img src="assets/fusions/${choice.image}" alt="${choice.name}" draggable="false" />`;
+  if (choice.image) return `<img src="../assets/fusions/${choice.image}" alt="${choice.name}" draggable="false" />`;
   const plant = plants.find(item => item.name === choice.name);
   if (plant) return renderCharacterImage(plant);
   return '<div class="fusion-name-art" aria-hidden="true">Fusion</div>';
@@ -1381,7 +1381,7 @@ function renderFusionChoiceImage(choice) {
 
 function renderCharacterImage(character) {
   const file = characterImageFiles[character.name] || `${slugify(character.name)}.png`;
-  const path = `assets/characters/${file}`;
+  const path = `../assets/characters/${file}`;
   return `<img src="${path}" alt="${character.name}" draggable="false" />`;
 }
 

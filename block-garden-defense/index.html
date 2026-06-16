@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lucas's Block Garden Defense</title>
+    <link rel="stylesheet" href="styles.css?v=creative-20260616b" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="hud">
+        <div class="title-lockup">
+          <p class="eyebrow">Private mini prototype</p>
+          <h1>Lucas's Block Garden Defense</h1>
+        </div>
+
+        <div class="status-strip" aria-label="Game status">
+          <div class="status-pill">
+            <span>Sun</span>
+            <strong id="sunCount">225</strong>
+          </div>
+          <div class="status-pill">
+            <span>Wave</span>
+            <strong id="waveCount">1/10</strong>
+          </div>
+          <div class="status-pill">
+            <span>Base</span>
+            <strong id="baseCount">3</strong>
+          </div>
+        </div>
+
+        <button id="restartButton" class="icon-button" type="button" title="Restart" aria-label="Restart">↻</button>
+      </header>
+
+      <section class="setup-panel" aria-label="Game setup and tools">
+        <div class="control-group">
+          <span>Mode</span>
+          <div class="segmented-control" role="group" aria-label="Choose mode">
+            <button class="option-button is-selected" type="button" data-mode="campaign">Campaign</button>
+            <button class="option-button" type="button" data-mode="creative">Creative</button>
+          </div>
+          <small id="modeStatus" class="unlock-status">6 random plants this run.</small>
+        </div>
+
+        <div class="control-group">
+          <span>Level</span>
+          <div class="segmented-control" role="group" aria-label="Choose level">
+            <button class="option-button" type="button" data-level="garden">Garden</button>
+            <button class="option-button" type="button" data-level="mine">Mine Rush</button>
+            <button class="option-button is-selected" type="button" data-level="night">Night Siege</button>
+          </div>
+          <small id="unlockStatus" class="unlock-status">Clear Garden to unlock Mine Rush.</small>
+        </div>
+
+        <div class="control-group">
+          <span>Difficulty</span>
+          <div class="segmented-control" role="group" aria-label="Choose difficulty">
+            <button class="option-button" type="button" data-difficulty="easy">Easy</button>
+            <button class="option-button is-selected" type="button" data-difficulty="normal">Normal</button>
+            <button class="option-button" type="button" data-difficulty="hard">Hard</button>
+          </div>
+        </div>
+
+        <div class="tool-belt" aria-label="Minecraft tools">
+          <button class="tool-button" type="button" data-tool="tnt">
+            <img src="../assets/minecraft/tools/tnt.png" alt="" />
+            <span>TNT</span>
+            <strong>125</strong>
+          </button>
+          <button class="tool-button" type="button" data-tool="diamond">
+            <img src="../assets/minecraft/tools/diamond.png" alt="" />
+            <span>Boost</span>
+            <strong>150</strong>
+          </button>
+          <button class="tool-button" type="button" data-tool="golem">
+            <img src="../assets/minecraft/tools/iron-golem.png" alt="" />
+            <span>Golem</span>
+            <strong>200</strong>
+          </button>
+          <button id="soundButton" class="tool-button sound-toggle" type="button" aria-label="Toggle sound" title="Sound">
+            <span aria-hidden="true">♪</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="terrain-legend" aria-label="Block guide">
+        <div class="legend-item">
+          <span class="legend-swatch terrain-grass" aria-hidden="true"></span>
+          <strong>Grass</strong>
+          <small>normal planting</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-dirt" aria-hidden="true"></span>
+          <strong>Dirt</strong>
+          <small>Sunflowers make sun faster</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-stone" aria-hidden="true"></span>
+          <strong>Stone</strong>
+          <small>no plants, TNT works</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-ore" aria-hidden="true"></span>
+          <strong>Ore</strong>
+          <small>first use gives +50 sun</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-mud" aria-hidden="true"></span>
+          <strong>Mud</strong>
+          <small>mobs move slower</small>
+        </div>
+      </section>
+
+      <section class="play-surface" aria-label="Game board">
+        <aside id="seedBank" class="seed-bank" aria-label="Plant cards"></aside>
+
+        <div class="battlefield-wrap">
+          <div id="battlefield" class="battlefield" aria-label="Five lane lawn"></div>
+          <div id="projectileLayer" class="projectile-layer" aria-hidden="true"></div>
+          <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="message-row" aria-live="polite">
+        <p id="message">Pick a plant, then click a grass block.</p>
+        <button id="startWaveButton" class="primary-button" type="button">Start Wave</button>
+      </section>
+
+      <div id="endOverlay" class="end-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+        <div class="end-card">
+          <p id="endKicker">Game over</p>
+          <h2 id="endTitle">The base fell.</h2>
+          <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js?v=creative-20260616b"></script>
+  </body>
+</html>
