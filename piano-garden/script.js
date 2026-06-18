@@ -608,7 +608,93 @@ const OPEN_REFERENCE_SONGS = [
     sourceUrl: ""
   }
 ];
-SONGS.splice(0, SONGS.length, ...OPEN_REFERENCE_SONGS);
+const AGE_SIX_REFERENCE_SONGS = [
+  OPEN_REFERENCE_SONGS[0],
+  OPEN_REFERENCE_SONGS[1],
+  OPEN_REFERENCE_SONGS[2],
+  OPEN_REFERENCE_SONGS[3],
+  OPEN_REFERENCE_SONGS[6],
+  OPEN_REFERENCE_SONGS[10],
+  OPEN_REFERENCE_SONGS[11],
+  {
+    title: "Fur Elise",
+    shortTitle: "Fur Elise",
+    tempo: "Beethoven 3/8",
+    hard: true,
+    sourceLabel: "IMSLP: Beethoven Fur Elise, public domain score",
+    sourceUrl: "https://imslp.org/wiki/F%C3%BCr_Elise%2C_WoO_59_%28Beethoven%2C_Ludwig_van%29",
+    measures: [
+      ["E", "Eb", "E", "Eb", "E", "B", "D", "C"],
+      ["A", "C", "E", "A", "B", "E", "G", "B"],
+      ["C2", "E", "E", "Eb", "E", "Eb"],
+      ["E", "B", "D", "C", "A"],
+      ["C", "E", "A", "B"],
+      ["E", "C2", "B", "A"],
+      ["B", "C2", "D2", "C2"],
+      ["E", "Eb", "E", "Eb", "E", "B", "D", "C"],
+      ["A"]
+    ]
+  },
+  {
+    title: "Can-Can",
+    shortTitle: "Can-Can",
+    tempo: "Offenbach 2/4",
+    hard: true,
+    sourceLabel: "IMSLP: Offenbach Orphee aux enfers, public domain score",
+    sourceUrl: "https://imslp.org/wiki/Orph%C3%A9e_aux_enfers_%28Offenbach%2C_Jacques%29",
+    measures: [
+      ["C", "C", "D", "E", "E", "D"],
+      ["C", "C", "D", "E", "E", "D"],
+      ["C", "D", "E", "F", "G", "A"],
+      ["G", "F", "E", "D", "C"],
+      ["G", "G", "A", "B", "C2", "B"],
+      ["A", "G", "F", "E", "D"],
+      ["C", "C", "D", "E", "F", "G"],
+      ["A", "G", "F", "E", "D", "C"]
+    ]
+  },
+  {
+    title: "Auld Lang Syne",
+    shortTitle: "Auld Lang Syne",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "Traditional public domain melody",
+    sourceUrl: "https://garson-law.com/auld-lang-syne-and-the-public-domain/",
+    measures: [
+      ["G", "C2", "C2", "C2"],
+      ["E", "D", "C2", "D"],
+      ["E", "C2", "C2", "E"],
+      ["G", "A", "G"],
+      ["E", "E", "C2", "D"],
+      ["E", "D", "C2", "D"],
+      ["E", "C2", "A", "G"],
+      ["C2"]
+    ]
+  },
+  {
+    title: "Greensleeves",
+    shortTitle: "Greensleeves",
+    tempo: "Traditional 6/8",
+    hard: true,
+    sourceLabel: "Traditional public domain melody",
+    sourceUrl: "https://imslp.org/wiki/Greensleeves_to_a_Ground_%28Anonymous%29",
+    measures: [
+      ["E", "G", "A", "B"],
+      ["C2", "B", "A", "F"],
+      ["D", "F", "G", "A"],
+      ["B", "G", "E"],
+      ["E", "G", "A", "B"],
+      ["C2", "D2", "C2", "B"],
+      ["G", "E", "F", "G"],
+      ["A", "G", "F", "E"],
+      ["D", "C"]
+    ]
+  },
+  OPEN_REFERENCE_SONGS[12],
+  OPEN_REFERENCE_SONGS[13],
+  OPEN_REFERENCE_SONGS[14]
+];
+SONGS.splice(0, SONGS.length, ...AGE_SIX_REFERENCE_SONGS);
 
 const CUSTOM_SONG_INDEX = SONGS.length;
 const VALID_NOTE_NAMES = new Set(NOTES.map((item) => item.note));
