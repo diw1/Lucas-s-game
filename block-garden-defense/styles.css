@@ -56,6 +56,7 @@ button {
 .hud,
 .setup-panel,
 .terrain-legend,
+.fusion-guide,
 .message-row {
   border: 3px solid var(--outline);
   border-radius: 8px;
@@ -134,7 +135,7 @@ h1 {
 
 .setup-panel {
   display: grid;
-  grid-template-columns: minmax(190px, 0.75fr) minmax(250px, 1fr) minmax(230px, 0.9fr) auto;
+  grid-template-columns: minmax(278px, 0.9fr) minmax(250px, 0.95fr) minmax(220px, 0.75fr) auto;
   gap: 12px;
   align-items: center;
   padding: 10px;
@@ -145,6 +146,126 @@ h1 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 8px;
+}
+
+.fusion-guide {
+  position: relative;
+  min-height: 86px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(172px, 1fr);
+  gap: 8px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+.fusion-guide[data-filter-plant]:not([data-filter-plant=""]) {
+  padding-top: 26px;
+}
+
+.fusion-guide[data-filter-plant]:not([data-filter-plant=""])::before {
+  content: attr(data-filter-plant) " recipes";
+  position: absolute;
+  left: 10px;
+  top: 6px;
+  color: #5d6c61;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fusion-recipe {
+  min-width: 0;
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: 28px auto 28px auto 34px minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
+  padding: 7px;
+  border: 2px solid rgba(38, 51, 36, 0.74);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 245, 193, 0.92), rgba(226, 240, 215, 0.92)),
+    var(--paper);
+}
+
+.fusion-recipe img {
+  width: 28px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 2px rgba(30, 40, 28, 0.18));
+}
+
+.fusion-recipe .fusion-result {
+  width: 34px;
+  height: 40px;
+}
+
+.fusion-recipe span {
+  font-weight: 900;
+  color: #7b5a19;
+}
+
+.fusion-recipe strong {
+  min-width: 0;
+  font-size: 0.78rem;
+  line-height: 1.02;
+}
+
+.fusion-recipe small {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  background: var(--sun);
+  font-size: 0.68rem;
+}
+
+.fusion-recipe em {
+  display: inline-block;
+  margin-left: 4px;
+  color: #9a352e;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.fusion-recipe.is-active {
+  border-color: #6f8f2f;
+  background:
+    linear-gradient(180deg, rgba(255, 241, 139, 0.96), rgba(205, 239, 176, 0.96)),
+    var(--paper);
+  box-shadow: inset 0 -4px rgba(97, 129, 40, 0.16);
+}
+
+.fusion-recipe.is-pinned {
+  outline: 4px solid rgba(245, 191, 61, 0.72);
+}
+
+.fusion-recipe.is-disabled {
+  opacity: 0.52;
+}
+
+.fusion-recipe.is-filtered-out {
+  display: none;
+}
+
+.fusion-recipe.is-discovered em {
+  color: #4f7d36;
+}
+
+.fusion-recipe.is-discovered em::before {
+  content: "Found";
+}
+
+.fusion-recipe.is-discovered em {
+  font-size: 0;
+}
+
+.fusion-recipe.is-discovered em::before {
+  font-size: 0.62rem;
 }
 
 .legend-item {
@@ -181,6 +302,40 @@ h1 {
   font-size: 0.68rem;
   font-weight: 800;
   line-height: 1.05;
+}
+
+body[data-mode="campaign"] .terrain-legend {
+  grid-template-columns: repeat(5, minmax(86px, 1fr));
+  gap: 5px;
+  padding: 5px;
+  border-width: 2px;
+  box-shadow: 0 8px 20px rgba(34, 48, 34, 0.14);
+}
+
+body[data-mode="campaign"] .legend-item {
+  min-height: 32px;
+  grid-template-columns: 20px minmax(0, auto);
+  grid-template-rows: 1fr;
+  column-gap: 5px;
+  justify-content: center;
+  padding: 4px 6px;
+  border-width: 1px;
+  background: rgba(255, 253, 244, 0.78);
+}
+
+body[data-mode="campaign"] .legend-swatch {
+  grid-row: 1;
+  width: 18px;
+  height: 18px;
+  border-width: 1px;
+}
+
+body[data-mode="campaign"] .legend-item strong {
+  font-size: 0.72rem;
+}
+
+body[data-mode="campaign"] .legend-item small {
+  display: none;
 }
 
 .legend-swatch.terrain-grass {
@@ -239,6 +394,10 @@ h1 {
   gap: 6px;
 }
 
+.segmented-control {
+  flex-wrap: wrap;
+}
+
 .option-button,
 .tool-button {
   min-height: 40px;
@@ -251,6 +410,7 @@ h1 {
 
 .option-button {
   flex: 1 1 0;
+  min-width: 72px;
   padding: 7px 10px;
 }
 
@@ -346,6 +506,19 @@ h1 {
 .seed-card.is-selected {
   background: #fff0b8;
   outline: 4px solid rgba(245, 191, 61, 0.72);
+}
+
+.seed-card.is-fusion-partner {
+  outline: 4px solid rgba(104, 166, 63, 0.7);
+  background: #f2ffd7;
+}
+
+.seed-card.is-recipe-part {
+  outline: 4px solid rgba(245, 191, 61, 0.78);
+}
+
+.seed-card.is-selected.is-fusion-partner {
+  background: #fff0b8;
 }
 
 .seed-card.is-disabled {
@@ -492,6 +665,21 @@ h1 {
   filter: drop-shadow(0 2px 2px rgba(29, 79, 143, 0.32));
 }
 
+.plant.is-fusion img {
+  filter:
+    drop-shadow(0 6px 4px rgba(30, 40, 28, 0.25))
+    drop-shadow(0 0 8px rgba(255, 219, 79, 0.82));
+}
+
+.plant.is-armed::before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 3px solid rgba(255, 238, 101, 0.9);
+  border-radius: 50%;
+  animation: armed-pulse 1100ms ease-in-out infinite;
+}
+
 .tnt-charge {
   left: 50%;
   top: 52%;
@@ -545,9 +733,43 @@ h1 {
   height: calc(var(--tile) * 0.78);
 }
 
+.enemy.slime.has-art {
+  width: calc(var(--tile) * 0.96);
+  height: calc(var(--tile) * 0.78);
+}
+
+.enemy.witch.has-art,
+.enemy.zombiepigman.has-art,
+.enemy.witherskeleton.has-art {
+  width: calc(var(--tile) * 0.92);
+  height: calc(var(--tile) * 1.06);
+}
+
+.enemy.blaze.has-art {
+  width: calc(var(--tile) * 1.02);
+  height: calc(var(--tile) * 1.08);
+}
+
+.enemy.guardian.has-art {
+  width: calc(var(--tile) * 1.18);
+  height: calc(var(--tile) * 0.92);
+}
+
 .enemy.ravager.has-art {
   width: calc(var(--tile) * 1.32);
   height: calc(var(--tile) * 1.08);
+}
+
+.enemy.obsidianravager.has-art,
+.enemy.commandravager.has-art,
+.enemy.chargedravager.has-art {
+  width: calc(var(--tile) * 1.48);
+  height: calc(var(--tile) * 1.18);
+}
+
+.enemy.witherlord.has-art {
+  width: calc(var(--tile) * 1.08);
+  height: calc(var(--tile) * 1.22);
 }
 
 .enemy-art {
@@ -564,6 +786,90 @@ h1 {
 
 .enemy.is-slowed {
   filter: drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22)) drop-shadow(0 0 8px rgba(142, 215, 239, 0.78));
+}
+
+.enemy.armoredskeleton.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
+    drop-shadow(0 0 8px rgba(180, 188, 195, 0.9))
+    saturate(0.55);
+}
+
+.enemy.chargedcreeper.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
+    drop-shadow(0 0 10px rgba(112, 222, 255, 0.96))
+    brightness(1.12);
+}
+
+.enemy.blaze.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
+    drop-shadow(0 0 11px rgba(247, 173, 41, 0.95))
+    saturate(1.18);
+}
+
+.enemy.slime.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.2))
+    drop-shadow(0 0 8px rgba(95, 181, 78, 0.72));
+}
+
+.enemy.witch.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.24))
+    drop-shadow(0 0 8px rgba(128, 70, 154, 0.74));
+}
+
+.enemy.zombiepigman.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.24))
+    drop-shadow(0 0 8px rgba(230, 135, 121, 0.66));
+}
+
+.enemy.guardian.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.24))
+    drop-shadow(0 0 9px rgba(77, 160, 151, 0.78));
+}
+
+.enemy.witherskeleton.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.26))
+    drop-shadow(0 0 8px rgba(92, 82, 105, 0.8))
+    brightness(0.88);
+}
+
+.enemy.obsidianravager.has-art .enemy-art {
+  filter:
+    drop-shadow(0 8px 5px rgba(21, 25, 22, 0.28))
+    drop-shadow(0 0 10px rgba(85, 68, 111, 0.88))
+    brightness(0.72)
+    saturate(0.72);
+}
+
+.enemy.commandravager.has-art .enemy-art {
+  filter:
+    drop-shadow(0 8px 5px rgba(21, 25, 22, 0.28))
+    drop-shadow(0 0 10px rgba(245, 191, 61, 0.92))
+    sepia(0.34)
+    saturate(1.28);
+}
+
+.enemy.chargedravager.has-art .enemy-art {
+  filter:
+    drop-shadow(0 8px 5px rgba(21, 25, 22, 0.28))
+    drop-shadow(0 0 14px rgba(112, 222, 255, 0.98))
+    brightness(1.18)
+    saturate(1.22);
+}
+
+.enemy.witherlord.has-art .enemy-art {
+  filter:
+    drop-shadow(0 8px 5px rgba(21, 25, 22, 0.28))
+    drop-shadow(0 0 12px rgba(105, 91, 136, 0.92))
+    grayscale(0.45)
+    brightness(0.86);
 }
 
 .enemy-body {
@@ -704,6 +1010,20 @@ h1 {
     0 0 10px rgba(240, 123, 49, 0.78);
 }
 
+.projectile.cherry {
+  background: #d84b49;
+  box-shadow:
+    inset -3px -3px rgba(0, 0, 0, 0.12),
+    0 0 8px rgba(216, 75, 73, 0.68);
+}
+
+.projectile.hypno {
+  background: #d889d8;
+  box-shadow:
+    inset -3px -3px rgba(0, 0, 0, 0.12),
+    0 0 8px rgba(195, 91, 213, 0.68);
+}
+
 .projectile.spike {
   border-radius: 3px 50% 50% 50%;
   background: #e8d36b;
@@ -796,6 +1116,42 @@ h1 {
   z-index: 21;
 }
 
+.fusion-burst {
+  position: absolute;
+  width: calc(var(--tile) * 1.55);
+  aspect-ratio: 1;
+  border: 4px solid rgba(116, 93, 20, 0.76);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 248, 161, 0.96) 0 24%, rgba(118, 212, 117, 0.72) 25% 54%, rgba(255, 255, 255, 0) 55% 100%);
+  transform: translate(-50%, -50%) scale(0.24);
+  animation: fusion-pop 620ms ease-out forwards;
+  z-index: 22;
+}
+
+.hit-spark {
+  position: absolute;
+  width: calc(var(--tile) * 0.42);
+  aspect-ratio: 1;
+  border: 3px solid rgba(38, 51, 36, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 241, 111, 0.9);
+  transform: translate(-50%, -50%) scale(0.25);
+  animation: hit-pop 330ms ease-out forwards;
+  z-index: 23;
+}
+
+.hit-spark.fire,
+.hit-spark.cherry {
+  background: rgba(240, 123, 49, 0.9);
+  border-color: rgba(116, 43, 29, 0.7);
+}
+
+.hit-spark.snow {
+  background: rgba(142, 215, 239, 0.9);
+  border-color: rgba(54, 111, 143, 0.72);
+}
+
 .fume-spray {
   position: absolute;
   height: calc(var(--tile) * 0.36);
@@ -856,6 +1212,40 @@ h1 {
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.18);
+  }
+}
+
+@keyframes fusion-pop {
+  45% {
+    opacity: 0.94;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+}
+
+@keyframes hit-pop {
+  55% {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+}
+
+@keyframes armed-pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 0.78;
+    transform: scale(1.08);
   }
 }
 
@@ -952,6 +1342,10 @@ h1 {
 
   .terrain-legend {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fusion-guide {
+    grid-auto-columns: minmax(164px, 44vw);
   }
 
   .tool-belt {
@@ -1076,5 +1470,9 @@ h1 {
 
   .terrain-legend {
     grid-template-columns: 1fr;
+  }
+
+  .fusion-guide {
+    grid-auto-columns: minmax(158px, 78vw);
   }
 }

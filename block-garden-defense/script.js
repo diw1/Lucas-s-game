@@ -12,28 +12,31 @@ const TERRAIN = {
 
 const difficultyConfigs = {
   easy: {
-    initialSun: 325,
-    base: 5,
-    hpMultiplier: 0.78,
-    speedMultiplier: 0.86,
-    spawnGapBonus: 180,
-    rewardMultiplier: 1.15
+    initialSun: 300,
+    base: 4,
+    hpMultiplier: 1.02,
+    speedMultiplier: 0.96,
+    spawnGapBonus: -40,
+    rewardMultiplier: 1.0,
+    waveMultiplier: 1.28
   },
   normal: {
-    initialSun: 225,
+    initialSun: 200,
     base: 3,
-    hpMultiplier: 1.12,
-    speedMultiplier: 1.06,
-    spawnGapBonus: -80,
-    rewardMultiplier: 0.92
+    hpMultiplier: 1.36,
+    speedMultiplier: 1.16,
+    spawnGapBonus: -220,
+    rewardMultiplier: 0.82,
+    waveMultiplier: 1.55
   },
   hard: {
-    initialSun: 175,
+    initialSun: 150,
     base: 2,
-    hpMultiplier: 1.38,
-    speedMultiplier: 1.18,
-    spawnGapBonus: -180,
-    rewardMultiplier: 0.78
+    hpMultiplier: 1.78,
+    speedMultiplier: 1.34,
+    spawnGapBonus: -380,
+    rewardMultiplier: 0.66,
+    waveMultiplier: 1.95
   }
 };
 
@@ -51,6 +54,33 @@ const modeConfigs = {
     base: 12,
     spawnGapBonus: 100,
     rewardMultiplier: 1.15
+  },
+  creativefusion: {
+    name: "Creative Fusion",
+    loadoutSize: null,
+    allPlants: true,
+    fusion: true,
+    creative: true,
+    initialSun: 3000,
+    base: 18,
+    spawnGapBonus: -60,
+    rewardMultiplier: 1.15,
+    hpMultiplier: 1.12,
+    speedMultiplier: 1.08,
+    waveMultiplier: 1.35
+  },
+  fusion: {
+    name: "Fusion Mod",
+    loadoutSize: null,
+    allPlants: true,
+    fusion: true,
+    initialSun: 650,
+    base: 5,
+    spawnGapBonus: -260,
+    rewardMultiplier: 0.86,
+    hpMultiplier: 1.32,
+    speedMultiplier: 1.16,
+    waveMultiplier: 1.75
   }
 };
 
@@ -90,6 +120,12 @@ const plantOrder = [
   "cactus",
   "starfruit",
   "fumeshroom",
+  "kernelpult",
+  "magnetshroom",
+  "hypnoshroom",
+  "doomshroom",
+  "blover",
+  "spikeweed",
   "torchwood",
   "wallnut",
   "tallnut",
@@ -227,6 +263,73 @@ const plantTypes = {
     fumeRange: 3.2,
     fireEvery: 1850
   },
+  kernelpult: {
+    name: "Kernel-pult",
+    note: "butter lob",
+    cost: 125,
+    hp: 105,
+    image: "../assets/characters/kernel-pult.png",
+    damage: 28,
+    fireEvery: 1850,
+    lob: true,
+    slowFactor: 0.66,
+    slowMs: 900,
+    projectileClass: "cabbage"
+  },
+  magnetshroom: {
+    name: "Magnet-shroom",
+    note: "weakens metal",
+    cost: 100,
+    hp: 95,
+    image: "../assets/characters/magnet-shroom.png",
+    fumeDamage: 22,
+    fumeRange: 2.8,
+    fireEvery: 2100
+  },
+  hypnoshroom: {
+    name: "Hypno-shroom",
+    note: "slow charm",
+    cost: 75,
+    hp: 75,
+    image: "../assets/characters/hypno-shroom.png",
+    damage: 12,
+    slowFactor: 0.34,
+    slowMs: 3200,
+    projectileClass: "hypno",
+    fireEvery: 2300
+  },
+  doomshroom: {
+    name: "Doom-shroom",
+    note: "huge boom",
+    cost: 225,
+    hp: 1,
+    image: "../assets/characters/doom-shroom.png",
+    instant: true,
+    blastRadius: 2.15,
+    damage: 780
+  },
+  blover: {
+    name: "Blover",
+    note: "pushes lanes",
+    cost: 100,
+    hp: 85,
+    image: "../assets/characters/blover.png",
+    fumeDamage: 18,
+    fumeRange: 4.2,
+    fireEvery: 1750,
+    slowFactor: 0.72,
+    slowMs: 1200
+  },
+  spikeweed: {
+    name: "Spikeweed",
+    note: "ground spikes",
+    cost: 100,
+    hp: 160,
+    image: "../assets/characters/spikeweed.png",
+    fumeDamage: 26,
+    fumeRange: 1.4,
+    fireEvery: 900
+  },
   torchwood: {
     name: "Torchwood",
     note: "fires peas",
@@ -305,8 +408,595 @@ const plantTypes = {
     instant: true,
     rowBlast: true,
     damage: 520
+  },
+  sunshooter: {
+    name: "Sunshooter",
+    note: "sun + pea",
+    cost: 125,
+    hp: 135,
+    image: "../assets/fusions/sunshooter.png",
+    producesSun: true,
+    sunEvery: 9200,
+    damage: 24,
+    fireEvery: 1250,
+    fusion: true
+  },
+  sunmine: {
+    name: "Sun Mine",
+    note: "sun trap",
+    cost: 85,
+    hp: 95,
+    image: "../assets/fusions/sun-mine.png",
+    producesSun: true,
+    sunEvery: 10200,
+    mine: true,
+    armMs: 3600,
+    damage: 430,
+    fusion: true
+  },
+  peanut: {
+    name: "Peanut",
+    note: "wall shooter",
+    cost: 150,
+    hp: 540,
+    image: "../assets/fusions/peanut.png",
+    damage: 22,
+    fireEvery: 1350,
+    fusion: true
+  },
+  sunnut: {
+    name: "Sun-nut",
+    note: "sun wall",
+    cost: 125,
+    hp: 560,
+    image: "../assets/fusions/sun-nut.png",
+    producesSun: true,
+    sunEvery: 7600,
+    fusion: true
+  },
+  torchthree: {
+    name: "Torchthree",
+    note: "fire lanes",
+    cost: 425,
+    hp: 185,
+    image: "../assets/fusions/torchthree.png",
+    damage: 28,
+    fireEvery: 1450,
+    laneSpread: true,
+    projectileClass: "fire",
+    fusion: true
+  },
+  fumewood: {
+    name: "Fumewood",
+    note: "fire spray",
+    cost: 225,
+    hp: 285,
+    image: "../assets/fusions/fumewood.png",
+    fumeDamage: 45,
+    fumeRange: 3.55,
+    fireEvery: 1700,
+    torch: true,
+    fusion: true
+  },
+  potatoshooter: {
+    name: "Potato Shooter",
+    note: "armed pea",
+    cost: 125,
+    hp: 115,
+    image: "../assets/fusions/potato-shooter.png",
+    damage: 22,
+    fireEvery: 1450,
+    mine: true,
+    armMs: 5200,
+    mineDamage: 360,
+    fusion: true
+  },
+  cherrymine: {
+    name: "Cherry Mine",
+    note: "wide trap",
+    cost: 125,
+    hp: 90,
+    image: "../assets/fusions/cherry-mine.png",
+    mine: true,
+    armMs: 2600,
+    damage: 640,
+    mineRadius: 1.45,
+    fusion: true
+  },
+  jalapenomine: {
+    name: "Jalapeno Mine",
+    note: "row trap",
+    cost: 100,
+    hp: 90,
+    image: "../assets/fusions/jalapeno-mine.png",
+    mine: true,
+    armMs: 3000,
+    damage: 430,
+    rowMine: true,
+    fusion: true
+  },
+  scorchwood: {
+    name: "Scorchwood",
+    note: "fire pea",
+    cost: 250,
+    hp: 275,
+    image: "../assets/fusions/scorchwood.png",
+    damage: 34,
+    fireEvery: 1280,
+    projectileClass: "fire",
+    torch: true,
+    fusion: true
+  },
+  cherryshooter: {
+    name: "Cherry Shooter",
+    note: "splash pea",
+    cost: 200,
+    hp: 130,
+    image: "../assets/fusions/cherry-shooter.png",
+    damage: 34,
+    fireEvery: 1500,
+    splashRadius: 0.68,
+    projectileClass: "cherry",
+    fusion: true
+  },
+  cabbagenut: {
+    name: "Cabbage-nut",
+    note: "lob wall",
+    cost: 200,
+    hp: 520,
+    image: "../assets/fusions/cabbage-nut.png",
+    damage: 38,
+    fireEvery: 2100,
+    lob: true,
+    projectileClass: "cabbage",
+    fusion: true
+  },
+  cabbagepot: {
+    name: "Cabbage-pot",
+    note: "mine pult",
+    cost: 175,
+    hp: 120,
+    image: "../assets/fusions/cabbage-pot.png",
+    damage: 34,
+    fireEvery: 2200,
+    lob: true,
+    projectileClass: "cabbage",
+    mine: true,
+    armMs: 4800,
+    mineDamage: 380,
+    fusion: true
+  },
+  chompShooter: {
+    name: "Chomp Shooter",
+    note: "bite + pea",
+    cost: 225,
+    hp: 170,
+    image: "../assets/fusions/chomp-shooter.png",
+    damage: 24,
+    fireEvery: 1350,
+    chompDamage: 190,
+    chompRange: 1.1,
+    chompEvery: 5600,
+    fusion: true
+  },
+  cherryChomper: {
+    name: "Cherry Chomper",
+    note: "bite boom",
+    cost: 250,
+    hp: 170,
+    image: "../assets/fusions/cherry-chomper.png",
+    chompDamage: 310,
+    chompRange: 1.15,
+    chompEvery: 7200,
+    chompSplashRadius: 0.86,
+    fusion: true
+  },
+  chillybomb: {
+    name: "Chilly Bomb",
+    note: "ice boom",
+    cost: 200,
+    hp: 1,
+    image: "../assets/fusions/chilly-bomb.png",
+    instant: true,
+    blastRadius: 1.6,
+    damage: 430,
+    slowFactor: 0.42,
+    slowMs: 3800,
+    fusion: true
+  },
+  sunbomb: {
+    name: "Sun Bomb",
+    note: "boom + sun",
+    cost: 175,
+    hp: 1,
+    image: "../assets/fusions/sun-bomb.png",
+    instant: true,
+    blastRadius: 1.45,
+    damage: 480,
+    sunBurst: 75,
+    fusion: true
+  },
+  sunpepper: {
+    name: "Sun Pepper",
+    note: "row + sun",
+    cost: 175,
+    hp: 1,
+    image: "../assets/fusions/sun-pepper.png",
+    instant: true,
+    rowBlast: true,
+    damage: 470,
+    sunBurst: 50,
+    fusion: true
+  },
+  sunchomper: {
+    name: "Sun Chomper",
+    note: "bite + sun",
+    cost: 225,
+    hp: 165,
+    image: "../assets/fusions/sun-chomper.png",
+    producesSun: true,
+    sunEvery: 9400,
+    chompDamage: 230,
+    chompRange: 1.15,
+    chompEvery: 6100,
+    fusion: true
+  },
+  cactusdrone: {
+    name: "Cactus Drone",
+    note: "smart spike",
+    cost: 200,
+    hp: 105,
+    image: "../assets/fusions/cactus-drone.png",
+    damage: 28,
+    fireEvery: 950,
+    homing: true,
+    projectileClass: "spike",
+    bonusVs: { spider: 1.7 },
+    fusion: true
+  },
+  flameTallnut: {
+    name: "Flame Tall-nut",
+    note: "fire wall",
+    cost: 250,
+    hp: 860,
+    image: "../assets/fusions/flame-tall-nut.png",
+    torch: true,
+    fusion: true
+  },
+  butterNut: {
+    name: "Butter-nut",
+    note: "butter wall",
+    cost: 175,
+    hp: 620,
+    image: "../assets/fusions/butter-nut.png",
+    damage: 18,
+    fireEvery: 1750,
+    lob: true,
+    slowFactor: 0.48,
+    slowMs: 1400,
+    projectileClass: "cabbage",
+    fusion: true
+  },
+  butterPot: {
+    name: "Butter Pot",
+    note: "butter mine",
+    cost: 125,
+    hp: 105,
+    image: "../assets/fusions/butter-pot.png",
+    damage: 26,
+    fireEvery: 1900,
+    lob: true,
+    slowFactor: 0.48,
+    slowMs: 1500,
+    projectileClass: "cabbage",
+    mine: true,
+    armMs: 4100,
+    mineDamage: 320,
+    fusion: true
+  },
+  popcornPult: {
+    name: "Popcorn-pult",
+    note: "splash butter",
+    cost: 225,
+    hp: 125,
+    image: "../assets/fusions/popcorn-pult.png",
+    damage: 46,
+    fireEvery: 2200,
+    lob: true,
+    splashRadius: 0.72,
+    slowFactor: 0.58,
+    slowMs: 1000,
+    projectileClass: "cabbage",
+    fusion: true
+  },
+  peaShroom: {
+    name: "Pea-shroom",
+    note: "cheap pea",
+    cost: 100,
+    hp: 95,
+    image: "../assets/fusions/pea-shroom.png",
+    producesSun: true,
+    sunEvery: 11800,
+    damage: 18,
+    fireEvery: 1250,
+    fusion: true
+  },
+  flameShroom: {
+    name: "Flame-shroom",
+    note: "fire mist",
+    cost: 175,
+    hp: 110,
+    image: "../assets/fusions/flame-shroom.png",
+    fumeDamage: 42,
+    fumeRange: 3.4,
+    fireEvery: 1550,
+    torch: true,
+    fusion: true
+  },
+  torchweed: {
+    name: "Torchweed",
+    note: "fire spikes",
+    cost: 175,
+    hp: 210,
+    image: "../assets/fusions/torchweed.png",
+    fumeDamage: 36,
+    fumeRange: 1.65,
+    fireEvery: 850,
+    torch: true,
+    fusion: true
+  },
+  scorchWallnut: {
+    name: "Scorch Wall-nut",
+    note: "burning wall",
+    cost: 225,
+    hp: 690,
+    image: "../assets/fusions/scorch-wall-nut.png",
+    torch: true,
+    fumeDamage: 24,
+    fumeRange: 1.2,
+    fireEvery: 1100,
+    fusion: true
+  },
+  scorchedThreepeater: {
+    name: "Scorched Threepeater",
+    note: "hot lanes",
+    cost: 450,
+    hp: 155,
+    image: "../assets/fusions/scorched-threepeater.png",
+    damage: 34,
+    fireEvery: 1350,
+    laneSpread: true,
+    projectileClass: "fire",
+    fusion: true
+  },
+  cherryNut: {
+    name: "Cherry-nut",
+    note: "boom wall",
+    cost: 175,
+    hp: 540,
+    image: "../assets/fusions/cherry-nut.png",
+    fumeDamage: 30,
+    fumeRange: 1.4,
+    fireEvery: 1800,
+    fusion: true
+  },
+  cherryPumpkin: {
+    name: "Cherry Pumpkin",
+    note: "shell boom",
+    cost: 225,
+    hp: 720,
+    image: "../assets/fusions/cherry-pumpkin.png",
+    fumeDamage: 34,
+    fumeRange: 1.5,
+    fireEvery: 1700,
+    fusion: true
+  },
+  cherryMagnet: {
+    name: "Cherry Magnet",
+    note: "metal boom",
+    cost: 175,
+    hp: 110,
+    image: "../assets/fusions/cherry-magnet.png",
+    damage: 36,
+    fireEvery: 1700,
+    splashRadius: 0.75,
+    projectileClass: "cherry",
+    bonusVs: { armoredskeleton: 1.8 },
+    fusion: true
+  },
+  magnetNut: {
+    name: "Magnet-nut",
+    note: "metal wall",
+    cost: 175,
+    hp: 650,
+    image: "../assets/fusions/magnet-nut.png",
+    fumeDamage: 28,
+    fumeRange: 2.2,
+    fireEvery: 1700,
+    bonusVs: { armoredskeleton: 1.7 },
+    fusion: true
+  },
+  hypnoShooter: {
+    name: "Hypnoshooter",
+    note: "slow pea",
+    cost: 175,
+    hp: 105,
+    image: "../assets/fusions/hypnoshooter.png",
+    damage: 22,
+    slowFactor: 0.32,
+    slowMs: 3600,
+    projectileClass: "hypno",
+    fireEvery: 1450,
+    fusion: true
+  },
+  hypnoPepper: {
+    name: "Hypno Pepper",
+    note: "charm row",
+    cost: 175,
+    hp: 1,
+    image: "../assets/fusions/hypno-pepper.png",
+    instant: true,
+    rowBlast: true,
+    damage: 360,
+    slowFactor: 0.3,
+    slowMs: 4200,
+    fusion: true
+  },
+  doomCactus: {
+    name: "Doom Cactus",
+    note: "doom spike",
+    cost: 275,
+    hp: 115,
+    image: "../assets/fusions/doom-cactus.png",
+    damage: 58,
+    fireEvery: 1500,
+    splashRadius: 0.9,
+    projectileClass: "spike",
+    bonusVs: { spider: 1.8 },
+    fusion: true
+  },
+  doomChomper: {
+    name: "Doom Chomper",
+    note: "huge bite",
+    cost: 300,
+    hp: 190,
+    image: "../assets/fusions/doom-chomper.png",
+    chompDamage: 480,
+    chompRange: 1.25,
+    chompEvery: 7200,
+    chompSplashRadius: 1.25,
+    fusion: true
+  },
+  doomPepper: {
+    name: "Doom Pepper",
+    note: "doom row",
+    cost: 300,
+    hp: 1,
+    image: "../assets/fusions/doom-pepper.png",
+    instant: true,
+    rowBlast: true,
+    damage: 850,
+    fusion: true
+  },
+  doomBlover: {
+    name: "Doom Blover",
+    note: "wide storm",
+    cost: 275,
+    hp: 1,
+    image: "../assets/fusions/doom-blover.png",
+    instant: true,
+    blastRadius: 2.45,
+    damage: 650,
+    slowFactor: 0.48,
+    slowMs: 2600,
+    fusion: true
+  },
+  clovePult: {
+    name: "Clove-pult",
+    note: "wind lob",
+    cost: 200,
+    hp: 115,
+    image: "../assets/fusions/clove-pult.png",
+    damage: 34,
+    fireEvery: 1850,
+    lob: true,
+    slowFactor: 0.66,
+    slowMs: 1400,
+    projectileClass: "cabbage",
+    fusion: true
+  },
+  luminaStar: {
+    name: "Lumina Star",
+    note: "sun stars",
+    cost: 200,
+    hp: 115,
+    image: "../assets/fusions/lumina-star.png",
+    producesSun: true,
+    sunEvery: 9800,
+    damage: 20,
+    fireEvery: 1450,
+    allLaneShot: true,
+    projectileClass: "star",
+    fusion: true
+  },
+  cherryBombDrone: {
+    name: "Cherry Drone",
+    note: "homing boom",
+    cost: 250,
+    hp: 100,
+    image: "../assets/fusions/cherry-bomb-drone.png",
+    damage: 42,
+    fireEvery: 1250,
+    homing: true,
+    splashRadius: 0.7,
+    projectileClass: "cherry",
+    fusion: true
+  },
+  bambomb: {
+    name: "Bambomb",
+    note: "fast boom",
+    cost: 175,
+    hp: 1,
+    image: "../assets/fusions/bambomb.png",
+    instant: true,
+    blastRadius: 1.25,
+    damage: 560,
+    fusion: true
   }
 };
+
+function fusionKey(a, b) {
+  return [a, b].sort().join("+");
+}
+
+const fusionRecipes = [
+  { parts: ["sunflower", "peashooter"], result: "sunshooter", cost: 75 },
+  { parts: ["sunflower", "potatomine"], result: "sunmine", cost: 45 },
+  { parts: ["wallnut", "peashooter"], result: "peanut", cost: 75 },
+  { parts: ["wallnut", "sunflower"], result: "sunnut", cost: 75 },
+  { parts: ["torchwood", "threepeater"], result: "torchthree", cost: 125 },
+  { parts: ["torchwood", "fumeshroom"], result: "fumewood", cost: 100 },
+  { parts: ["potatomine", "peashooter"], result: "potatoshooter", cost: 65 },
+  { parts: ["cherrybomb", "potatomine"], result: "cherrymine", cost: 75 },
+  { parts: ["jalapeno", "potatomine"], result: "jalapenomine", cost: 70 },
+  { parts: ["torchwood", "peashooter"], result: "scorchwood", cost: 95 },
+  { parts: ["cherrybomb", "peashooter"], result: "cherryshooter", cost: 95 },
+  { parts: ["wallnut", "cabbagepult"], result: "cabbagenut", cost: 80 },
+  { parts: ["potatomine", "cabbagepult"], result: "cabbagepot", cost: 80 },
+  { parts: ["chomper", "peashooter"], result: "chompShooter", cost: 95 },
+  { parts: ["chomper", "cherrybomb"], result: "cherryChomper", cost: 100 },
+  { parts: ["snowpea", "cherrybomb"], result: "chillybomb", cost: 100 },
+  { parts: ["sunflower", "cherrybomb"], result: "sunbomb", cost: 90 },
+  { parts: ["sunflower", "jalapeno"], result: "sunpepper", cost: 90 },
+  { parts: ["sunflower", "chomper"], result: "sunchomper", cost: 95 },
+  { parts: ["cactus", "cattail"], result: "cactusdrone", cost: 95 },
+  { parts: ["tallnut", "torchwood"], result: "flameTallnut", cost: 125 },
+  { parts: ["kernelpult", "wallnut"], result: "butterNut", cost: 90 },
+  { parts: ["kernelpult", "potatomine"], result: "butterPot", cost: 80 },
+  { parts: ["kernelpult", "melonpult"], result: "popcornPult", cost: 110 },
+  { parts: ["sunshroom", "peashooter"], result: "peaShroom", cost: 60 },
+  { parts: ["sunshroom", "torchwood"], result: "flameShroom", cost: 85 },
+  { parts: ["torchwood", "spikeweed"], result: "torchweed", cost: 80 },
+  { parts: ["torchwood", "wallnut"], result: "scorchWallnut", cost: 90 },
+  { parts: ["threepeater", "jalapeno"], result: "scorchedThreepeater", cost: 150 },
+  { parts: ["cherrybomb", "wallnut"], result: "cherryNut", cost: 85 },
+  { parts: ["cherrybomb", "pumpkin"], result: "cherryPumpkin", cost: 100 },
+  { parts: ["cherrybomb", "magnetshroom"], result: "cherryMagnet", cost: 90 },
+  { parts: ["magnetshroom", "wallnut"], result: "magnetNut", cost: 85 },
+  { parts: ["hypnoshroom", "peashooter"], result: "hypnoShooter", cost: 85 },
+  { parts: ["hypnoshroom", "jalapeno"], result: "hypnoPepper", cost: 90 },
+  { parts: ["doomshroom", "cactus"], result: "doomCactus", cost: 125 },
+  { parts: ["doomshroom", "chomper"], result: "doomChomper", cost: 140 },
+  { parts: ["doomshroom", "jalapeno"], result: "doomPepper", cost: 150 },
+  { parts: ["doomshroom", "blover"], result: "doomBlover", cost: 130 },
+  { parts: ["blover", "cabbagepult"], result: "clovePult", cost: 90 },
+  { parts: ["sunflower", "starfruit"], result: "luminaStar", cost: 90 },
+  { parts: ["cattail", "cherrybomb"], result: "cherryBombDrone", cost: 120 },
+  { parts: ["squash", "cherrybomb"], result: "bambomb", cost: 95 }
+];
+
+const fusionRecipeMap = new Map(fusionRecipes.map((recipe) => [fusionKey(...recipe.parts), recipe]));
+const FUSION_DEX_KEY = "blockGardenFusionDex";
 
 const enemyTypes = {
   zombie: {
@@ -329,6 +1019,28 @@ const enemyTypes = {
     rangedDamage: 24,
     reward: 22
   },
+  armoredskeleton: {
+    label: "Armored Skeleton",
+    image: "../assets/minecraft/skeleton.png",
+    hp: 230,
+    speed: 15,
+    bite: 18,
+    biteEvery: 880,
+    range: 3.4,
+    rangedDamage: 32,
+    reward: 34,
+    armored: true
+  },
+  witherskeleton: {
+    label: "Wither Skeleton",
+    image: "../assets/minecraft/wither-skeleton.png",
+    hp: 310,
+    speed: 17,
+    bite: 34,
+    biteEvery: 760,
+    reward: 48,
+    armored: true
+  },
   creeper: {
     label: "Creeper",
     image: "../assets/minecraft/creeper.png",
@@ -339,6 +1051,26 @@ const enemyTypes = {
     reward: 25,
     explodes: true
   },
+  chargedcreeper: {
+    label: "Charged Creeper",
+    image: "../assets/minecraft/creeper.png",
+    hp: 260,
+    speed: 22,
+    bite: 220,
+    biteEvery: 1120,
+    reward: 42,
+    explodes: true,
+    charged: true
+  },
+  zombiepigman: {
+    label: "Zombie Pigman",
+    image: "../assets/minecraft/zombie-pigman.png",
+    hp: 260,
+    speed: 23,
+    bite: 32,
+    biteEvery: 640,
+    reward: 40
+  },
   spider: {
     label: "Spider",
     image: "../assets/minecraft/spider.png",
@@ -347,6 +1079,49 @@ const enemyTypes = {
     bite: 13,
     biteEvery: 680,
     reward: 24
+  },
+  slime: {
+    label: "Slime",
+    image: "../assets/minecraft/slime.png",
+    hp: 180,
+    speed: 28,
+    bite: 16,
+    biteEvery: 560,
+    reward: 28
+  },
+  witch: {
+    label: "Witch",
+    image: "../assets/minecraft/witch.png",
+    hp: 340,
+    speed: 15,
+    bite: 16,
+    biteEvery: 1050,
+    range: 3.75,
+    rangedDamage: 38,
+    reward: 55
+  },
+  blaze: {
+    label: "Blaze",
+    image: "../assets/minecraft/blaze.png",
+    hp: 300,
+    speed: 18,
+    bite: 30,
+    biteEvery: 780,
+    range: 3.9,
+    rangedDamage: 46,
+    reward: 58
+  },
+  guardian: {
+    label: "Guardian",
+    image: "../assets/minecraft/guardian.png",
+    hp: 420,
+    speed: 14,
+    bite: 36,
+    biteEvery: 820,
+    range: 4.15,
+    rangedDamage: 54,
+    reward: 70,
+    armored: true
   },
   ravager: {
     label: "Ravager",
@@ -357,6 +1132,58 @@ const enemyTypes = {
     biteEvery: 720,
     reward: 140,
     boss: true
+  },
+  obsidianravager: {
+    label: "Obsidian Ravager",
+    image: "../assets/minecraft/ravager.png",
+    hp: 1280,
+    speed: 11,
+    bite: 58,
+    biteEvery: 650,
+    reward: 210,
+    boss: true,
+    stompEvery: 5200,
+    stompDamage: 34,
+    stompRadius: 1.35
+  },
+  commandravager: {
+    label: "Command Ravager",
+    image: "../assets/minecraft/ravager.png",
+    hp: 1040,
+    speed: 12,
+    bite: 48,
+    biteEvery: 700,
+    reward: 230,
+    boss: true,
+    summonEvery: 6200,
+    summonList: ["armoredskeleton", "spider", "chargedcreeper"]
+  },
+  chargedravager: {
+    label: "Charged Ravager",
+    image: "../assets/minecraft/ravager.png",
+    hp: 1120,
+    speed: 15,
+    bite: 72,
+    biteEvery: 680,
+    reward: 250,
+    boss: true,
+    charged: true,
+    deathBlastRadius: 1.85,
+    deathBlastDamage: 120
+  },
+  witherlord: {
+    label: "Wither Lord",
+    image: "../assets/minecraft/wither-skeleton.png",
+    hp: 940,
+    speed: 16,
+    bite: 34,
+    biteEvery: 760,
+    range: 4.3,
+    rangedDamage: 48,
+    reward: 220,
+    boss: true,
+    summonEvery: 7000,
+    summonList: ["witherskeleton", "armoredskeleton"]
   }
 };
 
@@ -381,6 +1208,13 @@ const terrainMaps = {
     "GSGMGGSGG",
     "GGOGDGMGG",
     "GGSGGGOGG"
+  ],
+  fusionlab: [
+    "GOGDGGOMG",
+    "GGDMGOGGG",
+    "GOGGGDMOG",
+    "GGGOMGGDG",
+    "GMDGGOGGG"
   ]
 };
 
@@ -422,6 +1256,21 @@ const levelConfigs = {
     name: "Night Siege",
     terrain: terrainMaps.night,
     waves: [...wavePlans.slice(0, 9), ["zombie", "spider", "skeleton", "creeper", "ravager", "creeper", "spider", "skeleton"]]
+  },
+  fusionlab: {
+    name: "Fusion Lab",
+    terrain: terrainMaps.fusionlab,
+    waves: [
+      ["zombie", "spider", "armoredskeleton", "zombie"],
+      ["spider", "chargedcreeper", "zombiepigman", "armoredskeleton", "slime"],
+      ["armoredskeleton", "witch", "chargedcreeper", "spider", "zombiepigman", "armoredskeleton"],
+      ["chargedcreeper", "slime", "blaze", "armoredskeleton", "zombiepigman", "spider"],
+      ["guardian", "chargedcreeper", "spider", "commandravager", "armoredskeleton", "witch", "slime"],
+      ["chargedcreeper", "witherskeleton", "spider", "ravager", "blaze", "witherlord", "armoredskeleton"],
+      ["armoredskeleton", "guardian", "obsidianravager", "slime", "chargedcreeper", "zombiepigman", "witch"],
+      ["witherlord", "blaze", "armoredskeleton", "commandravager", "guardian", "chargedcreeper", "witherskeleton"],
+      ["chargedravager", "guardian", "witherlord", "chargedcreeper", "obsidianravager", "blaze", "commandravager"]
+    ]
   }
 };
 
@@ -430,6 +1279,7 @@ const dom = {
   projectileLayer: document.querySelector("#projectileLayer"),
   fxLayer: document.querySelector("#fxLayer"),
   seedBank: document.querySelector("#seedBank"),
+  fusionGuide: document.querySelector("#fusionGuide"),
   modeButtons: Array.from(document.querySelectorAll("[data-mode]")),
   levelButtons: Array.from(document.querySelectorAll("[data-level]")),
   difficultyButtons: Array.from(document.querySelectorAll("[data-difficulty]")),
@@ -467,11 +1317,15 @@ const state = {
   tnts: [],
   usedOre: new Set(),
   loadout: [],
+  discoveredFusions: loadDiscoveredFusions(),
+  pinnedFusionRecipe: null,
   unlockedLevels: loadUnlockedLevels(),
   waveActive: false,
   gameOver: false,
   spawnQueue: [],
   nextSpawnAt: 0,
+  nextWaveAutoAt: 0,
+  nextWaveCountdown: 0,
   lastFrameAt: performance.now(),
   nextSkySunAt: performance.now() + 4300
 };
@@ -489,6 +1343,23 @@ function loadUnlockedLevels() {
     // Ignore bad local storage and fall back to the first level.
   }
   return new Set(["garden"]);
+}
+
+function loadDiscoveredFusions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FUSION_DEX_KEY) || "null");
+    if (Array.isArray(saved)) {
+      const validResults = new Set(fusionRecipes.map((recipe) => recipe.result));
+      return new Set(saved.filter((key) => validResults.has(key)));
+    }
+  } catch {
+    // Ignore bad local storage and start a fresh fusion dex.
+  }
+  return new Set();
+}
+
+function saveDiscoveredFusions() {
+  localStorage.setItem(FUSION_DEX_KEY, JSON.stringify(Array.from(state.discoveredFusions)));
 }
 
 function saveUnlockedLevels() {
@@ -541,11 +1412,87 @@ function makeSeedBank() {
       state.selectedTool = null;
       refreshSeedCards();
       refreshToolButtons();
-      setMessage(`${type.name} selected.`);
+      refreshFusionGuide();
+      setMessage(selectionMessage(key));
       playSound("click");
     });
     dom.seedBank.append(card);
   });
+}
+
+function makeFusionGuide() {
+  if (!dom.fusionGuide) return;
+  dom.fusionGuide.innerHTML = "";
+  dom.fusionGuide.classList.toggle("is-hidden", !modeConfigs[state.mode].fusion);
+  if (!modeConfigs[state.mode].fusion) return;
+
+  fusionRecipes.forEach((recipe) => {
+    const [first, second] = recipe.parts;
+    const result = plantTypes[recipe.result];
+    const item = document.createElement("div");
+    item.className = "fusion-recipe";
+    item.dataset.first = first;
+    item.dataset.second = second;
+    item.dataset.result = recipe.result;
+    item.dataset.cost = recipe.cost;
+    item.dataset.recipe = fusionKey(first, second);
+    item.innerHTML = `
+      <img src="${plantTypes[first].image}" alt="" />
+      <span>+</span>
+      <img src="${plantTypes[second].image}" alt="" />
+      <span>=</span>
+      <img class="fusion-result" src="${result.image}" alt="" />
+      <strong>${result.name}<small>${recipe.cost}</small><em>New</em></strong>
+    `;
+    item.addEventListener("click", () => {
+      state.selectedPlant = first;
+      state.selectedTool = null;
+      state.pinnedFusionRecipe = item.dataset.recipe;
+      refreshSeedCards();
+      refreshToolButtons();
+      refreshFusionGuide();
+      setMessage(`Recipe selected: plant ${plantTypes[first].name}, then fuse with ${plantTypes[second].name}.`);
+      playSound("click");
+    });
+    dom.fusionGuide.append(item);
+  });
+  refreshFusionGuide();
+}
+
+function fusionPartnersFor(key) {
+  return fusionRecipes
+    .filter((recipe) => recipe.parts.includes(key))
+    .map((recipe) => recipe.parts.find((part) => part !== key));
+}
+
+function fusionRecipesFor(key) {
+  return fusionRecipes.filter((recipe) => recipe.parts.includes(key));
+}
+
+function selectionMessage(key) {
+  const type = plantTypes[key];
+  if (!modeConfigs[state.mode].fusion) return `${type.name} selected.`;
+  const partners = fusionPartnersFor(key).map((partner) => plantTypes[partner].name);
+  if (!partners.length) return `${type.name} selected. No fusion recipe yet.`;
+  return `${type.name} selected. Can fuse with ${partners.slice(0, 3).join(", ")}${partners.length > 3 ? "..." : ""}.`;
+}
+
+function refreshFusionGuide() {
+  if (!dom.fusionGuide || !modeConfigs[state.mode].fusion) return;
+  const selectedRecipes = fusionRecipesFor(state.selectedPlant);
+  const shouldFilter = selectedRecipes.length > 0;
+  Array.from(dom.fusionGuide.querySelectorAll(".fusion-recipe")).forEach((item) => {
+    const active = item.dataset.first === state.selectedPlant || item.dataset.second === state.selectedPlant;
+    const affordable = state.sun >= Number(item.dataset.cost || 0);
+    const pinned = state.pinnedFusionRecipe === item.dataset.recipe;
+    const discovered = state.discoveredFusions.has(item.dataset.result);
+    item.classList.toggle("is-active", active);
+    item.classList.toggle("is-pinned", pinned);
+    item.classList.toggle("is-disabled", !affordable);
+    item.classList.toggle("is-discovered", discovered);
+    item.classList.toggle("is-filtered-out", shouldFilter && !active);
+  });
+  dom.fusionGuide.dataset.filterPlant = shouldFilter ? plantTypes[state.selectedPlant].name : "";
 }
 
 function makeBoard() {
@@ -592,10 +1539,13 @@ function resetGame() {
   state.golems = [];
   state.tnts = [];
   state.usedOre = new Set();
+  state.pinnedFusionRecipe = null;
   state.waveActive = false;
   state.gameOver = false;
   state.spawnQueue = [];
   state.nextSpawnAt = 0;
+  state.nextWaveAutoAt = 0;
+  state.nextWaveCountdown = 0;
   state.lastFrameAt = performance.now();
   state.nextSkySunAt = performance.now() + 4300;
   dom.projectileLayer.innerHTML = "";
@@ -603,9 +1553,19 @@ function resetGame() {
   dom.endOverlay.classList.add("is-hidden");
   dom.startWaveButton.disabled = false;
   dom.startWaveButton.textContent = "Start Wave";
-  setMessage(state.mode === "creative" ? "Creative mode: all plants are ready." : "New random plant hand. Sunflower is always included.");
+  const mode = modeConfigs[state.mode];
+  setMessage(
+    state.mode === "creativefusion"
+      ? "Creative Fusion: huge sun, all plants, and every fusion recipe."
+      : mode.fusion
+      ? "Fusion Mod: plant a recipe part on another plant to fuse them."
+      : state.mode === "creative"
+        ? "Creative mode: all plants are ready."
+        : "New random plant hand. Sunflower is always included."
+  );
   makeBoard();
   makeSeedBank();
+  makeFusionGuide();
   refreshHud();
   refreshSeedCards();
   refreshToolButtons();
@@ -619,18 +1579,28 @@ function refreshHud() {
   dom.baseCount.textContent = state.base;
   if (dom.modeStatus) {
     dom.modeStatus.textContent =
-      state.mode === "creative"
+      state.mode === "creativefusion"
+        ? `Creative Fusion Dex ${state.discoveredFusions.size}/${fusionRecipes.length}`
+        : modeConfigs[state.mode].fusion
+        ? `Fusion Dex ${state.discoveredFusions.size}/${fusionRecipes.length}`
+        : state.mode === "creative"
         ? "All plants, 1500 starting sun."
         : `${activePlantKeys().length} random plants this run.`;
   }
 }
 
 function refreshSeedCards() {
+  const fusionPartners = new Set(modeConfigs[state.mode].fusion ? fusionPartnersFor(state.selectedPlant) : []);
+  const pinnedRecipe = fusionRecipes.find((recipe) => fusionKey(...recipe.parts) === state.pinnedFusionRecipe);
+  const pinnedParts = new Set(pinnedRecipe?.parts || []);
   Array.from(dom.seedBank.querySelectorAll(".seed-card")).forEach((card) => {
     const key = card.dataset.plant;
     card.classList.toggle("is-selected", !state.selectedTool && state.selectedPlant === key);
     card.classList.toggle("is-disabled", state.sun < plantTypes[key].cost);
+    card.classList.toggle("is-fusion-partner", fusionPartners.has(key));
+    card.classList.toggle("is-recipe-part", pinnedParts.has(key));
   });
+  refreshFusionGuide();
 }
 
 function refreshToolButtons() {
@@ -643,6 +1613,7 @@ function refreshToolButtons() {
 }
 
 function refreshOptionButtons() {
+  document.body.dataset.mode = state.mode;
   dom.modeButtons.forEach((button) => {
     button.classList.toggle("is-selected", state.mode === button.dataset.mode);
   });
@@ -657,6 +1628,10 @@ function refreshOptionButtons() {
   });
   if (state.mode === "creative") {
     dom.unlockStatus.textContent = "Creative opens every level for testing.";
+  } else if (state.mode === "creativefusion") {
+    dom.unlockStatus.textContent = "Creative Fusion opens every level with all recipes and extra sun.";
+  } else if (state.mode === "fusion") {
+    dom.unlockStatus.textContent = "Fusion opens every level and keeps campaign progress separate.";
   } else {
     const nextLocked = LEVEL_ORDER.find((level) => !state.unlockedLevels.has(level));
     dom.unlockStatus.textContent = nextLocked
@@ -671,14 +1646,17 @@ function currentLevel() {
 
 function currentDifficulty() {
   const difficulty = difficultyConfigs[state.difficulty];
-  if (state.mode !== "creative") return difficulty;
-  const creative = modeConfigs.creative;
+  const mode = modeConfigs[state.mode];
+  if (!mode.initialSun) return difficulty;
   return {
     ...difficulty,
-    initialSun: creative.initialSun,
-    base: creative.base,
-    spawnGapBonus: difficulty.spawnGapBonus + creative.spawnGapBonus,
-    rewardMultiplier: Math.max(difficulty.rewardMultiplier, creative.rewardMultiplier)
+    initialSun: mode.initialSun,
+    base: mode.base,
+    hpMultiplier: difficulty.hpMultiplier * (mode.hpMultiplier || 1),
+    speedMultiplier: difficulty.speedMultiplier * (mode.speedMultiplier || 1),
+    spawnGapBonus: difficulty.spawnGapBonus + (mode.spawnGapBonus || 0),
+    rewardMultiplier: mode.rewardMultiplier || difficulty.rewardMultiplier,
+    waveMultiplier: difficulty.waveMultiplier * (mode.waveMultiplier || 1)
   };
 }
 
@@ -687,7 +1665,7 @@ function currentMaxWaves() {
 }
 
 function levelIsAvailable(level) {
-  return state.mode === "creative" || state.unlockedLevels.has(level);
+  return state.mode !== "campaign" || state.unlockedLevels.has(level);
 }
 
 function setMessage(text) {
@@ -717,7 +1695,11 @@ function placePlant(row, col) {
     playSound("error");
     return;
   }
-  if (getPlantAt(row, col)) {
+  const existingPlant = getPlantAt(row, col);
+  if (existingPlant) {
+    if (tryFusePlant(existingPlant, state.selectedPlant)) {
+      return;
+    }
     setMessage("That block already has a plant.");
     return;
   }
@@ -764,6 +1746,55 @@ function placePlant(row, col) {
   }
 }
 
+function tryFusePlant(plant, ingredientKey) {
+  if (!modeConfigs[state.mode].fusion) return false;
+  const recipe = fusionRecipeMap.get(fusionKey(plant.type, ingredientKey));
+  if (!recipe) {
+    setMessage("No fusion recipe for those two plants.");
+    playSound("error");
+    return true;
+  }
+  if (state.sun < recipe.cost) {
+    setMessage(`Need ${recipe.cost} sun to fuse ${plantTypes[recipe.result].name}.`);
+    playSound("error");
+    return true;
+  }
+
+  spendSun(recipe.cost);
+  const previousName = plantTypes[plant.type].name;
+  const ingredientName = plantTypes[ingredientKey].name;
+  const resultType = plantTypes[recipe.result];
+  const now = performance.now();
+  plant.type = recipe.result;
+  plant.maxHp = resultType.hp;
+  plant.hp = Math.min(resultType.hp, Math.max(plant.hp, Math.round(resultType.hp * 0.68)));
+  plant.nextFireAt = now + 480;
+  plant.nextSunAt = now + 1800;
+  plant.sunEvery = plant.terrain === "dirt" && resultType.producesSun ? Math.round(resultType.sunEvery * 0.72) : resultType.sunEvery;
+  plant.armedAt = resultType.mine ? now + resultType.armMs : 0;
+  plant.nextChompAt = now + 500;
+  renderPlant(plant);
+  fusionAt(plant.col * tileSize + tileSize * 0.5, plant.row * tileSize + tileSize * 0.5);
+  const isNewDiscovery = !state.discoveredFusions.has(recipe.result);
+  state.discoveredFusions.add(recipe.result);
+  saveDiscoveredFusions();
+  state.pinnedFusionRecipe = null;
+  refreshHud();
+  refreshSeedCards();
+  refreshFusionGuide();
+  setMessage(`${previousName} + ${ingredientName} = ${resultType.name}.`);
+  if (isNewDiscovery) {
+    setMessage(`New Fusion Dex: ${resultType.name}.`);
+  }
+  if (resultType.instant && resultType.rowBlast) {
+    setTimeout(() => detonateJalapeno(plant), 520);
+  } else if (resultType.instant) {
+    setTimeout(() => detonateCherry(plant), 520);
+  }
+  playSound("boost");
+  return true;
+}
+
 function renderPlant(plant) {
   const cell = getCell(plant.row, plant.col);
   if (!cell) return;
@@ -784,11 +1815,15 @@ function renderPlant(plant) {
     cell.append(el);
   }
 
+  plant.el.className = `plant ${plant.type}`;
+  const img = plant.el.querySelector("img");
+  img.src = plantTypes[plant.type].image;
   const fill = plant.el.querySelector(".health-fill");
   fill.style.width = `${Math.max(0, (plant.hp / plant.maxHp) * 100)}%`;
   fill.style.background = plant.hp < plant.maxHp * 0.35 ? "#c83e35" : "#43a047";
-  plant.el.classList.toggle("is-armed", plantTypes[plant.type].mine && performance.now() >= plant.armedAt);
+  plant.el.classList.toggle("is-armed", Boolean(plantTypes[plant.type].mine && performance.now() >= plant.armedAt));
   plant.el.classList.toggle("is-boosted", Boolean(plant.boosted));
+  plant.el.classList.toggle("is-fusion", Boolean(plantTypes[plant.type].fusion));
 }
 
 function getCell(row, col) {
@@ -901,8 +1936,10 @@ function triggerTnt(tnt) {
 
 function startWave() {
   if (state.gameOver || state.waveActive) return;
+  state.nextWaveAutoAt = 0;
+  state.nextWaveCountdown = 0;
   state.waveActive = true;
-  state.spawnQueue = [...currentLevel().waves[state.wave - 1]];
+  state.spawnQueue = buildSpawnQueue(currentLevel().waves[state.wave - 1]);
   state.nextSpawnAt = performance.now() + 450;
   dom.startWaveButton.disabled = true;
   dom.startWaveButton.textContent = "Wave Running";
@@ -910,21 +1947,59 @@ function startWave() {
   playSound("wave");
 }
 
-function spawnEnemy(kind) {
+function buildSpawnQueue(plan) {
+  const difficulty = currentDifficulty();
+  const targetCount = Math.max(plan.length, Math.ceil(plan.length * (difficulty.waveMultiplier || 1)));
+  const queue = [...plan];
+  const isFusion = modeConfigs[state.mode].fusion;
+  const fusionPool = [
+    "armoredskeleton",
+    "chargedcreeper",
+    "spider",
+    "witch",
+    "slime",
+    "zombiepigman",
+    "blaze",
+    "witherskeleton",
+    "guardian"
+  ];
+  const normalPool = ["zombie", "skeleton", "spider", "creeper"];
+  const pool = isFusion ? fusionPool : normalPool;
+
+  for (let index = queue.length; index < targetCount; index += 1) {
+    if (isFusion && state.wave >= 8 && index % 10 === 7) {
+      queue.push(index % 20 === 7 ? "commandravager" : "witherlord");
+    } else if (isFusion && state.wave >= 6 && index % 8 === 5) {
+      queue.push("ravager");
+    } else if (index % 5 === 4 && state.wave >= 3) {
+      queue.push(isFusion ? "chargedcreeper" : "creeper");
+    } else if (index % 4 === 2 && state.wave >= 2) {
+      queue.push(isFusion ? "armoredskeleton" : "skeleton");
+    } else {
+      queue.push(pool[(index + state.wave) % pool.length]);
+    }
+  }
+
+  return queue;
+}
+
+function spawnEnemy(kind, options = {}) {
   const type = enemyTypes[kind];
   const difficulty = currentDifficulty();
-  const row = Math.floor(Math.random() * ROWS);
+  const row = options.row ?? Math.floor(Math.random() * ROWS);
   const bonus = state.wave - 1;
-  const hp = Math.round((type.hp + bonus * 20) * difficulty.hpMultiplier);
+  const hp = Math.round((type.hp + bonus * 20) * difficulty.hpMultiplier * (options.hpScale || 1));
+  const now = performance.now();
   const enemy = {
     id: crypto.randomUUID(),
     kind,
     row,
-    x: COLS * tileSize + tileSize * 0.18,
+    x: options.x ?? COLS * tileSize + tileSize * 0.18,
     hp,
     maxHp: hp,
     speed: (type.speed + bonus * 1.25) * difficulty.speedMultiplier,
     nextBiteAt: 0,
+    nextSpecialAt: now + 1800 + Math.random() * 1400,
     slowUntil: 0,
     slowFactor: 1,
     el: null
@@ -976,6 +2051,7 @@ function gameLoop(now) {
     updateProjectiles(dt, now);
     updateSuns(now);
     checkWaveComplete();
+    updateAutoWaveCountdown(now);
     renderAll();
   }
 
@@ -1011,6 +2087,9 @@ function updatePlants(now) {
       const target = nearestEnemyInRow(plant.row, plant.col, type.chompRange);
       if (target) {
         target.hp -= boostedValue(plant, type.chompDamage);
+        if (type.chompSplashRadius) {
+          damageEnemiesAround(target.row, target.x / tileSize, type.chompSplashRadius, Math.round(boostedValue(plant, type.chompDamage) * 0.45));
+        }
         plant.nextChompAt = now + type.chompEvery;
         blastAt(target.x + tileSize * 0.25, target.row * tileSize + tileSize * 0.5);
         setMessage("Chomper took a big bite.");
@@ -1060,7 +2139,9 @@ function fireForPlant(plant, type) {
       damage: boostedValue(plant, type.damage),
       className: type.projectileClass || "pea",
       speed: 330,
-      homing: true
+      homing: true,
+      splashRadius: type.splashRadius,
+      bonusVs: type.bonusVs
     });
     return;
   }
@@ -1216,15 +2297,26 @@ function updateEnemies(now, dt) {
       triggerTnt(tnt);
       return;
     }
+    updateEnemySpecial(enemy, type, enemyCol, now);
 
     const blocker = state.plants.find((plant) => plant.row === enemy.row && plant.col === enemyCol);
     const mine = blocker && plantTypes[blocker.type].mine ? blocker : null;
 
     if (mine && now >= mine.armedAt) {
+      const mineType = plantTypes[mine.type];
       blastAt(enemy.x + tileSize * 0.28, enemy.row * tileSize + tileSize * 0.48);
-      damageEnemiesAround(enemy.row, enemyCol, 1.05, plantTypes[mine.type].damage);
+      if (mineType.rowMine) {
+        rowBlastAt(enemy.row);
+        state.enemies.forEach((rowEnemy) => {
+          if (rowEnemy.row === enemy.row) {
+            rowEnemy.hp -= mineType.damage;
+          }
+        });
+      } else {
+        damageEnemiesAround(enemy.row, enemyCol, mineType.mineRadius || 1.05, mineType.mineDamage || mineType.damage);
+      }
       mine.hp = 0;
-      setMessage("Potato Mine popped.");
+      setMessage(`${mineType.name} popped.`);
       return;
     }
 
@@ -1280,6 +2372,28 @@ function updateEnemies(now, dt) {
   removeDeadEnemies();
 }
 
+function updateEnemySpecial(enemy, type, enemyCol, now) {
+  if (!type.boss || now < enemy.nextSpecialAt) return;
+
+  if (type.stompEvery) {
+    rowBlastAt(enemy.row);
+    damagePlantsAround(enemy.row, enemyCol, type.stompRadius || 1.15, type.stompDamage || 28);
+    enemy.nextSpecialAt = now + type.stompEvery;
+    setMessage(`${type.label} stomped the lane.`);
+    playSound("boom");
+    return;
+  }
+
+  if (type.summonEvery && type.summonList?.length) {
+    const summonKind = type.summonList[Math.floor(Math.random() * type.summonList.length)];
+    const summonRow = Math.max(0, Math.min(ROWS - 1, enemy.row + [-1, 0, 1][Math.floor(Math.random() * 3)]));
+    spawnEnemy(summonKind, { row: summonRow, hpScale: 0.72 });
+    enemy.nextSpecialAt = now + type.summonEvery;
+    setMessage(`${type.label} called reinforcements.`);
+    playSound("wave");
+  }
+}
+
 function findRangedTarget(enemy, type) {
   if (!type.range) return null;
   return state.plants
@@ -1318,6 +2432,7 @@ function updateProjectiles(dt, now) {
       } else {
         hit.hp -= damage;
       }
+      hitSparkAt(hit.x + tileSize * 0.3, hit.row * tileSize + tileSize * 0.44, projectile.className);
       if (projectile.slowMs) {
         hit.slowUntil = now + projectile.slowMs;
         hit.slowFactor = projectile.slowFactor;
@@ -1410,28 +2525,39 @@ function collectSun(id, silent = false) {
 
 function detonateCherry(plant) {
   if (state.gameOver) return;
+  const type = plantTypes[plant.type];
   const row = plant.row;
   const col = plant.col;
   blastAt(col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.5);
-  damageEnemiesAround(row, col, plantTypes.cherrybomb.blastRadius, plantTypes.cherrybomb.damage);
+  damageEnemiesAround(row, col, type.blastRadius || plantTypes.cherrybomb.blastRadius, type.damage || plantTypes.cherrybomb.damage);
+  if (type.slowMs) {
+    slowEnemiesAround(row, col, type.blastRadius || plantTypes.cherrybomb.blastRadius, type.slowMs, type.slowFactor || 0.5);
+  }
+  grantSunBurst(type.sunBurst);
   plant.hp = 0;
   removeDeadPlants();
   removeDeadEnemies();
-  setMessage("Cherry Bomb cleared nearby blocks.");
+  setMessage(`${type.name} cleared nearby blocks.`);
 }
 
 function detonateJalapeno(plant) {
   if (state.gameOver) return;
+  const type = plantTypes[plant.type];
   rowBlastAt(plant.row);
   state.enemies.forEach((enemy) => {
     if (enemy.row === plant.row) {
-      enemy.hp -= plantTypes.jalapeno.damage;
+      enemy.hp -= type.damage || plantTypes.jalapeno.damage;
+      if (type.slowMs) {
+        enemy.slowUntil = performance.now() + type.slowMs;
+        enemy.slowFactor = type.slowFactor || 0.5;
+      }
     }
   });
+  grantSunBurst(type.sunBurst);
   plant.hp = 0;
   removeDeadPlants();
   removeDeadEnemies();
-  setMessage("Jalapeno burned a whole row.");
+  setMessage(`${type.name} burned a whole row.`);
 }
 
 function damageEnemiesAround(row, col, radius, damage) {
@@ -1453,6 +2579,26 @@ function damagePlantsAround(row, col, radius, damage) {
   });
 }
 
+function slowEnemiesAround(row, col, radius, slowMs, slowFactor) {
+  const now = performance.now();
+  state.enemies.forEach((enemy) => {
+    const enemyCol = enemy.x / tileSize;
+    const distance = Math.hypot(enemy.row - row, enemyCol - col);
+    if (distance <= radius) {
+      enemy.slowUntil = now + slowMs;
+      enemy.slowFactor = slowFactor;
+    }
+  });
+}
+
+function grantSunBurst(amount) {
+  if (!amount) return;
+  state.sun += amount;
+  refreshHud();
+  refreshSeedCards();
+  refreshToolButtons();
+}
+
 function blastAt(x, y) {
   const el = document.createElement("div");
   el.className = "explosion";
@@ -1469,6 +2615,24 @@ function tntBlastAt(x, y) {
   el.style.top = `${y}px`;
   dom.fxLayer.append(el);
   setTimeout(() => el.remove(), 660);
+}
+
+function fusionAt(x, y) {
+  const el = document.createElement("div");
+  el.className = "fusion-burst";
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  dom.fxLayer.append(el);
+  setTimeout(() => el.remove(), 640);
+}
+
+function hitSparkAt(x, y, kind = "pea") {
+  const el = document.createElement("div");
+  el.className = `hit-spark ${kind}`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  dom.fxLayer.append(el);
+  setTimeout(() => el.remove(), 360);
 }
 
 function sprayAt(x, y, width) {
@@ -1505,7 +2669,15 @@ function removeDeadEnemies() {
   state.enemies = state.enemies.filter((enemy) => {
     if (enemy.hp > 0) return true;
     enemy.el?.remove();
-    const reward = enemy.noReward ? 0 : Math.round(enemyTypes[enemy.kind].reward * currentDifficulty().rewardMultiplier);
+    const type = enemyTypes[enemy.kind];
+    if (!enemy.noReward && type.deathBlastRadius) {
+      const enemyCol = enemy.x / tileSize;
+      blastAt(enemy.x + tileSize * 0.3, enemy.row * tileSize + tileSize * 0.48);
+      damagePlantsAround(enemy.row, enemyCol, type.deathBlastRadius, type.deathBlastDamage || type.bite);
+      setMessage(`${type.label} exploded on defeat.`);
+      playSound("boom");
+    }
+    const reward = enemy.noReward ? 0 : Math.round(type.reward * currentDifficulty().rewardMultiplier);
     if (reward && !state.gameOver) {
       state.sun += reward;
       refreshHud();
@@ -1525,10 +2697,29 @@ function checkWaveComplete() {
 
   state.wave += 1;
   state.waveActive = false;
-  dom.startWaveButton.disabled = false;
-  dom.startWaveButton.textContent = "Start Wave";
+  state.nextWaveAutoAt = performance.now() + 3000;
+  state.nextWaveCountdown = 3;
+  dom.startWaveButton.disabled = true;
+  dom.startWaveButton.textContent = "Next Wave 3";
   refreshHud();
-  setMessage(`Wave cleared. Build more before ${currentLevel().name} wave ${state.wave}.`);
+  setMessage(`Wave cleared. Next wave starts in 3.`);
+}
+
+function updateAutoWaveCountdown(now) {
+  if (!state.nextWaveAutoAt || state.waveActive || state.gameOver) return;
+  const remaining = Math.max(0, Math.ceil((state.nextWaveAutoAt - now) / 1000));
+  if (remaining !== state.nextWaveCountdown) {
+    state.nextWaveCountdown = remaining;
+    dom.startWaveButton.textContent = remaining > 0 ? `Next Wave ${remaining}` : "Starting";
+    if (remaining > 0) {
+      setMessage(`Wave ${state.wave} starts in ${remaining}.`);
+    }
+  }
+  if (now >= state.nextWaveAutoAt) {
+    state.nextWaveAutoAt = 0;
+    state.nextWaveCountdown = 0;
+    startWave();
+  }
 }
 
 function endGame(won) {
@@ -1544,7 +2735,7 @@ function endGame(won) {
 }
 
 function unlockNextLevel() {
-  if (state.mode === "creative") return;
+  if (state.mode !== "campaign") return;
   const index = LEVEL_ORDER.indexOf(state.level);
   const nextLevel = LEVEL_ORDER[index + 1];
   if (!nextLevel || state.unlockedLevels.has(nextLevel)) return;
@@ -1604,7 +2795,9 @@ function playSound(kind) {
 dom.modeButtons.forEach((button) => {
   button.addEventListener("click", () => {
     state.mode = button.dataset.mode;
-    if (!levelIsAvailable(state.level)) {
+    if (modeConfigs[state.mode].fusion) {
+      state.level = "fusionlab";
+    } else if (!levelIsAvailable(state.level)) {
       state.level = firstUnlockedLevel();
     }
     resetGame();

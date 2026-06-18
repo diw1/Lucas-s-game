@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lucas's Block Garden Defense</title>
-    <link rel="stylesheet" href="styles.css?v=creative-20260616b" />
+    <link rel="stylesheet" href="styles.css?v=minecraft-mobs-20260618" />
   </head>
   <body>
     <main class="game-shell">
@@ -38,6 +38,8 @@
           <div class="segmented-control" role="group" aria-label="Choose mode">
             <button class="option-button is-selected" type="button" data-mode="campaign">Campaign</button>
             <button class="option-button" type="button" data-mode="creative">Creative</button>
+            <button class="option-button" type="button" data-mode="creativefusion">Creative Fusion</button>
+            <button class="option-button" type="button" data-mode="fusion">Fusion</button>
           </div>
           <small id="modeStatus" class="unlock-status">6 random plants this run.</small>
         </div>
@@ -48,6 +50,7 @@
             <button class="option-button" type="button" data-level="garden">Garden</button>
             <button class="option-button" type="button" data-level="mine">Mine Rush</button>
             <button class="option-button is-selected" type="button" data-level="night">Night Siege</button>
+            <button class="option-button" type="button" data-level="fusionlab">Fusion Lab</button>
           </div>
           <small id="unlockStatus" class="unlock-status">Clear Garden to unlock Mine Rush.</small>
         </div>
@@ -111,6 +114,8 @@
         </div>
       </section>
 
+      <section id="fusionGuide" class="fusion-guide is-hidden" aria-label="Fusion recipes"></section>
+
       <section class="play-surface" aria-label="Game board">
         <aside id="seedBank" class="seed-bank" aria-label="Plant cards"></aside>
 
@@ -135,6 +140,6 @@
       </div>
     </main>
 
-    <script src="script.js?v=creative-20260616b"></script>
+    <script src="script.js?v=minecraft-mobs-20260618"></script>
   </body>
 </html>
