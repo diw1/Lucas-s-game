@@ -419,8 +419,196 @@ const SONGS = [
   }
 ];
 
-const REFERENCE_SONG_INDEXES = [0, 1, 2, 22, 23, 24];
-SONGS.splice(0, SONGS.length, ...REFERENCE_SONG_INDEXES.map((index) => SONGS[index]));
+const OPEN_REFERENCE_SONGS = [
+  {
+    ...SONGS[0],
+    sourceLabel: "PD Info public domain listing: Jingle Bells",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-song-list/pd-song-list-best-j.php"
+  },
+  {
+    ...SONGS[1],
+    sourceLabel: "Traditional public domain spiritual",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-song-list/pd-song-list-best-w.php"
+  },
+  {
+    ...SONGS[2],
+    sourceLabel: "PD Info public domain listing: Yankee Doodle",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-song-list/pd-song-list-best-y.php"
+  },
+  {
+    title: "Twinkle, Twinkle, Little Star",
+    shortTitle: "Twinkle",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "PD Info children's public domain song list",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-music-genres/pd-children-songs.php",
+    measures: [
+      ["C", "C", "G", "G"],
+      ["A", "A", "G"],
+      ["F", "F", "E", "E"],
+      ["D", "D", "C"],
+      ["G", "G", "F", "F"],
+      ["E", "E", "D"],
+      ["G", "G", "F", "F"],
+      ["E", "E", "D"],
+      ["C", "C", "G", "G"],
+      ["A", "A", "G"],
+      ["F", "F", "E", "E"],
+      ["D", "D", "C"]
+    ]
+  },
+  {
+    title: "Mary Had a Little Lamb",
+    shortTitle: "Mary Lamb",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "PD Info children's public domain song list",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-music-genres/pd-children-songs.php",
+    measures: [
+      ["E", "D", "C", "D"],
+      ["E", "E", "E"],
+      ["D", "D", "D"],
+      ["E", "G", "G"],
+      ["E", "D", "C", "D"],
+      ["E", "E", "E", "E"],
+      ["D", "D", "E", "D"],
+      ["C"]
+    ]
+  },
+  {
+    title: "Hot Cross Buns",
+    shortTitle: "Hot Cross",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "PD Info children's public domain song list",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-music-genres/pd-children-songs.php",
+    measures: [
+      ["B", "A", "G"],
+      ["B", "A", "G"],
+      ["G", "G", "G", "G"],
+      ["A", "A", "A", "A"],
+      ["B", "A", "G"]
+    ]
+  },
+  {
+    title: "Frere Jacques",
+    shortTitle: "Frere Jacques",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "Traditional public domain round",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-music-genres/pd-children-songs.php",
+    measures: [
+      ["C", "D", "E", "C"],
+      ["C", "D", "E", "C"],
+      ["E", "F", "G"],
+      ["E", "F", "G"],
+      ["G", "A", "G", "F", "E", "C"],
+      ["G", "A", "G", "F", "E", "C"],
+      ["C", "G", "C"],
+      ["C", "G", "C"]
+    ]
+  },
+  {
+    title: "London Bridge",
+    shortTitle: "London Bridge",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "Public domain children's song list",
+    sourceUrl: "https://littlesongbird.com/wp-content/uploads/2013/11/Piggyback-and-PD-list.pdf",
+    measures: [
+      ["G", "A", "G", "F"],
+      ["E", "F", "G"],
+      ["D", "E", "F"],
+      ["E", "F", "G"],
+      ["G", "A", "G", "F"],
+      ["E", "F", "G"],
+      ["D", "G", "E", "C"]
+    ]
+  },
+  {
+    title: "Row, Row, Row Your Boat",
+    shortTitle: "Row Boat",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "PD Info children's public domain song list",
+    sourceUrl: "https://www.pdinfo.com/mobile/pd-music-genres/pd-children-songs.php",
+    measures: [
+      ["C", "C", "C", "D", "E"],
+      ["E", "D", "E", "F", "G"],
+      ["C2", "C2", "C2", "G", "G", "G"],
+      ["E", "E", "E", "C", "C", "C"],
+      ["G", "F", "E", "D", "C"]
+    ]
+  },
+  {
+    title: "Old MacDonald Had a Farm",
+    shortTitle: "Old MacDonald",
+    tempo: "Traditional 4/4",
+    medium: true,
+    sourceLabel: "Public domain children's song list",
+    sourceUrl: "https://littlesongbird.com/wp-content/uploads/2013/11/Piggyback-and-PD-list.pdf",
+    measures: [
+      ["C", "C", "C", "G", "A", "A", "G"],
+      ["E", "E", "D", "D", "C"],
+      ["G", "G", "F", "F", "E", "E", "D"],
+      ["G", "G", "F", "F", "E", "E", "D"],
+      ["C", "C", "C", "G", "A", "A", "G"],
+      ["E", "E", "D", "D", "C"]
+    ]
+  },
+  {
+    title: "Ode to Joy",
+    shortTitle: "Ode to Joy",
+    tempo: "Beethoven 4/4",
+    medium: true,
+    sourceLabel: "IMSLP: Beethoven Symphony No. 9, public domain score",
+    sourceUrl: "https://imslp.org/wiki/Symphony_No.9%2C_Op.125_%28Beethoven%2C_Ludwig_van%29",
+    measures: [
+      ["E", "E", "F", "G"],
+      ["G", "F", "E", "D"],
+      ["C", "C", "D", "E"],
+      ["E", "D", "D"],
+      ["E", "E", "F", "G"],
+      ["G", "F", "E", "D"],
+      ["C", "C", "D", "E"],
+      ["D", "C", "C"]
+    ]
+  },
+  {
+    title: "Amazing Grace",
+    shortTitle: "Amazing Grace",
+    tempo: "Hymn 3/4",
+    medium: true,
+    sourceLabel: "Open Hymnal Project: Amazing Grace, public domain",
+    sourceUrl: "https://openhymnal.org/Pdf/Amazing_Grace-New_Britain.pdf",
+    measures: [
+      ["G", "C2", "E", "C2"],
+      ["E", "D", "C"],
+      ["A", "G", "E", "C"],
+      ["G", "C2", "E", "C2"],
+      ["E", "D", "C2"],
+      ["E", "G", "E", "C"],
+      ["G", "C2", "E", "C2"],
+      ["E", "D", "C"]
+    ]
+  },
+  {
+    ...SONGS[22],
+    sourceLabel: "User-provided Pokemon lead sheet screenshot",
+    sourceUrl: ""
+  },
+  {
+    ...SONGS[23],
+    sourceLabel: "User-provided Pokemon piano sheet screenshot",
+    sourceUrl: ""
+  },
+  {
+    ...SONGS[24],
+    sourceLabel: "User-provided PVZ piano sheet screenshot",
+    sourceUrl: ""
+  }
+];
+SONGS.splice(0, SONGS.length, ...OPEN_REFERENCE_SONGS);
 
 const CUSTOM_SONG_INDEX = SONGS.length;
 const VALID_NOTE_NAMES = new Set(NOTES.map((item) => item.note));
