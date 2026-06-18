@@ -419,6 +419,9 @@ const SONGS = [
   }
 ];
 
+const REFERENCE_SONG_INDEXES = [0, 1, 2, 22, 23, 24];
+SONGS.splice(0, SONGS.length, ...REFERENCE_SONG_INDEXES.map((index) => SONGS[index]));
+
 const CUSTOM_SONG_INDEX = SONGS.length;
 const VALID_NOTE_NAMES = new Set(NOTES.map((item) => item.note));
 
