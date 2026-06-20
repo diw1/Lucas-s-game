@@ -43,6 +43,22 @@ button {
   cursor: pointer;
 }
 
+.back-home {
+  position: fixed;
+  left: 10px;
+  top: 10px;
+  z-index: 80;
+  border: 3px solid var(--outline);
+  border-radius: 8px;
+  background: var(--sun);
+  color: var(--ink);
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: inset 0 -4px rgba(0, 0, 0, 0.12), 0 8px 18px rgba(34, 48, 34, 0.18);
+}
+
 .game-shell {
   width: min(1240px, calc(100vw - 24px));
   min-height: 100vh;
@@ -755,6 +771,23 @@ body[data-mode="campaign"] .legend-item small {
   height: calc(var(--tile) * 0.92);
 }
 
+.enemy.enderman.has-art,
+.enemy.drowned.has-art,
+.enemy.pillager.has-art {
+  width: calc(var(--tile) * 0.94);
+  height: calc(var(--tile) * 1.12);
+}
+
+.enemy.ghast.has-art {
+  width: calc(var(--tile) * 1.2);
+  height: calc(var(--tile) * 0.92);
+}
+
+.enemy.enderdragon.has-art {
+  width: calc(var(--tile) * 1.72);
+  height: calc(var(--tile) * 0.94);
+}
+
 .enemy.ravager.has-art {
   width: calc(var(--tile) * 1.32);
   height: calc(var(--tile) * 1.08);
@@ -786,6 +819,12 @@ body[data-mode="campaign"] .legend-item small {
 
 .enemy.is-slowed {
   filter: drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22)) drop-shadow(0 0 8px rgba(142, 215, 239, 0.78));
+}
+
+.enemy.is-charmed {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
+    drop-shadow(0 0 11px rgba(195, 91, 213, 0.92));
 }
 
 .enemy.armoredskeleton.has-art .enemy-art {
@@ -838,6 +877,36 @@ body[data-mode="campaign"] .legend-item small {
     drop-shadow(0 7px 4px rgba(21, 25, 22, 0.26))
     drop-shadow(0 0 8px rgba(92, 82, 105, 0.8))
     brightness(0.88);
+}
+
+.enemy.enderman.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.26))
+    drop-shadow(0 0 9px rgba(155, 84, 219, 0.82));
+}
+
+.enemy.drowned.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.24))
+    drop-shadow(0 0 8px rgba(67, 167, 164, 0.72));
+}
+
+.enemy.ghast.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.2))
+    drop-shadow(0 0 10px rgba(225, 230, 232, 0.9));
+}
+
+.enemy.pillager.has-art .enemy-art {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.24))
+    drop-shadow(0 0 8px rgba(124, 143, 147, 0.72));
+}
+
+.enemy.enderdragon.has-art .enemy-art {
+  filter:
+    drop-shadow(0 8px 5px rgba(21, 25, 22, 0.28))
+    drop-shadow(0 0 14px rgba(155, 84, 219, 0.95));
 }
 
 .enemy.obsidianravager.has-art .enemy-art {
@@ -1263,7 +1332,7 @@ body[data-mode="campaign"] .legend-item small {
 .message-row {
   min-height: 64px;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -1282,6 +1351,16 @@ body[data-mode="campaign"] .legend-item small {
   padding: 8px 15px;
   font-weight: 900;
   box-shadow: inset 0 -5px rgba(0, 0, 0, 0.12);
+}
+
+.secondary-button {
+  min-height: 42px;
+  border: 3px solid var(--outline);
+  border-radius: 8px;
+  background: #dbeed4;
+  padding: 8px 13px;
+  font-weight: 900;
+  box-shadow: inset 0 -5px rgba(0, 0, 0, 0.1);
 }
 
 .primary-button:disabled {

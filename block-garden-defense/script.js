@@ -126,6 +126,7 @@ const plantOrder = [
   "doomshroom",
   "blover",
   "spikeweed",
+  "gift",
   "torchwood",
   "wallnut",
   "tallnut",
@@ -288,15 +289,14 @@ const plantTypes = {
   },
   hypnoshroom: {
     name: "Hypno-shroom",
-    note: "slow charm",
+    note: "turns mobs",
     cost: 75,
     hp: 75,
     image: "../assets/characters/hypno-shroom.png",
-    damage: 12,
-    slowFactor: 0.34,
-    slowMs: 3200,
+    damage: 8,
+    charmMs: 4300,
     projectileClass: "hypno",
-    fireEvery: 2300
+    fireEvery: 2100
   },
   doomshroom: {
     name: "Doom-shroom",
@@ -329,6 +329,14 @@ const plantTypes = {
     fumeDamage: 26,
     fumeRange: 1.4,
     fireEvery: 900
+  },
+  gift: {
+    name: "Gift",
+    note: "wild fusion",
+    cost: 125,
+    hp: 120,
+    image: "../assets/ui/gift.png",
+    gift: true
   },
   torchwood: {
     name: "Torchwood",
@@ -818,15 +826,14 @@ const plantTypes = {
   },
   hypnoShooter: {
     name: "Hypnoshooter",
-    note: "slow pea",
+    note: "turn pea",
     cost: 175,
     hp: 105,
     image: "../assets/fusions/hypnoshooter.png",
-    damage: 22,
-    slowFactor: 0.32,
-    slowMs: 3600,
+    damage: 18,
+    charmMs: 5200,
     projectileClass: "hypno",
-    fireEvery: 1450,
+    fireEvery: 1350,
     fusion: true
   },
   hypnoPepper: {
@@ -837,9 +844,8 @@ const plantTypes = {
     image: "../assets/fusions/hypno-pepper.png",
     instant: true,
     rowBlast: true,
-    damage: 360,
-    slowFactor: 0.3,
-    slowMs: 4200,
+    damage: 220,
+    charmMs: 6400,
     fusion: true
   },
   doomCactus: {
@@ -942,6 +948,43 @@ const plantTypes = {
     blastRadius: 1.25,
     damage: 560,
     fusion: true
+  },
+  shieldwood: {
+    name: "Shieldwood",
+    note: "fire shell",
+    cost: 250,
+    hp: 760,
+    image: "../assets/fusions/shieldwood.png",
+    torch: true,
+    fumeDamage: 22,
+    fumeRange: 1.35,
+    fireEvery: 1150,
+    fusion: true
+  },
+  soyShroom: {
+    name: "Soy-shroom",
+    note: "cheap mist sun",
+    cost: 125,
+    hp: 105,
+    image: "../assets/fusions/soy-shroom.png",
+    producesSun: true,
+    sunEvery: 10600,
+    fumeDamage: 24,
+    fumeRange: 2.7,
+    fireEvery: 1700,
+    fusion: true
+  },
+  torchKelp: {
+    name: "Torch Kelp",
+    note: "homing fire",
+    cost: 275,
+    hp: 125,
+    image: "../assets/fusions/torch-kelp.png",
+    damage: 34,
+    fireEvery: 980,
+    homing: true,
+    projectileClass: "fire",
+    fusion: true
   }
 };
 
@@ -992,11 +1035,34 @@ const fusionRecipes = [
   { parts: ["blover", "cabbagepult"], result: "clovePult", cost: 90 },
   { parts: ["sunflower", "starfruit"], result: "luminaStar", cost: 90 },
   { parts: ["cattail", "cherrybomb"], result: "cherryBombDrone", cost: 120 },
-  { parts: ["squash", "cherrybomb"], result: "bambomb", cost: 95 }
+  { parts: ["squash", "cherrybomb"], result: "bambomb", cost: 95 },
+  { parts: ["pumpkin", "torchwood"], result: "shieldwood", cost: 105 },
+  { parts: ["sunshroom", "fumeshroom"], result: "soyShroom", cost: 70 },
+  { parts: ["cattail", "torchwood"], result: "torchKelp", cost: 125 },
+  { parts: ["magnetshroom", "cactus"], result: "cactusdrone", cost: 95 },
+  { parts: ["tallnut", "magnetshroom"], result: "magnetNut", cost: 95 }
 ];
 
 const fusionRecipeMap = new Map(fusionRecipes.map((recipe) => [fusionKey(...recipe.parts), recipe]));
 const FUSION_DEX_KEY = "blockGardenFusionDex";
+
+const giftBasePool = plantOrder.filter((key) => {
+  const type = plantTypes[key];
+  return key !== "gift" && !type.fusion && !type.instant;
+});
+
+function giftFusionRecipe(plantType, ingredientKey) {
+  if (plantType !== "gift" && ingredientKey !== "gift") return null;
+  const anchor = plantType === "gift" ? ingredientKey : plantType;
+  const options = fusionRecipes.filter((recipe) => recipe.parts.includes(anchor));
+  const pool = options.length ? options : fusionRecipes;
+  const recipe = pool[Math.floor(Math.random() * pool.length)];
+  return { ...recipe, parts: [plantType, ingredientKey], cost: Math.max(70, Math.round(recipe.cost * 0.82)), gift: true };
+}
+
+function randomGiftPlantKey() {
+  return giftBasePool[Math.floor(Math.random() * giftBasePool.length)] || "peashooter";
+}
 
 const enemyTypes = {
   zombie: {
@@ -1122,6 +1188,61 @@ const enemyTypes = {
     rangedDamage: 54,
     reward: 70,
     armored: true
+  },
+  enderman: {
+    label: "Enderman",
+    image: "../assets/minecraft/enderman.png",
+    hp: 320,
+    speed: 32,
+    bite: 42,
+    biteEvery: 620,
+    reward: 62
+  },
+  drowned: {
+    label: "Drowned",
+    image: "../assets/minecraft/drowned.png",
+    hp: 240,
+    speed: 16,
+    bite: 28,
+    biteEvery: 780,
+    range: 2.9,
+    rangedDamage: 34,
+    reward: 45
+  },
+  ghast: {
+    label: "Ghast",
+    image: "../assets/minecraft/ghast.png",
+    hp: 380,
+    speed: 12,
+    bite: 55,
+    biteEvery: 980,
+    range: 4.6,
+    rangedDamage: 58,
+    reward: 76
+  },
+  pillager: {
+    label: "Pillager",
+    image: "../assets/minecraft/pillager.png",
+    hp: 260,
+    speed: 17,
+    bite: 22,
+    biteEvery: 820,
+    range: 4.2,
+    rangedDamage: 44,
+    reward: 58
+  },
+  enderdragon: {
+    label: "Ender Dragon",
+    image: "../assets/minecraft/ender-dragon.png",
+    hp: 1760,
+    speed: 18,
+    bite: 92,
+    biteEvery: 680,
+    reward: 360,
+    boss: true,
+    stompEvery: 4800,
+    stompDamage: 48,
+    stompRadius: 1.6
   },
   ravager: {
     label: "Ravager",
@@ -1262,14 +1383,14 @@ const levelConfigs = {
     terrain: terrainMaps.fusionlab,
     waves: [
       ["zombie", "spider", "armoredskeleton", "zombie"],
-      ["spider", "chargedcreeper", "zombiepigman", "armoredskeleton", "slime"],
-      ["armoredskeleton", "witch", "chargedcreeper", "spider", "zombiepigman", "armoredskeleton"],
-      ["chargedcreeper", "slime", "blaze", "armoredskeleton", "zombiepigman", "spider"],
-      ["guardian", "chargedcreeper", "spider", "commandravager", "armoredskeleton", "witch", "slime"],
-      ["chargedcreeper", "witherskeleton", "spider", "ravager", "blaze", "witherlord", "armoredskeleton"],
-      ["armoredskeleton", "guardian", "obsidianravager", "slime", "chargedcreeper", "zombiepigman", "witch"],
-      ["witherlord", "blaze", "armoredskeleton", "commandravager", "guardian", "chargedcreeper", "witherskeleton"],
-      ["chargedravager", "guardian", "witherlord", "chargedcreeper", "obsidianravager", "blaze", "commandravager"]
+      ["spider", "chargedcreeper", "zombiepigman", "armoredskeleton", "slime", "drowned"],
+      ["armoredskeleton", "witch", "chargedcreeper", "enderman", "zombiepigman", "armoredskeleton"],
+      ["chargedcreeper", "slime", "blaze", "pillager", "zombiepigman", "spider", "drowned"],
+      ["guardian", "chargedcreeper", "ghast", "commandravager", "armoredskeleton", "witch", "slime"],
+      ["chargedcreeper", "witherskeleton", "enderman", "ravager", "blaze", "witherlord", "pillager"],
+      ["armoredskeleton", "guardian", "obsidianravager", "ghast", "chargedcreeper", "zombiepigman", "witch"],
+      ["witherlord", "blaze", "enderman", "commandravager", "guardian", "chargedcreeper", "witherskeleton"],
+      ["chargedravager", "guardian", "witherlord", "enderdragon", "obsidianravager", "ghast", "commandravager"]
     ]
   }
 };
@@ -1292,6 +1413,7 @@ const dom = {
   modeStatus: document.querySelector("#modeStatus"),
   message: document.querySelector("#message"),
   startWaveButton: document.querySelector("#startWaveButton"),
+  pauseNextWaveButton: document.querySelector("#pauseNextWaveButton"),
   restartButton: document.querySelector("#restartButton"),
   playAgainButton: document.querySelector("#playAgainButton"),
   endOverlay: document.querySelector("#endOverlay"),
@@ -1326,6 +1448,7 @@ const state = {
   nextSpawnAt: 0,
   nextWaveAutoAt: 0,
   nextWaveCountdown: 0,
+  nextWavePaused: false,
   lastFrameAt: performance.now(),
   nextSkySunAt: performance.now() + 4300
 };
@@ -1381,12 +1504,12 @@ function shuffleList(items) {
 function chooseLoadout() {
   const mode = modeConfigs[state.mode];
   if (mode.allPlants) {
-    state.loadout = [...plantOrder];
+    state.loadout = plantOrder.filter((key) => key !== "gift" || mode.fusion);
     return;
   }
 
   const extraSlots = Math.max(0, mode.loadoutSize - 1);
-  const candidates = plantOrder.filter((key) => key !== "sunflower");
+  const candidates = plantOrder.filter((key) => key !== "sunflower" && key !== "gift");
   state.loadout = ["sunflower", ...shuffleList(candidates).slice(0, extraSlots)];
 }
 
@@ -1472,6 +1595,7 @@ function fusionRecipesFor(key) {
 function selectionMessage(key) {
   const type = plantTypes[key];
   if (!modeConfigs[state.mode].fusion) return `${type.name} selected.`;
+  if (key === "gift") return "Gift selected. Plant it for a random plant, or place it on a plant for random fusion.";
   const partners = fusionPartnersFor(key).map((partner) => plantTypes[partner].name);
   if (!partners.length) return `${type.name} selected. No fusion recipe yet.`;
   return `${type.name} selected. Can fuse with ${partners.slice(0, 3).join(", ")}${partners.length > 3 ? "..." : ""}.`;
@@ -1546,6 +1670,7 @@ function resetGame() {
   state.nextSpawnAt = 0;
   state.nextWaveAutoAt = 0;
   state.nextWaveCountdown = 0;
+  state.nextWavePaused = false;
   state.lastFrameAt = performance.now();
   state.nextSkySunAt = performance.now() + 4300;
   dom.projectileLayer.innerHTML = "";
@@ -1553,6 +1678,8 @@ function resetGame() {
   dom.endOverlay.classList.add("is-hidden");
   dom.startWaveButton.disabled = false;
   dom.startWaveButton.textContent = "Start Wave";
+  dom.pauseNextWaveButton.classList.add("is-hidden");
+  dom.pauseNextWaveButton.textContent = "Pause";
   const mode = modeConfigs[state.mode];
   setMessage(
     state.mode === "creativefusion"
@@ -1713,19 +1840,21 @@ function placePlant(row, col) {
   refreshHud();
   refreshSeedCards();
 
+  const placedKey = state.selectedPlant === "gift" ? randomGiftPlantKey() : state.selectedPlant;
+  const placedType = plantTypes[placedKey];
   const now = performance.now();
   const plant = {
     id: crypto.randomUUID(),
-    type: state.selectedPlant,
+    type: placedKey,
     row,
     col,
-    hp: type.hp,
-    maxHp: type.hp,
+    hp: placedType.hp,
+    maxHp: placedType.hp,
     nextFireAt: now + 650,
     nextSunAt: now + 2200,
     terrain,
-    sunEvery: terrain === "dirt" && type.producesSun ? Math.round(type.sunEvery * 0.72) : type.sunEvery,
-    armedAt: type.mine ? now + type.armMs : 0,
+    sunEvery: terrain === "dirt" && placedType.producesSun ? Math.round(placedType.sunEvery * 0.72) : placedType.sunEvery,
+    armedAt: placedType.mine ? now + placedType.armMs : 0,
     nextChompAt: now + 500,
     el: null
   };
@@ -1733,22 +1862,25 @@ function placePlant(row, col) {
   grantOreBonus(row, col);
   renderPlant(plant);
 
-  if (type.instant && type.rowBlast) {
+  if (state.selectedPlant === "gift") {
+    setMessage(`Gift opened into ${placedType.name}.`);
+    fusionAt(col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.5);
+  } else if (placedType.instant && placedType.rowBlast) {
     setMessage("Jalapeno planted. The whole row is about to burn.");
     setTimeout(() => detonateJalapeno(plant), 520);
-  } else if (type.instant) {
+  } else if (placedType.instant) {
     setMessage("Cherry Bomb planted. Big boom incoming.");
     setTimeout(() => detonateCherry(plant), 520);
-  } else if (type.mine) {
+  } else if (placedType.mine) {
     setMessage("Potato Mine is hiding. It needs a moment to arm.");
   } else {
-    setMessage(`${type.name} is ready.`);
+    setMessage(`${placedType.name} is ready.`);
   }
 }
 
 function tryFusePlant(plant, ingredientKey) {
   if (!modeConfigs[state.mode].fusion) return false;
-  const recipe = fusionRecipeMap.get(fusionKey(plant.type, ingredientKey));
+  const recipe = fusionRecipeMap.get(fusionKey(plant.type, ingredientKey)) || giftFusionRecipe(plant.type, ingredientKey);
   if (!recipe) {
     setMessage("No fusion recipe for those two plants.");
     playSound("error");
@@ -1938,11 +2070,13 @@ function startWave() {
   if (state.gameOver || state.waveActive) return;
   state.nextWaveAutoAt = 0;
   state.nextWaveCountdown = 0;
+  state.nextWavePaused = false;
   state.waveActive = true;
   state.spawnQueue = buildSpawnQueue(currentLevel().waves[state.wave - 1]);
   state.nextSpawnAt = performance.now() + 450;
   dom.startWaveButton.disabled = true;
   dom.startWaveButton.textContent = "Wave Running";
+  dom.pauseNextWaveButton.classList.add("is-hidden");
   setMessage(`${currentLevel().name} wave ${state.wave} started.`);
   playSound("wave");
 }
@@ -1961,7 +2095,11 @@ function buildSpawnQueue(plan) {
     "zombiepigman",
     "blaze",
     "witherskeleton",
-    "guardian"
+    "guardian",
+    "enderman",
+    "drowned",
+    "ghast",
+    "pillager"
   ];
   const normalPool = ["zombie", "skeleton", "spider", "creeper"];
   const pool = isFusion ? fusionPool : normalPool;
@@ -2002,6 +2140,7 @@ function spawnEnemy(kind, options = {}) {
     nextSpecialAt: now + 1800 + Math.random() * 1400,
     slowUntil: 0,
     slowFactor: 1,
+    charmedUntil: 0,
     el: null
   };
   state.enemies.push(enemy);
@@ -2034,6 +2173,7 @@ function renderEnemy(enemy) {
   enemy.el.style.left = `${enemy.x}px`;
   enemy.el.style.top = `${enemy.row * tileSize + tileSize * (enemy.kind === "spider" ? 0.18 : 0.04)}px`;
   enemy.el.classList.toggle("is-slowed", enemy.slowUntil > performance.now());
+  enemy.el.classList.toggle("is-charmed", enemy.charmedUntil > performance.now());
   const fill = enemy.el.querySelector(".health-fill");
   fill.style.width = `${Math.max(0, (enemy.hp / enemy.maxHp) * 100)}%`;
   fill.style.background = enemy.hp < enemy.maxHp * 0.35 ? "#c83e35" : "#43a047";
@@ -2165,9 +2305,10 @@ function fireForPlant(plant, type) {
           y: plant.row * tileSize + tileSize * (0.42 + laneOffset * 0.12 + index * 0.06),
           targetY: targetRow * tileSize + tileSize * 0.42,
           damage: boostedValue(plant, type.damage),
-          slowFactor: type.slowFactor,
-          slowMs: type.slowMs,
-          className: type.projectileClass || "pea",
+      slowFactor: type.slowFactor,
+      slowMs: type.slowMs,
+      charmMs: type.charmMs,
+      className: type.projectileClass || "pea",
           lob: type.lob,
           splashRadius: type.splashRadius,
           bonusVs: type.bonusVs,
@@ -2188,6 +2329,7 @@ function firePea(config) {
     damage: config.damage,
     slowFactor: config.slowFactor || 1,
     slowMs: config.slowMs || 0,
+    charmMs: config.charmMs || 0,
     targetId: config.targetId,
     homing: Boolean(config.homing),
     lob: Boolean(config.lob),
@@ -2292,6 +2434,16 @@ function updateEnemies(now, dt) {
   state.enemies.forEach((enemy) => {
     const type = enemyTypes[enemy.kind];
     const enemyCol = Math.floor((enemy.x + tileSize * 0.26) / tileSize);
+    if (enemy.charmedUntil > now) {
+      const slow = enemy.slowUntil > now ? enemy.slowFactor : 1;
+      enemy.x += enemy.speed * slow * 1.18 * dt;
+      if (enemy.x > COLS * tileSize + tileSize * 1.8) {
+        enemy.hp = 0;
+        enemy.noReward = true;
+      }
+      return;
+    }
+
     const tnt = getTntAt(enemy.row, enemyCol);
     if (tnt) {
       triggerTnt(tnt);
@@ -2437,6 +2589,11 @@ function updateProjectiles(dt, now) {
         hit.slowUntil = now + projectile.slowMs;
         hit.slowFactor = projectile.slowFactor;
       }
+      if (projectile.charmMs) {
+        hit.charmedUntil = now + projectile.charmMs;
+        hit.slowUntil = 0;
+        setMessage(`${enemyTypes[hit.kind].label} turned around.`);
+      }
       projectile.dead = true;
     }
     if (projectile.x > COLS * tileSize + 60) {
@@ -2550,6 +2707,10 @@ function detonateJalapeno(plant) {
       if (type.slowMs) {
         enemy.slowUntil = performance.now() + type.slowMs;
         enemy.slowFactor = type.slowFactor || 0.5;
+      }
+      if (type.charmMs) {
+        enemy.charmedUntil = performance.now() + type.charmMs;
+        enemy.slowUntil = 0;
       }
     }
   });
@@ -2699,14 +2860,17 @@ function checkWaveComplete() {
   state.waveActive = false;
   state.nextWaveAutoAt = performance.now() + 3000;
   state.nextWaveCountdown = 3;
-  dom.startWaveButton.disabled = true;
+  state.nextWavePaused = false;
+  dom.startWaveButton.disabled = false;
   dom.startWaveButton.textContent = "Next Wave 3";
+  dom.pauseNextWaveButton.classList.remove("is-hidden");
+  dom.pauseNextWaveButton.textContent = "Pause";
   refreshHud();
-  setMessage(`Wave cleared. Next wave starts in 3.`);
+  setMessage(`Wave cleared. Next wave starts in 3. Pause if you need more time.`);
 }
 
 function updateAutoWaveCountdown(now) {
-  if (!state.nextWaveAutoAt || state.waveActive || state.gameOver) return;
+  if (!state.nextWaveAutoAt || state.nextWavePaused || state.waveActive || state.gameOver) return;
   const remaining = Math.max(0, Math.ceil((state.nextWaveAutoAt - now) / 1000));
   if (remaining !== state.nextWaveCountdown) {
     state.nextWaveCountdown = remaining;
@@ -2718,7 +2882,24 @@ function updateAutoWaveCountdown(now) {
   if (now >= state.nextWaveAutoAt) {
     state.nextWaveAutoAt = 0;
     state.nextWaveCountdown = 0;
+    dom.pauseNextWaveButton.classList.add("is-hidden");
     startWave();
+  }
+}
+
+function toggleNextWavePause() {
+  if (!state.nextWaveAutoAt || state.waveActive || state.gameOver) return;
+  state.nextWavePaused = !state.nextWavePaused;
+  if (state.nextWavePaused) {
+    dom.startWaveButton.textContent = "Start Next Wave";
+    dom.pauseNextWaveButton.textContent = "Resume Auto";
+    setMessage("Next wave paused. Build, fuse, then start when ready.");
+  } else {
+    state.nextWaveAutoAt = performance.now() + 3000;
+    state.nextWaveCountdown = 3;
+    dom.startWaveButton.textContent = "Next Wave 3";
+    dom.pauseNextWaveButton.textContent = "Pause";
+    setMessage("Auto next wave resumed. Starting in 3.");
   }
 }
 
@@ -2731,6 +2912,7 @@ function endGame(won) {
   dom.endTitle.textContent = won ? "Lucas defended the garden." : "The base fell.";
   dom.endOverlay.classList.remove("is-hidden");
   dom.startWaveButton.disabled = true;
+  dom.pauseNextWaveButton.classList.add("is-hidden");
   refreshOptionButtons();
 }
 
@@ -2851,6 +3033,7 @@ dom.soundButton.addEventListener("click", () => {
 });
 
 dom.startWaveButton.addEventListener("click", startWave);
+dom.pauseNextWaveButton.addEventListener("click", toggleNextWavePause);
 dom.restartButton.addEventListener("click", resetGame);
 dom.playAgainButton.addEventListener("click", resetGame);
 
