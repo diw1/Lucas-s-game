@@ -230,14 +230,16 @@ const plantTypes = {
   },
   melonpult: {
     name: "Melon-pult",
-    note: "splash hit",
+    note: "heavy splash",
     cost: 300,
     hp: 130,
-    image: "../assets/characters/melon-pult.png",
-    damage: 54,
+    image: "../assets/characters/melon-pult.png?v=melon-hd-20260622",
+    damage: 80,
     fireEvery: 2450,
     lob: true,
-    splashRadius: 0.82,
+    splashDamage: 28,
+    splashRadius: 1.08,
+    splashRows: 1,
     projectileClass: "melon"
   },
   cactus: {
@@ -2546,6 +2548,8 @@ function fireForPlant(plant, type) {
       speed: 330,
       homing: true,
       splashRadius: type.splashRadius,
+      splashDamage: type.splashDamage,
+      splashRows: type.splashRows,
       bonusVs: type.bonusVs
     });
     return;
@@ -2576,6 +2580,8 @@ function fireForPlant(plant, type) {
       className: type.projectileClass || "pea",
           lob: type.lob,
           splashRadius: type.splashRadius,
+          splashDamage: type.splashDamage,
+          splashRows: type.splashRows,
           bonusVs: type.bonusVs,
           speed: type.lob ? 215 : 285
         });
@@ -2599,6 +2605,8 @@ function firePea(config) {
     homing: Boolean(config.homing),
     lob: Boolean(config.lob),
     splashRadius: config.splashRadius || 0,
+    splashDamage: config.splashDamage || 0,
+    splashRows: config.splashRows ?? null,
     bonusVs: config.bonusVs,
     className: config.className,
     el: null
@@ -2857,8 +2865,17 @@ function updateProjectiles(dt, now) {
       const bonus = projectile.bonusVs?.[hit.kind] || 1;
       const damage = Math.round(projectile.damage * bonus);
       if (projectile.splashRadius) {
-        damageEnemiesAround(hit.row, hit.x / tileSize, projectile.splashRadius, damage);
-        blastAt(hit.x + tileSize * 0.28, hit.row * tileSize + tileSize * 0.46);
+        hit.hp -= damage;
+        const splashDamage = Math.round((projectile.splashDamage || projectile.damage) * bonus);
+        damageEnemiesAround(hit.row, hit.x / tileSize, projectile.splashRadius, splashDamage, {
+          excludeId: hit.id,
+          rowSpread: projectile.splashRows
+        });
+        if (projectile.className === "melon") {
+          melonSplashAt(hit.x + tileSize * 0.28, hit.row * tileSize + tileSize * 0.46);
+        } else {
+          blastAt(hit.x + tileSize * 0.28, hit.row * tileSize + tileSize * 0.46);
+        }
       } else {
         hit.hp -= damage;
       }
@@ -3000,8 +3017,10 @@ function detonateJalapeno(plant) {
   setMessage(`${type.name} burned a whole row.`);
 }
 
-function damageEnemiesAround(row, col, radius, damage) {
+function damageEnemiesAround(row, col, radius, damage, options = {}) {
   state.enemies.forEach((enemy) => {
+    if (options.excludeId && enemy.id === options.excludeId) return;
+    if (options.rowSpread !== null && options.rowSpread !== undefined && Math.abs(enemy.row - row) > options.rowSpread) return;
     const enemyCol = enemy.x / tileSize;
     const distance = Math.hypot(enemy.row - row, enemyCol - col);
     if (distance <= radius) {
@@ -3055,6 +3074,15 @@ function tntBlastAt(x, y) {
   el.style.top = `${y}px`;
   dom.fxLayer.append(el);
   setTimeout(() => el.remove(), 660);
+}
+
+function melonSplashAt(x, y) {
+  const el = document.createElement("div");
+  el.className = "melon-splash";
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  dom.fxLayer.append(el);
+  setTimeout(() => el.remove(), 520);
 }
 
 function fusionAt(x, y) {

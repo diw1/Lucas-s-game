@@ -771,6 +771,7 @@ body[data-mode="campaign"] .legend-item small {
 .sun-token,
 .projectile,
 .explosion,
+.melon-splash,
 .tnt-blast,
 .golem {
   position: absolute;
@@ -1264,10 +1265,16 @@ body[data-mode="campaign"] .legend-item small {
 }
 
 .projectile.melon {
-  width: 24px;
-  height: 24px;
-  background: #78a955;
-  border-color: #355d2f;
+  width: 30px;
+  height: 23px;
+  border-color: #2f672f;
+  border-radius: 52% 48% 50% 50%;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(236, 255, 172, 0.9) 0 13%, transparent 14%),
+    repeating-linear-gradient(112deg, #9bd53f 0 7px, #3f8b2f 8px 14px, #77bd35 15px 22px);
+  box-shadow:
+    inset -5px -4px rgba(28, 88, 28, 0.28),
+    0 8px 0 rgba(32, 44, 31, 0.12);
 }
 
 .projectile.is-lob {
@@ -1310,6 +1317,44 @@ body[data-mode="campaign"] .legend-item small {
   transform: translate(-50%, -50%) scale(0.2);
   animation: blast 520ms ease-out forwards;
   z-index: 20;
+}
+
+.melon-splash {
+  width: calc(var(--tile) * 2.15);
+  aspect-ratio: 1;
+  border: 3px solid rgba(43, 96, 36, 0.72);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 36% 34%, rgba(231, 255, 143, 0.9) 0 10%, transparent 11%),
+    radial-gradient(circle, rgba(139, 211, 64, 0.84) 0 28%, rgba(61, 145, 48, 0.54) 29% 60%, rgba(255, 255, 255, 0) 61% 100%);
+  transform: translate(-50%, -50%) scale(0.24);
+  animation: blast 500ms ease-out forwards;
+  z-index: 20;
+}
+
+.melon-splash::before,
+.melon-splash::after {
+  content: "";
+  position: absolute;
+  width: 22%;
+  height: 12%;
+  border-radius: 50%;
+  background: #2e7f2e;
+  box-shadow:
+    calc(var(--tile) * 0.32) calc(var(--tile) * 0.18) 0 #9bd53f,
+    calc(var(--tile) * -0.28) calc(var(--tile) * 0.08) 0 #4c9b35;
+}
+
+.melon-splash::before {
+  left: 26%;
+  top: 30%;
+  transform: rotate(-22deg);
+}
+
+.melon-splash::after {
+  right: 24%;
+  bottom: 28%;
+  transform: rotate(18deg);
 }
 
 .row-blast {
