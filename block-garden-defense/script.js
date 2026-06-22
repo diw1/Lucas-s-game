@@ -673,6 +673,18 @@ const plantTypes = {
     bonusVs: { spider: 1.7 },
     fusion: true
   },
+  magnetCactus: {
+    name: "Magnet Cactus",
+    note: "metal spikes",
+    cost: 200,
+    hp: 115,
+    image: "../assets/fusions/magnet-cactus.png",
+    damage: 30,
+    fireEvery: 1160,
+    projectileClass: "spike",
+    bonusVs: { armoredskeleton: 2, spider: 1.45 },
+    fusion: true
+  },
   flameTallnut: {
     name: "Flame Tall-nut",
     note: "fire wall",
@@ -833,6 +845,18 @@ const plantTypes = {
     fumeRange: 2.2,
     fireEvery: 1700,
     bonusVs: { armoredskeleton: 1.7 },
+    fusion: true
+  },
+  tallMagnetNut: {
+    name: "Tall Magnet-nut",
+    note: "huge metal wall",
+    cost: 250,
+    hp: 860,
+    image: "../assets/fusions/tall-magnet-nut.png",
+    fumeDamage: 26,
+    fumeRange: 2.55,
+    fireEvery: 1650,
+    bonusVs: { armoredskeleton: 2 },
     fusion: true
   },
   hypnoShooter: {
@@ -1050,8 +1074,8 @@ const fusionRecipes = [
   { parts: ["pumpkin", "torchwood"], result: "shieldwood", cost: 105 },
   { parts: ["sunshroom", "fumeshroom"], result: "soyShroom", cost: 70 },
   { parts: ["cattail", "torchwood"], result: "torchKelp", cost: 125 },
-  { parts: ["magnetshroom", "cactus"], result: "cactusdrone", cost: 95 },
-  { parts: ["tallnut", "magnetshroom"], result: "magnetNut", cost: 95 }
+  { parts: ["magnetshroom", "cactus"], result: "magnetCactus", cost: 95 },
+  { parts: ["tallnut", "magnetshroom"], result: "tallMagnetNut", cost: 95 }
 ];
 
 const fusionRecipeMap = new Map(fusionRecipes.map((recipe) => [fusionKey(...recipe.parts), recipe]));
