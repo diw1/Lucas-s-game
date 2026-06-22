@@ -133,6 +133,7 @@ const plantOrder = [
   "hypnoshroom",
   "doomshroom",
   "blover",
+  "garlic",
   "spikeweed",
   "gift",
   "torchwood",
@@ -329,6 +330,14 @@ const plantTypes = {
     fireEvery: 1750,
     slowFactor: 0.72,
     slowMs: 1200
+  },
+  garlic: {
+    name: "Garlic",
+    note: "lane turn",
+    cost: 50,
+    hp: 260,
+    image: "../assets/characters/garlic.png",
+    redirects: true
   },
   spikeweed: {
     name: "Spikeweed",
@@ -1067,7 +1076,7 @@ const fusionRecipes = [
   { parts: ["doomshroom", "chomper"], result: "doomChomper", cost: 140 },
   { parts: ["doomshroom", "jalapeno"], result: "doomPepper", cost: 150 },
   { parts: ["doomshroom", "blover"], result: "doomBlover", cost: 130 },
-  { parts: ["blover", "cabbagepult"], result: "clovePult", cost: 90 },
+  { parts: ["garlic", "cabbagepult"], result: "clovePult", cost: 90 },
   { parts: ["sunflower", "starfruit"], result: "luminaStar", cost: 90 },
   { parts: ["cattail", "cherrybomb"], result: "cherryBombDrone", cost: 120 },
   { parts: ["squash", "cherrybomb"], result: "bambomb", cost: 95 },
@@ -2781,6 +2790,9 @@ function updateEnemies(now, dt) {
     if (blocker) {
       if (now >= enemy.nextBiteAt) {
         damagePlant(blocker, type.bite);
+        if (plantTypes[blocker.type].redirects) {
+          redirectEnemyFromGarlic(enemy, blocker, now);
+        }
         enemy.nextBiteAt = now + type.biteEvery;
 
         if (type.explodes) {
@@ -2821,6 +2833,17 @@ function updateEnemies(now, dt) {
   removeDeadPlants();
   removeDeadTnts();
   removeDeadEnemies();
+}
+
+function redirectEnemyFromGarlic(enemy, garlic, now) {
+  if (enemy.nextRedirectAt && now < enemy.nextRedirectAt) return;
+  const candidates = [garlic.row - 1, garlic.row + 1].filter((row) => row >= 0 && row < ROWS);
+  if (!candidates.length) return;
+  const newRow = candidates.length === 1 ? candidates[0] : candidates[Math.floor(Math.random() * candidates.length)];
+  enemy.row = newRow;
+  enemy.nextRedirectAt = now + 1200;
+  floatingText("TURN", enemy.x + tileSize * 0.3, newRow * tileSize + tileSize * 0.22);
+  setMessage("Garlic diverted a mob to another lane.");
 }
 
 function updateEnemySpecial(enemy, type, enemyCol, now) {
