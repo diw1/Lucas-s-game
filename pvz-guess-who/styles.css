@@ -165,7 +165,7 @@ h3 {
 .start-panel {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(150px, 0.85fr) minmax(250px, 1.35fr) minmax(170px, 0.95fr) minmax(170px, 0.95fr) auto;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(250px, 1.25fr) minmax(170px, 0.9fr) minmax(230px, 1.35fr) auto;
   align-items: end;
   gap: 14px;
   padding: 14px;
@@ -554,6 +554,34 @@ h3 {
   font-weight: 900;
 }
 
+.prompt-card {
+  border: 3px solid var(--outline);
+  border-radius: var(--radius);
+  background: rgba(255, 250, 240, 0.95);
+  box-shadow: 0 4px 0 var(--outline);
+  padding: 14px 16px;
+  display: grid;
+  gap: 7px;
+  text-align: left;
+}
+
+.prompt-card span {
+  color: #b13429;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.prompt-card strong {
+  font-size: clamp(1.1rem, 2.4vw, 1.55rem);
+  line-height: 1.08;
+}
+
+.prompt-card.boss-prompt {
+  background: linear-gradient(180deg, #fff0a8, #ffd06a);
+}
+
 .answer-reveal {
   position: absolute;
   left: 10px;
@@ -717,6 +745,44 @@ h3 {
   box-shadow: 0 4px 0 var(--outline), inset 0 0 0 4px #f0b72f;
 }
 
+.memory-card {
+  min-height: 152px;
+}
+
+.memory-card.is-matched,
+.memory-card:disabled {
+  opacity: 1;
+}
+
+.memory-back,
+.memory-name-card {
+  width: 100%;
+  height: 116px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 900;
+}
+
+.memory-back {
+  color: #ffd227;
+  font-family: "Arial Black", "Trebuchet MS", Arial, sans-serif;
+  font-size: 4rem;
+  line-height: 1;
+  -webkit-text-stroke: 4px #2e6dad;
+  text-shadow: 4px 5px 0 #174162;
+  background: repeating-linear-gradient(135deg, #8fd0ee 0 14px, #fffbed 14px 28px);
+}
+
+.memory-name-card {
+  padding: 10px;
+  color: var(--ink);
+  background: #fff7c8;
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  line-height: 1.05;
+}
+
 .plant-card img {
   width: 100%;
   height: 116px;
@@ -819,6 +885,12 @@ h3 {
 }
 
 @media (max-width: 500px) {
+  .back-home {
+    position: static;
+    width: max-content;
+    margin: 8px 0 0 8px;
+  }
+
   .app-shell {
     max-width: 374px;
     margin-left: 8px;

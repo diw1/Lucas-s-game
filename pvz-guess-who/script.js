@@ -590,6 +590,148 @@ const highQualityPools = {
   ]
 };
 
+const oddChallenges = {
+  plant: [
+    {
+      prompt: "Which plant is not a mushroom?",
+      group: ["Puff-shroom", "Sun-shroom", "Fume-shroom", "Hypno-shroom", "Scaredy-shroom", "Ice-shroom", "Doom-shroom"],
+      odd: ["Peashooter", "Wall-nut", "Cactus"]
+    },
+    {
+      prompt: "Which plant is not for water or pool help?",
+      group: ["Lily Pad", "Tangle Kelp", "Sea-shroom", "Cattail"],
+      odd: ["Potato Mine", "Garlic", "Torchwood"]
+    },
+    {
+      prompt: "Which plant is not a roof helper?",
+      group: ["Cabbage-pult", "Flower Pot", "Kernel-pult", "Melon-pult", "Umbrella Leaf"],
+      odd: ["Cherry Bomb", "Tangle Kelp", "Puff-shroom"]
+    },
+    {
+      prompt: "Which plant does not explode or work one time?",
+      group: ["Cherry Bomb", "Potato Mine", "Jalapeno", "Squash", "Tangle Kelp", "Doom-shroom"],
+      odd: ["Sunflower", "Wall-nut", "Repeater"]
+    },
+    {
+      prompt: "Which plant is not a blocker or protector?",
+      group: ["Wall-nut", "Tall-nut", "Pumpkin", "Umbrella Leaf"],
+      odd: ["Snow Pea", "Starfruit", "Fume-shroom"]
+    }
+  ],
+  zombie: [
+    {
+      prompt: "Which zombie is not a pool zombie?",
+      group: ["Ducky Tube Zombie", "Snorkel Zombie", "Dolphin Rider Zombie"],
+      odd: ["Conehead Zombie", "Pogo Zombie", "Digger Zombie"]
+    },
+    {
+      prompt: "Which zombie does not wear or carry metal?",
+      group: ["Buckethead Zombie", "Football Zombie", "Pogo Zombie", "Digger Zombie", "Ladder Zombie"],
+      odd: ["Balloon Zombie", "Ducky Tube Zombie", "Imp"]
+    },
+    {
+      prompt: "Which zombie is not an aerial surprise?",
+      group: ["Balloon Zombie", "Bungee Zombie"],
+      odd: ["Newspaper Zombie", "Zomboni", "Screen Door Zombie"]
+    },
+    {
+      prompt: "Which zombie is not a jumper?",
+      group: ["Pole Vaulting Zombie", "Dolphin Rider Zombie", "Pogo Zombie"],
+      odd: ["Zombie", "Buckethead Zombie", "Newspaper Zombie"]
+    }
+  ]
+};
+
+const levelChallenges = [
+  {
+    title: "Night Start",
+    prompt: "It is night and you need sun. Which plant helps first?",
+    answer: "Sun-shroom",
+    choices: ["Puff-shroom", "Sunflower", "Coffee Bean", "Wall-nut", "Peashooter"]
+  },
+  {
+    title: "Pool Lane",
+    prompt: "You want to plant on water. What do you need?",
+    answer: "Lily Pad",
+    choices: ["Tangle Kelp", "Sea-shroom", "Cattail", "Flower Pot", "Pumpkin"]
+  },
+  {
+    title: "Fog Trouble",
+    prompt: "Fog is hiding the lawn. Which plant helps Lucas see?",
+    answer: "Plantern",
+    choices: ["Blover", "Cactus", "Starfruit", "Sun-shroom", "Garlic"]
+  },
+  {
+    title: "Roof Level",
+    prompt: "You are on the roof and need a place to plant.",
+    answer: "Flower Pot",
+    choices: ["Cabbage-pult", "Kernel-pult", "Umbrella Leaf", "Lily Pad", "Pumpkin"]
+  },
+  {
+    title: "Balloon Coming",
+    prompt: "A Balloon Zombie is floating in. Pick a good answer.",
+    answer: "Cactus",
+    choices: ["Blover", "Cattail", "Snow Pea", "Wall-nut", "Squash"]
+  },
+  {
+    title: "Digger Behind",
+    prompt: "A Digger Zombie may attack from behind. Who helps?",
+    answer: "Split Pea",
+    choices: ["Magnet-shroom", "Garlic", "Tall-nut", "Torchwood", "Repeater"]
+  },
+  {
+    title: "Falling Trouble",
+    prompt: "Bungee Zombies might steal plants. Who protects nearby plants?",
+    answer: "Umbrella Leaf",
+    choices: ["Cactus", "Blover", "Pumpkin", "Flower Pot", "Magnet-shroom"]
+  },
+  {
+    title: "Metal Hats",
+    prompt: "Buckets, helmets, and ladders are annoying. Pick the helper.",
+    answer: "Magnet-shroom",
+    choices: ["Fume-shroom", "Coffee Bean", "Spikeweed", "Torchwood", "Wall-nut"]
+  }
+];
+
+const teamChallenges = [
+  {
+    title: "Fog Pool Team",
+    prompt: "Pick 3 plants for foggy pool lanes.",
+    answers: ["Plantern", "Lily Pad", "Cattail"],
+    choices: ["Blover", "Sea-shroom", "Tangle Kelp", "Cactus", "Wall-nut"]
+  },
+  {
+    title: "Roof Starter Team",
+    prompt: "Pick 3 plants that make roof levels work.",
+    answers: ["Flower Pot", "Cabbage-pult", "Kernel-pult"],
+    choices: ["Melon-pult", "Umbrella Leaf", "Peashooter", "Lily Pad", "Puff-shroom"]
+  },
+  {
+    title: "Flying Trouble Team",
+    prompt: "Pick 3 plants for flying or falling zombies.",
+    answers: ["Cactus", "Blover", "Umbrella Leaf"],
+    choices: ["Cattail", "Plantern", "Snow Pea", "Tall-nut", "Garlic"]
+  },
+  {
+    title: "Night Economy Team",
+    prompt: "Pick 3 plants for a strong night start.",
+    answers: ["Sun-shroom", "Puff-shroom", "Fume-shroom"],
+    choices: ["Coffee Bean", "Scaredy-shroom", "Wall-nut", "Peashooter", "Marigold"]
+  },
+  {
+    title: "Slow And Stop Team",
+    prompt: "Pick 3 plants that slow, block, or freeze trouble.",
+    answers: ["Snow Pea", "Wall-nut", "Ice-shroom"],
+    choices: ["Tall-nut", "Pumpkin", "Squash", "Repeater", "Starfruit"]
+  },
+  {
+    title: "Fire Pea Team",
+    prompt: "Pick 3 plants for hot pea power.",
+    answers: ["Peashooter", "Repeater", "Torchwood"],
+    choices: ["Threepeater", "Jalapeno", "Snow Pea", "Sunflower", "Cactus"]
+  }
+];
+
 const characterImageFiles = {
   Peashooter: "peashooter.png",
   Sunflower: "sunflower.png",
@@ -754,6 +896,11 @@ const state = {
   pool: [],
   choices: [],
   diffusionSelection: [],
+  teamSelection: [],
+  memoryCards: [],
+  memorySelection: [],
+  challenge: null,
+  bossRound: false,
   cluesLeft: 0,
   lives: 0,
   cluesUsed: 0,
@@ -786,10 +933,12 @@ const roundPopup = document.querySelector("#roundPopup");
 const popupTitle = document.querySelector("#popupTitle");
 const popupDetail = document.querySelector("#popupDetail");
 const modeRadios = Array.from(document.querySelectorAll('[name="mode"]'));
-const recipeModeInputs = Array.from(document.querySelectorAll('[name="playMode"][value="fusion"], [name="playMode"][value="diffusion"]'));
+const plantOnlyModeInputs = Array.from(document.querySelectorAll(
+  '[name="playMode"][value="fusion"], [name="playMode"][value="diffusion"], [name="playMode"][value="level"], [name="playMode"][value="team"]'
+));
 
-modeRadios.forEach(input => input.addEventListener("change", syncRecipeModeAvailability));
-syncRecipeModeAvailability();
+modeRadios.forEach(input => input.addEventListener("change", syncPlayModeAvailability));
+syncPlayModeAvailability();
 
 startForm.addEventListener("submit", event => {
   event.preventDefault();
@@ -798,9 +947,9 @@ startForm.addEventListener("submit", event => {
   state.difficulty = formData.get("difficulty") || "easy";
   state.mode = formData.get("mode") || "plant";
   state.playMode = formData.get("playMode") || "shape";
-  if (state.mode === "zombie" && isRecipePlayMode(state.playMode)) state.playMode = "shape";
+  if (state.mode === "zombie" && isPlantOnlyPlayMode(state.playMode)) state.playMode = "shape";
   if (isRecipeMode()) state.mode = "plant";
-  state.round = 1;
+  state.round = Number(startForm.dataset.startRound || "1");
   state.score = Number(localStorage.getItem("plantGuessStars") || "0");
   resetTargetQueue();
   startScreen.classList.add("is-hidden");
@@ -823,13 +972,15 @@ if (launchParams.get("autostart") === "1") {
   const requestedDifficulty = launchParams.get("difficulty");
   const requestedMode = launchParams.get("mode");
   const requestedPlayMode = launchParams.get("playMode");
+  const requestedRound = Number(launchParams.get("round") || "1");
   const difficultyInput = document.querySelector(`[name="difficulty"][value="${cssEscape(requestedDifficulty || "")}"]`);
   const modeInput = document.querySelector(`[name="mode"][value="${cssEscape(requestedMode || "")}"]`);
   const playModeInput = document.querySelector(`[name="playMode"][value="${cssEscape(requestedPlayMode || "")}"]`);
   if (difficultyInput) difficultyInput.checked = true;
   if (modeInput) modeInput.checked = true;
   if (playModeInput) playModeInput.checked = true;
-  syncRecipeModeAvailability();
+  if (Number.isFinite(requestedRound) && requestedRound > 0) startForm.dataset.startRound = String(Math.floor(requestedRound));
+  syncPlayModeAvailability();
   requestAnimationFrame(() => startForm.requestSubmit());
 }
 
@@ -846,6 +997,9 @@ clueButton.addEventListener("click", () => {
 
 function startRound() {
   const settings = currentSettings();
+  state.bossRound = state.round % 5 === 0;
+  state.challenge = null;
+  state.memoryCards = [];
   if (state.playMode === "fusion") {
     state.pool = fusionRecipes.slice(0, fusionPoolSize());
     state.fusionRecipe = nextFusionRecipe(state.pool);
@@ -856,28 +1010,56 @@ function startRound() {
     state.fusionRecipe = nextFusionRecipe(state.pool);
     state.target = diffusionAnswerChoice(state.fusionRecipe);
     state.choices = buildDiffusionPlantChoices(state.fusionRecipe, state.pool, settings.choices);
+  } else if (state.playMode === "odd") {
+    state.pool = activeCharacters().slice(0, settings.poolSize);
+    state.fusionRecipe = null;
+    state.challenge = nextOddChallenge(settings.choices);
+    state.target = state.challenge.target;
+    state.choices = state.challenge.choices;
+  } else if (state.playMode === "level") {
+    state.pool = plants;
+    state.fusionRecipe = null;
+    state.challenge = nextLevelChallenge(settings.choices);
+    state.target = state.challenge.target;
+    state.choices = state.challenge.choices;
+  } else if (state.playMode === "team") {
+    state.pool = plants;
+    state.fusionRecipe = null;
+    state.challenge = nextTeamChallenge(settings.choices);
+    state.target = state.challenge.target;
+    state.choices = state.challenge.choices;
+  } else if (state.playMode === "memory") {
+    state.pool = activeCharacters().slice(0, settings.poolSize);
+    state.fusionRecipe = null;
+    state.challenge = nextMemoryChallenge(settings);
+    state.target = state.challenge.target;
+    state.choices = state.memoryCards;
   } else {
     state.pool = activeCharacters().slice(0, settings.poolSize);
     state.fusionRecipe = null;
+    state.challenge = null;
     state.target = nextTarget(state.pool);
     state.choices = buildChoices(state.target, state.pool, settings.choices);
   }
-  state.cluesLeft = settings.clues;
-  state.lives = settings.lives;
+  state.cluesLeft = state.playMode === "shape" ? settings.clues : 0;
+  state.lives = state.playMode === "memory" ? settings.lives + 1 : settings.lives;
+  if (state.bossRound) state.lives = Math.max(1, state.lives - 1);
   state.cluesUsed = 0;
   state.finished = false;
   state.diffusionSelection = [];
+  state.teamSelection = [];
+  state.memorySelection = [];
 
-  greeting.textContent = isRecipeMode() ? `${state.player}, guess the ${state.playMode}.` : `${state.player}, guess the ${state.mode}.`;
-  roundLabel.textContent = `Round ${state.round} · ${capitalize(state.difficulty)} · ${capitalize(state.mode)} · ${capitalize(state.playMode)}`;
+  greeting.textContent = roundGreeting();
+  roundLabel.textContent = `${state.bossRound ? "Boss · " : ""}Round ${state.round} · ${capitalize(state.difficulty)} · ${capitalize(state.mode)} · ${capitalize(state.playMode)}`;
   answerReveal.textContent = "";
   answerReveal.classList.remove("show");
   mysteryArt.classList.remove("revealed");
-  mysteryArt.classList.toggle("is-hidden", state.playMode === "hints" || isRecipeMode());
-  document.querySelector(".big-question").classList.toggle("is-hidden", state.playMode === "hints" || isRecipeMode());
-  hintStack.classList.toggle("show", state.playMode === "hints");
+  mysteryArt.classList.toggle("is-hidden", state.playMode === "hints" || isRecipeMode() || isPromptPlayMode());
+  document.querySelector(".big-question").classList.toggle("is-hidden", state.playMode === "hints" || isRecipeMode() || isPromptPlayMode());
+  hintStack.classList.toggle("show", state.playMode === "hints" || isPromptPlayMode());
   fusionBoard.classList.toggle("show", isRecipeMode());
-  mysteryArt.innerHTML = isRecipeMode() ? "" : renderCharacterImage(state.target);
+  mysteryArt.innerHTML = isRecipeMode() || isPromptPlayMode() ? "" : renderCharacterImage(state.target);
   fusionBoard.innerHTML = "";
   hintStack.innerHTML = "";
   answerLog.innerHTML = "";
@@ -889,6 +1071,18 @@ function startRound() {
   } else if (state.playMode === "diffusion") {
     renderDiffusionBoard();
     setMessage("Pick the two plants that make this fusion.");
+  } else if (state.playMode === "odd") {
+    renderChallengePrompt("Odd One Out", state.challenge.prompt);
+    setMessage("Pick the one that does not belong.");
+  } else if (state.playMode === "level") {
+    renderChallengePrompt(state.challenge.title, state.challenge.prompt);
+    setMessage("Pick the best helper for this level.");
+  } else if (state.playMode === "team") {
+    renderChallengePrompt(state.challenge.title, state.challenge.prompt);
+    setMessage("Pick 3 plants for the team.");
+  } else if (state.playMode === "memory") {
+    renderChallengePrompt("Memory Match", "Flip cards to match each picture with its name.");
+    setMessage("Find matching picture and name cards.");
   } else if (state.playMode === "hints") {
     showStartingHints();
     setMessage("Read the hints, then pick an answer.");
@@ -902,6 +1096,10 @@ function startRound() {
 
 function renderPlantGrid() {
   plantGrid.innerHTML = "";
+  if (state.playMode === "memory") {
+    renderMemoryGrid();
+    return;
+  }
   state.choices.forEach(plant => {
     const card = document.createElement("button");
     card.type = "button";
@@ -920,14 +1118,18 @@ function guessPlant(plant) {
     guessDiffusionPlant(plant);
     return;
   }
+  if (state.playMode === "team") {
+    guessTeamPlant(plant);
+    return;
+  }
   const card = plantGrid.querySelector(`[data-name="${cssEscape(plant.name)}"]`);
 
   if (plant.name === state.target.name) {
     state.finished = true;
-    state.score += Math.max(1, state.lives + state.cluesLeft);
+    state.score += roundScore();
     localStorage.setItem("plantGuessStars", String(state.score));
     revealAnswer();
-    setMessage(`Correct! It was ${plant.name}.`, "win");
+    setMessage(correctMessage(plant.name), "win");
     if (card) card.classList.add("is-correct");
     disableRoundControls();
     updateHud();
@@ -985,7 +1187,7 @@ function guessDiffusionPlant(plant) {
   const selectedNames = state.diffusionSelection.map(choice => choice.name);
   if (samePlantSet(selectedNames, state.target.inputs)) {
     state.finished = true;
-    state.score += Math.max(1, state.lives + state.cluesLeft);
+    state.score += roundScore();
     localStorage.setItem("plantGuessStars", String(state.score));
     revealAnswer();
     setMessage(`Correct! ${state.target.name} makes it.`, "win");
@@ -1027,8 +1229,148 @@ function guessDiffusionPlant(plant) {
   }, 800);
 }
 
+function guessTeamPlant(plant) {
+  const choiceId = plant.choiceId || plant.name;
+  const selectedIndex = state.teamSelection.findIndex(choice => choice.choiceId === choiceId);
+  if (selectedIndex >= 0) {
+    state.teamSelection.splice(selectedIndex, 1);
+    syncTeamSelectionCards();
+    setMessage("Pick 3 plants for the team.");
+    return;
+  }
+  if (state.teamSelection.length >= 3) return;
+
+  state.teamSelection.push(plant);
+  syncTeamSelectionCards();
+
+  if (state.teamSelection.length < 3) {
+    setMessage(`Pick ${3 - state.teamSelection.length} more plant${state.teamSelection.length === 2 ? "" : "s"}.`);
+    return;
+  }
+
+  const selectedNames = state.teamSelection.map(choice => choice.name);
+  if (samePlantSet(selectedNames, state.target.answers)) {
+    state.finished = true;
+    state.score += roundScore();
+    localStorage.setItem("plantGuessStars", String(state.score));
+    setMessage(`Great team! ${selectedNames.join(" + ")}.`, "win");
+    markCorrectCard();
+    disableRoundControls();
+    updateHud();
+    showRoundPopup("Great team!", `${state.challenge.title} · next round...`);
+    window.setTimeout(() => {
+      state.round += 1;
+      startRound();
+    }, 1700);
+    return;
+  }
+
+  state.lives -= 1;
+  markTeamSelection("is-wrong");
+  setMessage(`${selectedNames.join(" + ")} is not the team.`, "miss");
+  updateHud();
+
+  if (state.lives <= 0) {
+    state.finished = true;
+    setMessage(`The team was ${state.target.answers.join(" + ")}.`, "miss");
+    markCorrectCard();
+    disableRoundControls();
+    showRoundPopup("Out of hearts!", `${state.target.answers.join(" + ")} · next round...`);
+    window.setTimeout(() => {
+      state.round += 1;
+      startRound();
+    }, 2500);
+    return;
+  }
+
+  window.setTimeout(() => {
+    state.teamSelection = [];
+    syncTeamSelectionCards();
+    setMessage("Try another team.");
+  }, 850);
+}
+
+function renderMemoryGrid() {
+  state.memoryCards.forEach(card => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "plant-card memory-card";
+    if (card.matched) button.classList.add("is-correct");
+    button.disabled = card.matched;
+    button.dataset.cardId = card.cardId;
+    button.dataset.pairId = card.pairId;
+    button.innerHTML = renderMemoryCard(card);
+    button.addEventListener("click", () => guessMemoryCard(card));
+    plantGrid.append(button);
+  });
+}
+
+function guessMemoryCard(card) {
+  if (state.finished || card.matched || card.revealed) return;
+  card.revealed = true;
+  state.memorySelection.push(card);
+  renderPlantGrid();
+
+  if (state.memorySelection.length < 2) {
+    setMessage("Flip one more card.");
+    return;
+  }
+
+  const [first, second] = state.memorySelection;
+  if (first.pairId === second.pairId && first.type !== second.type) {
+    first.matched = true;
+    second.matched = true;
+    state.memorySelection = [];
+    renderPlantGrid();
+    const matchedCount = state.memoryCards.filter(item => item.matched).length;
+    if (matchedCount === state.memoryCards.length) {
+      state.finished = true;
+      state.score += roundScore();
+      localStorage.setItem("plantGuessStars", String(state.score));
+      setMessage("All matches found!", "win");
+      disableRoundControls();
+      updateHud();
+      showRoundPopup("Memory clear!", "Next round...");
+      window.setTimeout(() => {
+        state.round += 1;
+        startRound();
+      }, 1700);
+    } else {
+      setMessage("Match!");
+    }
+    return;
+  }
+
+  state.lives -= 1;
+  setMessage("Not a match.", "miss");
+  updateHud();
+
+  if (state.lives <= 0) {
+    state.finished = true;
+    state.memoryCards.forEach(item => {
+      item.revealed = true;
+    });
+    renderPlantGrid();
+    disableRoundControls();
+    showRoundPopup("Out of hearts!", "Memory board resets...");
+    window.setTimeout(() => {
+      state.round += 1;
+      startRound();
+    }, 2400);
+    return;
+  }
+
+  window.setTimeout(() => {
+    first.revealed = false;
+    second.revealed = false;
+    state.memorySelection = [];
+    renderPlantGrid();
+    setMessage("Try another pair.");
+  }, 900);
+}
+
 function revealAnswer() {
-  mysteryArt.classList.toggle("is-hidden", isRecipeMode());
+  mysteryArt.classList.toggle("is-hidden", isRecipeMode() || isPromptPlayMode());
   hintStack.classList.remove("show");
   document.querySelector(".big-question").classList.add("is-hidden");
   mysteryArt.classList.add("revealed");
@@ -1039,7 +1381,7 @@ function revealAnswer() {
 }
 
 function disableRoundControls() {
-  if (state.playMode === "diffusion") {
+  if (state.playMode === "diffusion" || state.playMode === "team" || state.playMode === "memory") {
     plantGrid.querySelectorAll("button").forEach(button => {
       button.disabled = true;
     });
@@ -1053,6 +1395,18 @@ function disableRoundControls() {
 }
 
 function markCorrectCard() {
+  if (state.playMode === "team") {
+    const remaining = plantNameCounts(state.target.answers);
+    plantGrid.querySelectorAll("button").forEach(button => {
+      const name = button.dataset.name;
+      if (remaining.get(name) > 0) {
+        button.classList.remove("is-selected", "is-wrong");
+        button.classList.add("is-correct");
+        remaining.set(name, remaining.get(name) - 1);
+      }
+    });
+    return;
+  }
   if (state.playMode === "diffusion") {
     const remaining = plantNameCounts(state.target.inputs);
     plantGrid.querySelectorAll("button").forEach(button => {
@@ -1080,8 +1434,8 @@ function updateHud() {
   questionsLeftEl.textContent = String(state.cluesLeft);
   livesLeftEl.textContent = "♥".repeat(Math.max(0, state.lives)) || "0";
   scoreValueEl.textContent = String(state.score);
-  clueButton.classList.toggle("is-hidden", state.playMode === "hints" || isRecipeMode());
-  clueButton.disabled = state.playMode === "hints" || isRecipeMode() || state.finished || state.cluesLeft <= 0;
+  clueButton.classList.toggle("is-hidden", state.playMode !== "shape");
+  clueButton.disabled = state.playMode !== "shape" || state.finished || state.cluesLeft <= 0;
 }
 
 function showStartingHints() {
@@ -1115,6 +1469,24 @@ function currentSettings() {
   return difficultySettings[state.difficulty] || difficultySettings.easy;
 }
 
+function roundScore() {
+  return Math.max(1, state.lives + state.cluesLeft) + (state.bossRound ? 3 : 0);
+}
+
+function correctMessage(answerName) {
+  return state.bossRound ? `Boss clear! It was ${answerName}.` : `Correct! It was ${answerName}.`;
+}
+
+function roundGreeting() {
+  if (state.bossRound) return `${state.player}, boss round!`;
+  if (isRecipeMode()) return `${state.player}, guess the ${state.playMode}.`;
+  if (state.playMode === "odd") return `${state.player}, find the odd one.`;
+  if (state.playMode === "level") return `${state.player}, help the level.`;
+  if (state.playMode === "team") return `${state.player}, build a team.`;
+  if (state.playMode === "memory") return `${state.player}, match the cards.`;
+  return `${state.player}, guess the ${state.mode}.`;
+}
+
 function isRecipeMode() {
   return isRecipePlayMode(state.playMode);
 }
@@ -1123,16 +1495,24 @@ function isRecipePlayMode(playMode) {
   return playMode === "fusion" || playMode === "diffusion";
 }
 
-function syncRecipeModeAvailability() {
+function isPromptPlayMode() {
+  return state.playMode === "odd" || state.playMode === "level" || state.playMode === "team" || state.playMode === "memory";
+}
+
+function isPlantOnlyPlayMode(playMode) {
+  return isRecipePlayMode(playMode) || playMode === "level" || playMode === "team";
+}
+
+function syncPlayModeAvailability() {
   const selectedMode = document.querySelector('[name="mode"]:checked')?.value || "plant";
   const isZombie = selectedMode === "zombie";
-  recipeModeInputs.forEach(input => {
+  plantOnlyModeInputs.forEach(input => {
     const label = input.closest("label");
     input.disabled = isZombie;
     label?.classList.toggle("is-unavailable", isZombie);
     label?.setAttribute("aria-disabled", String(isZombie));
   });
-  if (isZombie && recipeModeInputs.some(input => input.checked)) {
+  if (isZombie && plantOnlyModeInputs.some(input => input.checked)) {
     const shapeInput = document.querySelector('[name="playMode"][value="shape"]');
     if (shapeInput) shapeInput.checked = true;
   }
@@ -1152,6 +1532,83 @@ function fusionPoolSize() {
 
 function getHints(character) {
   return mysteryHintBank[character.name] || character.clues;
+}
+
+function nextOddChallenge(count) {
+  const rules = oddChallenges[state.mode] || oddChallenges.plant;
+  const rule = randomItem(rules);
+  const oddName = randomItem(rule.odd);
+  const commonCount = Math.min(count - 1, rule.group.length);
+  const names = shuffle([...shuffle(rule.group).slice(0, commonCount), oddName]);
+  const source = state.mode === "zombie" ? zombies : plants;
+  const choices = names.map(name => source.find(character => character.name === name)).filter(Boolean);
+  const target = choices.find(choice => choice.name === oddName) || choices[0];
+  return {
+    prompt: rule.prompt,
+    target,
+    choices
+  };
+}
+
+function nextLevelChallenge(count) {
+  const challenge = randomItem(levelChallenges);
+  const target = findPlantByName(challenge.answer);
+  return {
+    title: challenge.title,
+    prompt: challenge.prompt,
+    target,
+    choices: buildNamedPlantChoices([challenge.answer], challenge.choices, count)
+  };
+}
+
+function nextTeamChallenge(count) {
+  const challenge = randomItem(teamChallenges);
+  const answers = challenge.answers;
+  const choices = buildNamedPlantChoices(answers, challenge.choices, Math.max(count, answers.length));
+  return {
+    title: challenge.title,
+    prompt: challenge.prompt,
+    target: { name: answers.join(" + "), answers },
+    choices: choices.map((plant, index) => ({
+      ...plant,
+      choiceId: `team-${index}-${slugify(plant.name)}`
+    }))
+  };
+}
+
+function nextMemoryChallenge(settings) {
+  const pairCount = state.difficulty === "easy" ? 3 : state.difficulty === "medium" ? 4 : 5;
+  const characters = shuffle(activeCharacters().slice(0, settings.poolSize)).slice(0, pairCount);
+  const cards = characters.flatMap(character => [
+    {
+      cardId: `memory-${slugify(character.name)}-image`,
+      pairId: character.name,
+      type: "image",
+      character,
+      revealed: false,
+      matched: false
+    },
+    {
+      cardId: `memory-${slugify(character.name)}-name`,
+      pairId: character.name,
+      type: "name",
+      character,
+      revealed: false,
+      matched: false
+    }
+  ]);
+  state.memoryCards = shuffle(cards);
+  return {
+    target: { name: "Memory board" }
+  };
+}
+
+function buildNamedPlantChoices(answerNames, distractorNames, count) {
+  const names = shuffle([
+    ...answerNames,
+    ...shuffle(distractorNames.filter(name => !answerNames.includes(name))).slice(0, Math.max(0, count - answerNames.length))
+  ]);
+  return names.map(findPlantByName).filter(plant => plant.name);
 }
 
 function nextFusionRecipe(pool) {
@@ -1227,6 +1684,15 @@ function uniqueChoices(choices) {
     seen.add(choice.name);
     return true;
   });
+}
+
+function renderChallengePrompt(title, prompt) {
+  hintStack.innerHTML = `
+    <div class="prompt-card ${state.bossRound ? "boss-prompt" : ""}">
+      <span>${state.bossRound ? "Boss Round" : title}</span>
+      <strong>${prompt}</strong>
+    </div>
+  `;
 }
 
 function renderFusionBoard(revealed = false) {
@@ -1357,6 +1823,21 @@ function markDiffusionSelection(className) {
   });
 }
 
+function syncTeamSelectionCards() {
+  const selectedIds = new Set(state.teamSelection.map(choice => choice.choiceId));
+  plantGrid.querySelectorAll("button").forEach(button => {
+    button.classList.toggle("is-selected", selectedIds.has(button.dataset.choiceId));
+    button.classList.remove("is-wrong");
+  });
+}
+
+function markTeamSelection(className) {
+  const selectedIds = new Set(state.teamSelection.map(choice => choice.choiceId));
+  plantGrid.querySelectorAll("button").forEach(button => {
+    if (selectedIds.has(button.dataset.choiceId)) button.classList.add(className);
+  });
+}
+
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -1369,6 +1850,22 @@ function cssEscape(value) {
 function renderChoiceImage(choice) {
   if (choice.fusion) return renderFusionChoiceImage(choice);
   return renderCharacterImage(choice);
+}
+
+function renderMemoryCard(card) {
+  if (!card.revealed && !card.matched) {
+    return `
+      <div class="memory-back">?</div>
+      <span class="plant-name">Mystery</span>
+    `;
+  }
+  if (card.type === "image") {
+    return `${renderCharacterImage(card.character)}<span class="plant-name">Picture</span>`;
+  }
+  return `
+    <div class="memory-name-card">${card.character.name}</div>
+    <span class="plant-name">Name</span>
+  `;
 }
 
 function renderFusionChoiceImage(choice) {
