@@ -7,7 +7,10 @@ const TERRAIN = {
   D: "dirt",
   S: "stone",
   O: "ore",
-  M: "mud"
+  M: "mud",
+  W: "water",
+  N: "nether",
+  E: "end"
 };
 
 const difficultyConfigs = {
@@ -104,6 +107,11 @@ const toolTypes = {
     image: "../assets/minecraft/tools/iron-golem.png",
     damage: 145,
     durationMs: 7200
+  },
+  shovel: {
+    name: "Shovel Sell",
+    cost: 0,
+    image: "../assets/minecraft/tools/shovel.png"
   }
 };
 
@@ -362,10 +370,11 @@ const plantTypes = {
   },
   pumpkin: {
     name: "Pumpkin",
-    note: "shell wall",
+    note: "plant armor",
     cost: 125,
     hp: 620,
-    image: "../assets/characters/pumpkin.png"
+    image: "../assets/characters/pumpkin.png",
+    shell: true
   },
   potatomine: {
     name: "Potato Mine",
@@ -1045,6 +1054,15 @@ const fusionRecipes = [
 
 const fusionRecipeMap = new Map(fusionRecipes.map((recipe) => [fusionKey(...recipe.parts), recipe]));
 const FUSION_DEX_KEY = "blockGardenFusionDex";
+const CAMPAIGN_UPGRADES_KEY = "blockGardenCampaignUpgrades";
+
+const campaignUpgradeDefs = {
+  sun: { name: "Sun Start", note: "+50 starting sun each run" },
+  pea: { name: "Sharper Peas", note: "+12% projectile damage" },
+  wall: { name: "Stone Shells", note: "+15% wall health" },
+  tool: { name: "Tool Discount", note: "TNT, Boost, and Golem cost less" },
+  base: { name: "Base Armor", note: "+1 base health" }
+};
 
 const giftBasePool = plantOrder.filter((key) => {
   const type = plantTypes[key];
@@ -1060,8 +1078,9 @@ function giftFusionRecipe(plantType, ingredientKey) {
   return { ...recipe, parts: [plantType, ingredientKey], cost: Math.max(70, Math.round(recipe.cost * 0.82)), gift: true };
 }
 
-function randomGiftPlantKey() {
-  return giftBasePool[Math.floor(Math.random() * giftBasePool.length)] || "peashooter";
+function randomGiftPlantKey(terrain = "grass") {
+  const pool = terrain === "water" ? ["cattail", "torchKelp"] : giftBasePool;
+  return pool[Math.floor(Math.random() * pool.length)] || "peashooter";
 }
 
 const enemyTypes = {
@@ -1331,11 +1350,11 @@ const terrainMaps = {
     "GGSGGGOGG"
   ],
   fusionlab: [
-    "GOGDGGOMG",
-    "GGDMGOGGG",
-    "GOGGGDMOG",
+    "GOGDGNOMG",
+    "GGDMEOGWG",
+    "WOGGGNMOG",
     "GGGOMGGDG",
-    "GMDGGOGGG"
+    "GMDGENWGG"
   ]
 };
 
@@ -1401,6 +1420,12 @@ const dom = {
   fxLayer: document.querySelector("#fxLayer"),
   seedBank: document.querySelector("#seedBank"),
   fusionGuide: document.querySelector("#fusionGuide"),
+  fusionBook: document.querySelector("#fusionBook"),
+  fusionBookStatus: document.querySelector("#fusionBookStatus"),
+  fusionBookList: document.querySelector("#fusionBookList"),
+  toggleFusionBookButton: document.querySelector("#toggleFusionBookButton"),
+  creativeTools: document.querySelector("#creativeTools"),
+  creativeButtons: Array.from(document.querySelectorAll("[data-creative-action]")),
   modeButtons: Array.from(document.querySelectorAll("[data-mode]")),
   levelButtons: Array.from(document.querySelectorAll("[data-level]")),
   difficultyButtons: Array.from(document.querySelectorAll("[data-difficulty]")),
@@ -1418,7 +1443,9 @@ const dom = {
   playAgainButton: document.querySelector("#playAgainButton"),
   endOverlay: document.querySelector("#endOverlay"),
   endKicker: document.querySelector("#endKicker"),
-  endTitle: document.querySelector("#endTitle")
+  endTitle: document.querySelector("#endTitle"),
+  upgradeOverlay: document.querySelector("#upgradeOverlay"),
+  upgradeChoices: document.querySelector("#upgradeChoices")
 };
 
 const state = {
@@ -1440,7 +1467,10 @@ const state = {
   usedOre: new Set(),
   loadout: [],
   discoveredFusions: loadDiscoveredFusions(),
+  campaignUpgrades: loadCampaignUpgrades(),
   pinnedFusionRecipe: null,
+  fusionBookOpen: false,
+  pendingVictory: false,
   unlockedLevels: loadUnlockedLevels(),
   waveActive: false,
   gameOver: false,
@@ -1479,6 +1509,40 @@ function loadDiscoveredFusions() {
     // Ignore bad local storage and start a fresh fusion dex.
   }
   return new Set();
+}
+
+function loadCampaignUpgrades() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CAMPAIGN_UPGRADES_KEY) || "null");
+    if (saved && typeof saved === "object") {
+      return Object.fromEntries(Object.keys(campaignUpgradeDefs).map((key) => [key, Number(saved[key] || 0)]));
+    }
+  } catch {
+    // Ignore broken upgrade storage.
+  }
+  return Object.fromEntries(Object.keys(campaignUpgradeDefs).map((key) => [key, 0]));
+}
+
+function saveCampaignUpgrades() {
+  localStorage.setItem(CAMPAIGN_UPGRADES_KEY, JSON.stringify(state.campaignUpgrades));
+}
+
+function upgradeLevel(key) {
+  return state.mode === "campaign" ? state.campaignUpgrades[key] || 0 : 0;
+}
+
+function toolCost(key) {
+  return Math.max(45, Math.round(toolTypes[key].cost * (1 - upgradeLevel("tool") * 0.08)));
+}
+
+function plantMaxHpFor(key) {
+  const baseHp = plantTypes[key].hp;
+  const wallBonus = baseHp >= 500 ? 1 + upgradeLevel("wall") * 0.15 : 1;
+  return Math.round(baseHp * wallBonus);
+}
+
+function plantDamageValue(plant, value) {
+  return Math.round(value * (plant.boost || 1) * (1 + upgradeLevel("pea") * 0.12) * terrainDamageBoost(plant));
 }
 
 function saveDiscoveredFusions() {
@@ -1547,6 +1611,7 @@ function makeFusionGuide() {
   if (!dom.fusionGuide) return;
   dom.fusionGuide.innerHTML = "";
   dom.fusionGuide.classList.toggle("is-hidden", !modeConfigs[state.mode].fusion);
+  dom.fusionBook.classList.toggle("is-hidden", !modeConfigs[state.mode].fusion);
   if (!modeConfigs[state.mode].fusion) return;
 
   fusionRecipes.forEach((recipe) => {
@@ -1580,6 +1645,59 @@ function makeFusionGuide() {
     dom.fusionGuide.append(item);
   });
   refreshFusionGuide();
+  makeFusionBook();
+}
+
+function makeFusionBook() {
+  if (!dom.fusionBookList || !modeConfigs[state.mode].fusion) return;
+  dom.fusionBookList.innerHTML = "";
+  dom.fusionBookStatus.textContent = `${state.discoveredFusions.size}/${fusionRecipes.length} found`;
+  dom.toggleFusionBookButton.textContent = state.fusionBookOpen ? "Close" : "Open";
+  dom.fusionBookList.classList.toggle("is-hidden", !state.fusionBookOpen);
+  if (!state.fusionBookOpen) return;
+
+  const visibleRecipes = state.selectedPlant && fusionRecipesFor(state.selectedPlant).length
+    ? fusionRecipesFor(state.selectedPlant)
+    : fusionRecipes;
+
+  visibleRecipes.forEach((recipe) => {
+    const [first, second] = recipe.parts;
+    const result = plantTypes[recipe.result];
+    const discovered = state.discoveredFusions.has(recipe.result);
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `book-recipe${discovered ? "" : " is-hidden-recipe"}`;
+    item.innerHTML = `
+      <img src="${plantTypes[first].image}" alt="" />
+      <span>+</span>
+      <img src="${plantTypes[second].image}" alt="" />
+      <span>=</span>
+      <img src="${result.image}" alt="" />
+      <strong>${discovered ? result.name : "Unknown"}<small>${recipe.cost}</small></strong>
+    `;
+    item.addEventListener("click", () => {
+      state.selectedPlant = first;
+      state.pinnedFusionRecipe = fusionKey(first, second);
+      refreshSeedCards();
+      refreshFusionGuide();
+      makeFusionBook();
+      setMessage(`Book picked: ${plantTypes[first].name} + ${plantTypes[second].name}.`);
+      playSound("click");
+    });
+    dom.fusionBookList.append(item);
+  });
+
+  const gift = document.createElement("div");
+  gift.className = "book-recipe";
+  gift.innerHTML = `
+    <img src="${plantTypes.gift.image}" alt="" />
+    <span>+</span>
+    <img src="${plantTypes.sunflower.image}" alt="" />
+    <span>=</span>
+    <img src="${plantTypes.sunshooter.image}" alt="" />
+    <strong>Gift rolls a related fusion<small>random</small></strong>
+  `;
+  dom.fusionBookList.prepend(gift);
 }
 
 function fusionPartnersFor(key) {
@@ -1617,6 +1735,7 @@ function refreshFusionGuide() {
     item.classList.toggle("is-filtered-out", shouldFilter && !active);
   });
   dom.fusionGuide.dataset.filterPlant = shouldFilter ? plantTypes[state.selectedPlant].name : "";
+  makeFusionBook();
 }
 
 function makeBoard() {
@@ -1643,6 +1762,21 @@ function terrainAt(row, col) {
   return TERRAIN[rowMap[col]] || "grass";
 }
 
+function canPlantOnTerrain(key, terrain) {
+  if (terrain !== "water") return true;
+  return ["cattail", "torchKelp", "gift"].includes(key);
+}
+
+function terrainDamageBoost(plant) {
+  if (plant.terrain !== "nether") return 1;
+  const type = plantTypes[plant.type];
+  return type.torch || type.projectileClass === "fire" ? 1.28 : 0.9;
+}
+
+function isEndMob(kind) {
+  return kind === "enderman" || kind === "enderdragon";
+}
+
 function syncTileSize() {
   const rect = dom.battlefield.getBoundingClientRect();
   tileSize = rect.width / COLS;
@@ -1651,8 +1785,8 @@ function syncTileSize() {
 function resetGame() {
   const difficulty = currentDifficulty();
   chooseLoadout();
-  state.sun = difficulty.initialSun;
-  state.base = difficulty.base;
+  state.sun = difficulty.initialSun + upgradeLevel("sun") * 50;
+  state.base = difficulty.base + upgradeLevel("base");
   state.wave = 1;
   state.selectedPlant = activePlantKeys().includes(state.selectedPlant) ? state.selectedPlant : "sunflower";
   state.selectedTool = null;
@@ -1664,6 +1798,7 @@ function resetGame() {
   state.tnts = [];
   state.usedOre = new Set();
   state.pinnedFusionRecipe = null;
+  state.pendingVictory = false;
   state.waveActive = false;
   state.gameOver = false;
   state.spawnQueue = [];
@@ -1676,6 +1811,7 @@ function resetGame() {
   dom.projectileLayer.innerHTML = "";
   dom.fxLayer.innerHTML = "";
   dom.endOverlay.classList.add("is-hidden");
+  dom.upgradeOverlay.classList.add("is-hidden");
   dom.startWaveButton.disabled = false;
   dom.startWaveButton.textContent = "Start Wave";
   dom.pauseNextWaveButton.classList.add("is-hidden");
@@ -1693,6 +1829,7 @@ function resetGame() {
   makeBoard();
   makeSeedBank();
   makeFusionGuide();
+  refreshCreativeTools();
   refreshHud();
   refreshSeedCards();
   refreshToolButtons();
@@ -1733,14 +1870,18 @@ function refreshSeedCards() {
 function refreshToolButtons() {
   dom.toolButtons.forEach((button) => {
     const key = button.dataset.tool;
+    const cost = toolCost(key);
     button.classList.toggle("is-selected", state.selectedTool === key);
-    button.classList.toggle("is-disabled", state.sun < toolTypes[key].cost);
+    button.classList.toggle("is-disabled", key !== "shovel" && state.sun < cost);
+    const price = button.querySelector("strong");
+    if (price) price.textContent = key === "shovel" ? "1/2" : cost;
   });
   dom.soundButton.classList.toggle("is-on", state.soundOn);
 }
 
 function refreshOptionButtons() {
   document.body.dataset.mode = state.mode;
+  refreshCreativeTools();
   dom.modeButtons.forEach((button) => {
     button.classList.toggle("is-selected", state.mode === button.dataset.mode);
   });
@@ -1765,6 +1906,10 @@ function refreshOptionButtons() {
       ? `Clear ${levelConfigs[LEVEL_ORDER[LEVEL_ORDER.indexOf(nextLocked) - 1]]?.name || "Garden"} to unlock ${levelConfigs[nextLocked].name}.`
       : "All levels unlocked.";
   }
+}
+
+function refreshCreativeTools() {
+  dom.creativeTools.classList.toggle("is-hidden", state.mode !== "creativefusion");
 }
 
 function currentLevel() {
@@ -1823,6 +1968,18 @@ function placePlant(row, col) {
     return;
   }
   const existingPlant = getPlantAt(row, col);
+  if (existingPlant && state.selectedPlant === "pumpkin") {
+    if (pumpkinFusionAvailable(existingPlant.type) && tryFusePlant(existingPlant, state.selectedPlant)) {
+      return;
+    }
+    addPumpkinShell(existingPlant);
+    return;
+  }
+  if (!canPlantOnTerrain(state.selectedPlant, terrain)) {
+    setMessage("Water blocks need Cattail, Torch Kelp, or Gift.");
+    playSound("error");
+    return;
+  }
   if (existingPlant) {
     if (tryFusePlant(existingPlant, state.selectedPlant)) {
       return;
@@ -1840,16 +1997,17 @@ function placePlant(row, col) {
   refreshHud();
   refreshSeedCards();
 
-  const placedKey = state.selectedPlant === "gift" ? randomGiftPlantKey() : state.selectedPlant;
+  const placedKey = state.selectedPlant === "gift" ? randomGiftPlantKey(terrain) : state.selectedPlant;
   const placedType = plantTypes[placedKey];
+  const maxHp = plantMaxHpFor(placedKey);
   const now = performance.now();
   const plant = {
     id: crypto.randomUUID(),
     type: placedKey,
     row,
     col,
-    hp: placedType.hp,
-    maxHp: placedType.hp,
+    hp: maxHp,
+    maxHp,
     nextFireAt: now + 650,
     nextSunAt: now + 2200,
     terrain,
@@ -1865,6 +2023,7 @@ function placePlant(row, col) {
   if (state.selectedPlant === "gift") {
     setMessage(`Gift opened into ${placedType.name}.`);
     fusionAt(col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.5);
+    floatingText(placedType.name, col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.2);
   } else if (placedType.instant && placedType.rowBlast) {
     setMessage("Jalapeno planted. The whole row is about to burn.");
     setTimeout(() => detonateJalapeno(plant), 520);
@@ -1896,10 +2055,15 @@ function tryFusePlant(plant, ingredientKey) {
   const previousName = plantTypes[plant.type].name;
   const ingredientName = plantTypes[ingredientKey].name;
   const resultType = plantTypes[recipe.result];
+  const resultMaxHp = plantMaxHpFor(recipe.result);
   const now = performance.now();
   plant.type = recipe.result;
-  plant.maxHp = resultType.hp;
-  plant.hp = Math.min(resultType.hp, Math.max(plant.hp, Math.round(resultType.hp * 0.68)));
+  plant.maxHp = resultMaxHp;
+  plant.hp = Math.min(resultMaxHp, Math.max(plant.hp, Math.round(resultMaxHp * 0.68)));
+  if (ingredientKey === "pumpkin" || previousName === plantTypes.pumpkin.name) {
+    plant.shellHp = 0;
+    plant.shellMaxHp = 0;
+  }
   plant.nextFireAt = now + 480;
   plant.nextSunAt = now + 1800;
   plant.sunEvery = plant.terrain === "dirt" && resultType.producesSun ? Math.round(resultType.sunEvery * 0.72) : resultType.sunEvery;
@@ -1907,6 +2071,7 @@ function tryFusePlant(plant, ingredientKey) {
   plant.nextChompAt = now + 500;
   renderPlant(plant);
   fusionAt(plant.col * tileSize + tileSize * 0.5, plant.row * tileSize + tileSize * 0.5);
+  floatingText(resultType.name, plant.col * tileSize + tileSize * 0.5, plant.row * tileSize + tileSize * 0.18);
   const isNewDiscovery = !state.discoveredFusions.has(recipe.result);
   state.discoveredFusions.add(recipe.result);
   saveDiscoveredFusions();
@@ -1935,27 +2100,78 @@ function renderPlant(plant) {
     const el = document.createElement("div");
     el.className = `plant ${plant.type}`;
     const img = document.createElement("img");
+    img.className = "plant-art";
     img.src = plantTypes[plant.type].image;
     img.alt = "";
+    const shell = document.createElement("img");
+    shell.className = "pumpkin-shell";
+    shell.src = plantTypes.pumpkin.image;
+    shell.alt = "";
+    shell.hidden = true;
     const health = document.createElement("div");
     health.className = "health-bar";
     const fill = document.createElement("div");
     fill.className = "health-fill";
     health.append(fill);
-    el.append(img, health);
+    el.append(img, shell, health);
     plant.el = el;
     cell.append(el);
   }
 
   plant.el.className = `plant ${plant.type}`;
-  const img = plant.el.querySelector("img");
+  const img = plant.el.querySelector(".plant-art") || plant.el.querySelector("img");
   img.src = plantTypes[plant.type].image;
+  let shell = plant.el.querySelector(".pumpkin-shell");
+  if (!shell) {
+    shell = document.createElement("img");
+    shell.className = "pumpkin-shell";
+    shell.src = plantTypes.pumpkin.image;
+    shell.alt = "";
+    shell.hidden = true;
+    plant.el.insertBefore(shell, plant.el.querySelector(".health-bar"));
+  }
+  const hasShell = plant.shellHp > 0;
+  shell.hidden = !hasShell;
+  plant.el.classList.toggle("has-pumpkin-shell", hasShell);
   const fill = plant.el.querySelector(".health-fill");
-  fill.style.width = `${Math.max(0, (plant.hp / plant.maxHp) * 100)}%`;
-  fill.style.background = plant.hp < plant.maxHp * 0.35 ? "#c83e35" : "#43a047";
+  const shownHp = hasShell ? plant.shellHp : plant.hp;
+  const shownMaxHp = hasShell ? plant.shellMaxHp : plant.maxHp;
+  fill.style.width = `${Math.max(0, (shownHp / shownMaxHp) * 100)}%`;
+  fill.style.background = hasShell ? "#d58a35" : shownHp < shownMaxHp * 0.35 ? "#c83e35" : "#43a047";
   plant.el.classList.toggle("is-armed", Boolean(plantTypes[plant.type].mine && performance.now() >= plant.armedAt));
   plant.el.classList.toggle("is-boosted", Boolean(plant.boosted));
   plant.el.classList.toggle("is-fusion", Boolean(plantTypes[plant.type].fusion));
+}
+
+function pumpkinFusionAvailable(baseKey) {
+  return modeConfigs[state.mode].fusion && Boolean(fusionRecipeMap.get(fusionKey(baseKey, "pumpkin")));
+}
+
+function addPumpkinShell(plant) {
+  if (plant.type === "pumpkin") {
+    setMessage("That block is already a Pumpkin wall.");
+    playSound("error");
+    return false;
+  }
+  if (plant.shellHp > 0) {
+    setMessage("That plant already has Pumpkin armor.");
+    playSound("error");
+    return false;
+  }
+  const cost = plantTypes.pumpkin.cost;
+  if (state.sun < cost) {
+    setMessage(`Need ${cost} sun for Pumpkin armor.`);
+    playSound("error");
+    return false;
+  }
+  spendSun(cost);
+  plant.shellMaxHp = plantMaxHpFor("pumpkin");
+  plant.shellHp = plant.shellMaxHp;
+  renderPlant(plant);
+  floatingText("Pumpkin armor", plant.col * tileSize + tileSize * 0.5, plant.row * tileSize + tileSize * 0.18);
+  setMessage(`${plantTypes[plant.type].name} is protected by Pumpkin.`);
+  playSound("plant");
+  return true;
 }
 
 function getCell(row, col) {
@@ -1965,8 +2181,13 @@ function getCell(row, col) {
 function useToolAt(row, col) {
   const tool = toolTypes[state.selectedTool];
   if (!tool) return;
-  if (state.sun < tool.cost) {
-    setMessage(`Need ${tool.cost} sun for ${tool.name}.`);
+  if (state.selectedTool === "shovel") {
+    shovelPlantAt(row, col);
+    return;
+  }
+  const cost = toolCost(state.selectedTool);
+  if (state.sun < cost) {
+    setMessage(`Need ${cost} sun for ${tool.name}.`);
     playSound("error");
     return;
   }
@@ -1983,7 +2204,7 @@ function useToolAt(row, col) {
       playSound("error");
       return;
     }
-    spendSun(tool.cost);
+    spendSun(cost);
     plant.boosted = true;
     plant.boost = tool.boost;
     plant.maxHp = Math.round(plant.maxHp * 1.25);
@@ -2000,7 +2221,7 @@ function useToolAt(row, col) {
       playSound("error");
       return;
     }
-    spendSun(tool.cost);
+    spendSun(cost);
     placeTnt(row, col);
     grantOreBonus(row, col);
     setMessage("TNT armed. It will explode when a mob steps on it.");
@@ -2009,11 +2230,40 @@ function useToolAt(row, col) {
   }
 
   if (state.selectedTool === "golem") {
-    spendSun(tool.cost);
+    spendSun(cost);
     deployGolem(row);
     setMessage("Iron Golem is guarding that lane.");
     playSound("golem");
   }
+}
+
+function plantSellValue(plant) {
+  const type = plantTypes[plant.type];
+  const base = type.cost || 0;
+  const fusionRecipe = fusionRecipes.find((recipe) => recipe.result === plant.type);
+  const extra = fusionRecipe ? fusionRecipe.cost : 0;
+  const shellValue = plant.shellHp > 0 ? plantTypes.pumpkin.cost : 0;
+  return Math.max(0, Math.round((base + extra + shellValue) * 0.5));
+}
+
+function shovelPlantAt(row, col) {
+  const plant = getPlantAt(row, col);
+  if (!plant) {
+    setMessage("Shovel needs a plant to sell.");
+    playSound("error");
+    return;
+  }
+  const refund = plantSellValue(plant);
+  const name = plantTypes[plant.type].name;
+  plant.hp = 0;
+  state.sun += refund;
+  removeDeadPlants();
+  refreshHud();
+  refreshSeedCards();
+  refreshToolButtons();
+  floatingText(`+${refund}`, col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.2);
+  setMessage(`${name} sold for ${refund} sun.`);
+  playSound("click");
 }
 
 function grantOreBonus(row, col) {
@@ -2026,6 +2276,20 @@ function grantOreBonus(row, col) {
   refreshSeedCards();
   refreshToolButtons();
   setMessage("Diamond ore gave +50 sun.");
+}
+
+function damagePlant(plant, damage) {
+  if (plant.shellHp > 0) {
+    plant.shellHp = Math.max(0, plant.shellHp - damage);
+    if (plant.shellHp === 0) {
+      plant.shellMaxHp = 0;
+      renderPlant(plant);
+      floatingText("Shell broke", plant.col * tileSize + tileSize * 0.5, plant.row * tileSize + tileSize * 0.18);
+      playSound("hit");
+    }
+    return;
+  }
+  plant.hp -= damage;
 }
 
 function spendSun(amount) {
@@ -2174,6 +2438,7 @@ function renderEnemy(enemy) {
   enemy.el.style.top = `${enemy.row * tileSize + tileSize * (enemy.kind === "spider" ? 0.18 : 0.04)}px`;
   enemy.el.classList.toggle("is-slowed", enemy.slowUntil > performance.now());
   enemy.el.classList.toggle("is-charmed", enemy.charmedUntil > performance.now());
+  enemy.el.classList.toggle("is-enraged", Boolean(enemy.enraged));
   const fill = enemy.el.querySelector(".health-fill");
   fill.style.width = `${Math.max(0, (enemy.hp / enemy.maxHp) * 100)}%`;
   fill.style.background = enemy.hp < enemy.maxHp * 0.35 ? "#c83e35" : "#43a047";
@@ -2254,7 +2519,7 @@ function updatePlants(now) {
 }
 
 function boostedValue(plant, value) {
-  return Math.round(value * (plant.boost || 1));
+  return plantDamageValue(plant, value);
 }
 
 function nearestEnemyInRow(row, col, range) {
@@ -2475,7 +2740,7 @@ function updateEnemies(now, dt) {
     const rangedTarget = findRangedTarget(enemy, type);
     if (!blocker && rangedTarget) {
       if (now >= enemy.nextBiteAt) {
-        rangedTarget.hp -= type.rangedDamage;
+        damagePlant(rangedTarget, type.rangedDamage);
         enemy.nextBiteAt = now + type.biteEvery;
       }
       return;
@@ -2483,7 +2748,7 @@ function updateEnemies(now, dt) {
 
     if (blocker) {
       if (now >= enemy.nextBiteAt) {
-        blocker.hp -= type.bite;
+        damagePlant(blocker, type.bite);
         enemy.nextBiteAt = now + type.biteEvery;
 
         if (type.explodes) {
@@ -2496,8 +2761,10 @@ function updateEnemies(now, dt) {
       }
     } else {
       const slow = enemy.slowUntil > now ? enemy.slowFactor : 1;
-      const terrainSlow = terrainAt(enemy.row, Math.max(0, Math.min(COLS - 1, enemyCol))) === "mud" ? 0.72 : 1;
-      enemy.x -= enemy.speed * slow * terrainSlow * dt;
+      const currentTerrain = terrainAt(enemy.row, Math.max(0, Math.min(COLS - 1, enemyCol)));
+      const terrainSlow = currentTerrain === "mud" ? 0.72 : 1;
+      const endBoost = currentTerrain === "end" && isEndMob(enemy.kind) ? 1.28 : 1;
+      enemy.x -= enemy.speed * slow * terrainSlow * endBoost * dt;
     }
 
     if (enemy.x < -tileSize * 0.5) {
@@ -2525,12 +2792,22 @@ function updateEnemies(now, dt) {
 }
 
 function updateEnemySpecial(enemy, type, enemyCol, now) {
-  if (!type.boss || now < enemy.nextSpecialAt) return;
+  if (!type.boss) return;
+  if (!enemy.enraged && enemy.hp <= enemy.maxHp * 0.5) {
+    enemy.enraged = true;
+    enemy.speed *= 1.24;
+    enemy.nextSpecialAt = Math.min(enemy.nextSpecialAt, now + 700);
+    floatingText("BOSS PHASE", enemy.x + tileSize * 0.35, enemy.row * tileSize + tileSize * 0.25);
+    setMessage(`${type.label} entered a new phase.`);
+    playSound("boom");
+  }
+  if (now < enemy.nextSpecialAt) return;
 
   if (type.stompEvery) {
+    floatingText("STOMP", enemy.x + tileSize * 0.35, enemy.row * tileSize + tileSize * 0.2);
     rowBlastAt(enemy.row);
     damagePlantsAround(enemy.row, enemyCol, type.stompRadius || 1.15, type.stompDamage || 28);
-    enemy.nextSpecialAt = now + type.stompEvery;
+    enemy.nextSpecialAt = now + Math.round(type.stompEvery * (enemy.enraged ? 0.68 : 1));
     setMessage(`${type.label} stomped the lane.`);
     playSound("boom");
     return;
@@ -2540,7 +2817,8 @@ function updateEnemySpecial(enemy, type, enemyCol, now) {
     const summonKind = type.summonList[Math.floor(Math.random() * type.summonList.length)];
     const summonRow = Math.max(0, Math.min(ROWS - 1, enemy.row + [-1, 0, 1][Math.floor(Math.random() * 3)]));
     spawnEnemy(summonKind, { row: summonRow, hpScale: 0.72 });
-    enemy.nextSpecialAt = now + type.summonEvery;
+    floatingText("SUMMON", enemy.x + tileSize * 0.35, enemy.row * tileSize + tileSize * 0.2);
+    enemy.nextSpecialAt = now + Math.round(type.summonEvery * (enemy.enraged ? 0.7 : 1));
     setMessage(`${type.label} called reinforcements.`);
     playSound("wave");
   }
@@ -2592,6 +2870,7 @@ function updateProjectiles(dt, now) {
       if (projectile.charmMs) {
         hit.charmedUntil = now + projectile.charmMs;
         hit.slowUntil = 0;
+        floatingText("HYPNO", hit.x + tileSize * 0.3, hit.row * tileSize + tileSize * 0.18);
         setMessage(`${enemyTypes[hit.kind].label} turned around.`);
       }
       projectile.dead = true;
@@ -2735,7 +3014,7 @@ function damagePlantsAround(row, col, radius, damage) {
   state.plants.forEach((plant) => {
     const distance = Math.hypot(plant.row - row, plant.col - col);
     if (distance <= radius) {
-      plant.hp -= damage;
+      damagePlant(plant, damage);
     }
   });
 }
@@ -2785,6 +3064,16 @@ function fusionAt(x, y) {
   el.style.top = `${y}px`;
   dom.fxLayer.append(el);
   setTimeout(() => el.remove(), 640);
+}
+
+function floatingText(text, x, y) {
+  const el = document.createElement("div");
+  el.className = "floating-text";
+  el.textContent = text;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  dom.fxLayer.append(el);
+  setTimeout(() => el.remove(), 920);
 }
 
 function hitSparkAt(x, y, kind = "pea") {
@@ -2903,7 +3192,49 @@ function toggleNextWavePause() {
   }
 }
 
-function endGame(won) {
+function runCreativeAction(action) {
+  if (state.mode !== "creativefusion") return;
+  if (action === "gift") {
+    state.selectedPlant = "gift";
+    state.selectedTool = null;
+    refreshSeedCards();
+    refreshToolButtons();
+    setMessage("Gift selected for sandbox testing.");
+    playSound("click");
+    return;
+  }
+  if (action === "clear") {
+    state.enemies.forEach((enemy) => enemy.el?.remove());
+    state.projectiles.forEach((projectile) => projectile.el?.remove());
+    state.enemies = [];
+    state.projectiles = [];
+    dom.projectileLayer.innerHTML = "";
+    setMessage("Creative field cleared.");
+    playSound("boost");
+    return;
+  }
+  if (action === "mob") {
+    const pool = ["enderman", "ghast", "pillager", "guardian", "witch", "blaze", "slime"];
+    spawnEnemy(pool[Math.floor(Math.random() * pool.length)]);
+    setMessage("Creative mob spawned.");
+    playSound("wave");
+    return;
+  }
+  if (action === "boss") {
+    const bosses = ["ravager", "witherlord", "obsidianravager", "chargedravager", "enderdragon"];
+    spawnEnemy(bosses[Math.floor(Math.random() * bosses.length)], { hpScale: 0.85 });
+    setMessage("Creative boss spawned.");
+    playSound("wave");
+  }
+}
+
+function endGame(won, skipUpgrade = false) {
+  if (won && state.mode === "campaign" && !skipUpgrade) {
+    state.waveActive = false;
+    state.pendingVictory = true;
+    showUpgradeChoices();
+    return;
+  }
   state.gameOver = true;
   if (won) {
     unlockNextLevel();
@@ -2914,6 +3245,31 @@ function endGame(won) {
   dom.startWaveButton.disabled = true;
   dom.pauseNextWaveButton.classList.add("is-hidden");
   refreshOptionButtons();
+}
+
+function showUpgradeChoices() {
+  dom.upgradeChoices.innerHTML = "";
+  const choices = shuffleList(Object.keys(campaignUpgradeDefs)).slice(0, 3);
+  choices.forEach((key) => {
+    const def = campaignUpgradeDefs[key];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "upgrade-choice";
+    button.innerHTML = `${def.name}<small>Level ${(state.campaignUpgrades[key] || 0) + 1}: ${def.note}</small>`;
+    button.addEventListener("click", () => {
+      state.campaignUpgrades[key] = (state.campaignUpgrades[key] || 0) + 1;
+      saveCampaignUpgrades();
+      dom.upgradeOverlay.classList.add("is-hidden");
+      state.pendingVictory = false;
+      setMessage(`${def.name} upgraded.`);
+      endGame(true, true);
+    });
+    dom.upgradeChoices.append(button);
+  });
+  dom.upgradeOverlay.classList.remove("is-hidden");
+  dom.startWaveButton.disabled = true;
+  dom.pauseNextWaveButton.classList.add("is-hidden");
+  setMessage("Choose a campaign upgrade.");
 }
 
 function unlockNextLevel() {
@@ -3030,6 +3386,16 @@ dom.soundButton.addEventListener("click", () => {
     ensureAudio();
     playSound("boost");
   }
+});
+
+dom.toggleFusionBookButton.addEventListener("click", () => {
+  state.fusionBookOpen = !state.fusionBookOpen;
+  makeFusionBook();
+  playSound("click");
+});
+
+dom.creativeButtons.forEach((button) => {
+  button.addEventListener("click", () => runCreativeAction(button.dataset.creativeAction));
 });
 
 dom.startWaveButton.addEventListener("click", startWave);

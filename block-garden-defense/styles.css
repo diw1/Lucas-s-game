@@ -72,6 +72,8 @@ button {
 .hud,
 .setup-panel,
 .terrain-legend,
+.fusion-book,
+.creative-tools,
 .fusion-guide,
 .message-row {
   border: 3px solid var(--outline);
@@ -159,9 +161,97 @@ h1 {
 
 .terrain-legend {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
   padding: 8px;
+}
+
+.fusion-book,
+.creative-tools {
+  padding: 8px;
+}
+
+.book-header,
+.creative-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.book-header strong {
+  font-size: 0.9rem;
+}
+
+.book-header span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.mini-button {
+  min-height: 32px;
+  border: 2px solid var(--outline);
+  border-radius: 8px;
+  background: var(--sun);
+  color: var(--ink);
+  padding: 5px 9px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  box-shadow: inset 0 -3px rgba(0, 0, 0, 0.1);
+}
+
+.fusion-book-list {
+  max-height: 210px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 7px;
+  margin-top: 8px;
+  overflow: auto;
+}
+
+.book-recipe {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 26px auto 26px auto 32px minmax(0, 1fr);
+  gap: 4px;
+  align-items: center;
+  padding: 6px;
+  border: 2px solid rgba(38, 51, 36, 0.66);
+  border-radius: 8px;
+  background: rgba(255, 253, 244, 0.84);
+}
+
+.book-recipe img {
+  width: 26px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.book-recipe strong {
+  min-width: 0;
+  font-size: 0.73rem;
+  line-height: 1;
+}
+
+.book-recipe.is-hidden-recipe img,
+.book-recipe.is-hidden-recipe strong {
+  filter: grayscale(1);
+  opacity: 0.56;
+}
+
+.floating-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 28;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: #fff6bb;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-shadow: 2px 2px 0 var(--outline);
+  animation: float-label 900ms ease-out forwards;
 }
 
 .fusion-guide {
@@ -383,6 +473,24 @@ body[data-mode="campaign"] .legend-item small {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 48%, transparent 49%),
     linear-gradient(180deg, #6f5b3b, #4d3b29);
+}
+
+.legend-swatch.terrain-water {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 48%, transparent 49%),
+    linear-gradient(180deg, #5fb7d8, #286d99);
+}
+
+.legend-swatch.terrain-nether {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0 48%, transparent 49%),
+    linear-gradient(180deg, #b04632, #5c2227);
+}
+
+.legend-swatch.terrain-end {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 48%, transparent 49%),
+    linear-gradient(180deg, #d6d29b, #6f6892);
 }
 
 .control-group {
@@ -637,6 +745,26 @@ body[data-mode="campaign"] .legend-item small {
     linear-gradient(180deg, #6f5b3b, #4d3b29);
 }
 
+.cell.terrain-water {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 48%, transparent 49%),
+    linear-gradient(180deg, #68c0df, #2a719d);
+}
+
+.cell.terrain-nether {
+  background:
+    radial-gradient(circle at 34% 66%, rgba(244, 151, 58, 0.8) 0 8%, transparent 9%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0 48%, transparent 49%),
+    linear-gradient(180deg, #b04632, #5c2227);
+}
+
+.cell.terrain-end {
+  background:
+    radial-gradient(circle at 68% 28%, rgba(154, 102, 217, 0.56) 0 7%, transparent 8%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 48%, transparent 49%),
+    linear-gradient(180deg, #d6d29b, #6f6892);
+}
+
 .plant,
 .tnt-charge,
 .enemy,
@@ -660,11 +788,28 @@ body[data-mode="campaign"] .legend-item small {
   z-index: 4;
 }
 
-.plant img {
+.plant .plant-art,
+.plant .pumpkin-shell {
+  position: relative;
+  z-index: 1;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 6px 4px rgba(30, 40, 28, 0.25));
+}
+
+.plant.has-pumpkin-shell .plant-art {
+  max-width: 72%;
+  max-height: 72%;
+  transform: translateY(-2%);
+}
+
+.plant .pumpkin-shell {
+  position: absolute;
+  z-index: 2;
+  width: 108%;
+  height: 108%;
+  pointer-events: none;
 }
 
 .plant.is-boosted::after {
@@ -681,7 +826,7 @@ body[data-mode="campaign"] .legend-item small {
   filter: drop-shadow(0 2px 2px rgba(29, 79, 143, 0.32));
 }
 
-.plant.is-fusion img {
+.plant.is-fusion .plant-art {
   filter:
     drop-shadow(0 6px 4px rgba(30, 40, 28, 0.25))
     drop-shadow(0 0 8px rgba(255, 219, 79, 0.82));
@@ -716,6 +861,7 @@ body[data-mode="campaign"] .legend-item small {
 
 .health-bar {
   position: absolute;
+  z-index: 3;
   left: 13%;
   right: 13%;
   bottom: 6%;
@@ -825,6 +971,12 @@ body[data-mode="campaign"] .legend-item small {
   filter:
     drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
     drop-shadow(0 0 11px rgba(195, 91, 213, 0.92));
+}
+
+.enemy.is-enraged {
+  filter:
+    drop-shadow(0 7px 4px rgba(21, 25, 22, 0.22))
+    drop-shadow(0 0 12px rgba(200, 62, 53, 0.9));
 }
 
 .enemy.armoredskeleton.has-art .enemy-art {
@@ -1198,6 +1350,20 @@ body[data-mode="campaign"] .legend-item small {
   z-index: 22;
 }
 
+.floating-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 28;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: #fff6bb;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-shadow: 2px 2px 0 var(--outline);
+  animation: float-label 900ms ease-out forwards;
+}
+
 .hit-spark {
   position: absolute;
   width: calc(var(--tile) * 0.42);
@@ -1306,6 +1472,13 @@ body[data-mode="campaign"] .legend-item small {
   }
 }
 
+@keyframes float-label {
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -140%);
+  }
+}
+
 @keyframes armed-pulse {
   0%,
   100% {
@@ -1378,11 +1551,22 @@ body[data-mode="campaign"] .legend-item small {
   background: rgba(21, 29, 24, 0.46);
 }
 
+.upgrade-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(21, 29, 24, 0.34);
+}
+
 .is-hidden {
   display: none !important;
 }
 
-.end-card {
+.end-card,
+.upgrade-card {
   width: min(420px, 100%);
   border: 4px solid var(--outline);
   border-radius: 8px;
@@ -1392,6 +1576,41 @@ body[data-mode="campaign"] .legend-item small {
   text-align: center;
   display: grid;
   gap: 12px;
+}
+
+.upgrade-card {
+  width: min(520px, 100%);
+}
+
+.upgrade-card p {
+  color: #9a352e;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.upgrade-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.upgrade-choice {
+  min-height: 86px;
+  border: 3px solid var(--outline);
+  border-radius: 8px;
+  background: #e8f3d5;
+  padding: 8px;
+  font-weight: 900;
+  text-align: left;
+  box-shadow: inset 0 -5px rgba(0, 0, 0, 0.1);
+}
+
+.upgrade-choice small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
 }
 
 .end-card p {

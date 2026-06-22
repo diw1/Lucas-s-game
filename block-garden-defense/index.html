@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lucas's Block Garden Defense</title>
-    <link rel="stylesheet" href="styles.css?v=more-fusion-pause-20260620" />
+    <link rel="stylesheet" href="styles.css?v=major-systems-20260622" />
   </head>
   <body>
     <a class="back-home" href="../index.html" aria-label="Back to games">← Games</a>
@@ -81,6 +81,11 @@
             <span>Golem</span>
             <strong>200</strong>
           </button>
+          <button class="tool-button" type="button" data-tool="shovel">
+            <img src="../assets/minecraft/tools/shovel.png" alt="" />
+            <span>Sell</span>
+            <strong>½</strong>
+          </button>
           <button id="soundButton" class="tool-button sound-toggle" type="button" aria-label="Toggle sound" title="Sound">
             <span aria-hidden="true">♪</span>
           </button>
@@ -113,6 +118,37 @@
           <strong>Mud</strong>
           <small>mobs move slower</small>
         </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-water" aria-hidden="true"></span>
+          <strong>Water</strong>
+          <small>only water plants</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-nether" aria-hidden="true"></span>
+          <strong>Nether</strong>
+          <small>fire plants hit harder</small>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch terrain-end" aria-hidden="true"></span>
+          <strong>End</strong>
+          <small>End mobs move faster</small>
+        </div>
+      </section>
+
+      <section id="fusionBook" class="fusion-book is-hidden" aria-label="Fusion book">
+        <div class="book-header">
+          <strong>Fusion Book</strong>
+          <span id="fusionBookStatus">0/0 found</span>
+          <button id="toggleFusionBookButton" class="mini-button" type="button">Open</button>
+        </div>
+        <div id="fusionBookList" class="fusion-book-list"></div>
+      </section>
+
+      <section id="creativeTools" class="creative-tools is-hidden" aria-label="Creative fusion tools">
+        <button class="mini-button" type="button" data-creative-action="gift">Gift</button>
+        <button class="mini-button" type="button" data-creative-action="mob">Mob</button>
+        <button class="mini-button" type="button" data-creative-action="boss">Boss</button>
+        <button class="mini-button" type="button" data-creative-action="clear">Clear</button>
       </section>
 
       <section id="fusionGuide" class="fusion-guide is-hidden" aria-label="Fusion recipes"></section>
@@ -140,8 +176,16 @@
           <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
         </div>
       </div>
+
+      <div id="upgradeOverlay" class="upgrade-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle">
+        <div class="upgrade-card">
+          <p>Campaign reward</p>
+          <h2 id="upgradeTitle">Choose an upgrade</h2>
+          <div id="upgradeChoices" class="upgrade-choices"></div>
+        </div>
+      </div>
     </main>
 
-    <script src="script.js?v=more-fusion-pause-20260620"></script>
+    <script src="script.js?v=major-systems-20260622"></script>
   </body>
 </html>
