@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Gatling Pea",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Pea",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/3/30/Gatling_Pea.png/revision/latest?cb=20250511101530",
+    "local": "assets/fusions/pvzf-gatling-pea.png"
+  },
+  {
+    "name": "Gatling Pea-shroom",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Pea-shroom",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/3/37/Gatling_Pea-shroom.png/revision/latest?cb=20250119040805",
+    "local": "assets/fusions/pvzf-gatling-pea-shroom.png"
+  },
+  {
+    "name": "Hypno Gatling Pea",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Pea",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/0/0f/1270_-_Hypno_Gatling_Pea.png/revision/latest?cb=20250813233120",
+    "local": "assets/fusions/pvzf-hypno-gatling-pea.png"
+  },
+  {
+    "name": "Gatling Snow Pea",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Pea",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/3/32/Gatling_Snow_Pea.png/revision/latest?cb=20250118082347",
+    "local": "assets/fusions/pvzf-gatling-snow-pea.png"
+  },
+  {
+    "name": "Gatling Cherry",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Cherry",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/e/ed/Gatling_Cherry.png/revision/latest?cb=20250119040809",
+    "local": "assets/fusions/pvzf-gatling-cherry.png"
+  },
+  {
+    "name": "Gatling Doom",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Doom",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/d/d7/Gatling_Doom.png/revision/latest?cb=20260425133419",
+    "local": "assets/fusions/pvzf-gatling-doom.png"
+  },
+  {
+    "name": "Gatling Pea Turret",
+    "page": "https://pvz-fusion.fandom.com/wiki/Gatling_Pea_Turret",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/3/37/GPTshoot.png/revision/latest?cb=20250629063350",
+    "local": "assets/fusions/pvzf-gatling-pea-turret.png"
+  },
+  {
+    "name": "Fortness Nut",
+    "page": "https://pvz-fusion.fandom.com/wiki/Fortness_Nut",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/5/5b/Fortness_Nut.png/revision/latest?cb=20260425195922",
+    "local": "assets/fusions/pvzf-fortness-nut.png"
+  },
+  {
+    "name": "Melon Cannon",
+    "page": "https://pvz-fusion.fandom.com/wiki/Melon_Cannon",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/4/4c/Melon_Cannon.png/revision/latest?cb=20250123103304",
+    "local": "assets/fusions/pvzf-melon-cannon.png"
+  },
+  {
+    "name": "Giant Chomper",
+    "page": "https://pvz-fusion.fandom.com/wiki/Giant_Chomper",
+    "url": "https://static.wikia.nocookie.net/pvz-fusion/images/1/10/Giant_Chomper.png/revision/latest?cb=20250222230923",
+    "local": "assets/fusions/pvzf-giant-chomper.png"
+  }
+]

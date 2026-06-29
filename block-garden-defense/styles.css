@@ -833,6 +833,22 @@ body[data-mode="campaign"] .legend-item small {
     drop-shadow(0 0 8px rgba(255, 219, 79, 0.82));
 }
 
+.plant.is-titan .plant-art {
+  filter:
+    drop-shadow(0 7px 5px rgba(30, 40, 28, 0.28))
+    drop-shadow(0 0 12px rgba(255, 231, 105, 0.95))
+    drop-shadow(0 0 18px rgba(95, 198, 94, 0.72));
+}
+
+.plant.is-titan::before {
+  content: "";
+  position: absolute;
+  inset: 3%;
+  border: 3px solid rgba(255, 228, 80, 0.76);
+  border-radius: 50%;
+  animation: armed-pulse 1300ms ease-in-out infinite;
+}
+
 .plant.is-armed::before {
   content: "";
   position: absolute;

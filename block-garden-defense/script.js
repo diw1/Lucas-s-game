@@ -134,6 +134,9 @@ const plantOrder = [
   "doomshroom",
   "blover",
   "garlic",
+  "splitpea",
+  "puffshroom",
+  "iceshroom",
   "spikeweed",
   "gift",
   "torchwood",
@@ -338,6 +341,38 @@ const plantTypes = {
     hp: 260,
     image: "../assets/characters/garlic.png",
     redirects: true
+  },
+  splitpea: {
+    name: "Split Pea",
+    note: "split shot",
+    cost: 125,
+    hp: 115,
+    image: "../assets/characters/split-pea.png",
+    damage: 20,
+    shots: 2,
+    fireEvery: 1350
+  },
+  puffshroom: {
+    name: "Puff-shroom",
+    note: "short puff",
+    cost: 0,
+    hp: 70,
+    image: "../assets/characters/puff-shroom.png",
+    fumeDamage: 24,
+    fumeRange: 1.85,
+    fireEvery: 1450
+  },
+  iceshroom: {
+    name: "Ice-shroom",
+    note: "freeze burst",
+    cost: 75,
+    hp: 1,
+    image: "../assets/characters/ice-shroom.png",
+    instant: true,
+    blastRadius: 2.2,
+    damage: 120,
+    slowFactor: 0.28,
+    slowMs: 5200
   },
   spikeweed: {
     name: "Spikeweed",
@@ -1029,6 +1064,137 @@ const plantTypes = {
     homing: true,
     projectileClass: "fire",
     fusion: true
+  },
+  gatlingPea: {
+    name: "Gatling Pea",
+    note: "rapid peas",
+    cost: 300,
+    hp: 135,
+    image: "../assets/fusions/pvzf-gatling-pea.png",
+    damage: 20,
+    shots: 4,
+    fireEvery: 1120,
+    fusion: true
+  },
+  gatlingPeaShroom: {
+    name: "Gatling Pea-shroom",
+    note: "rapid puff",
+    cost: 275,
+    hp: 120,
+    image: "../assets/fusions/pvzf-gatling-pea-shroom.png",
+    damage: 16,
+    shots: 4,
+    fumeDamage: 18,
+    fumeRange: 2.35,
+    fireEvery: 1180,
+    fusion: true
+  },
+  hypnoGatlingPea: {
+    name: "Hypno Gatling Pea",
+    note: "rapid charm",
+    cost: 325,
+    hp: 125,
+    image: "../assets/fusions/pvzf-hypno-gatling-pea.png",
+    damage: 12,
+    shots: 4,
+    charmMs: 5000,
+    projectileClass: "hypno",
+    fireEvery: 1300,
+    fusion: true
+  },
+  gatlingSnowPea: {
+    name: "Gatling Snow Pea",
+    note: "rapid freeze",
+    cost: 350,
+    hp: 135,
+    image: "../assets/fusions/pvzf-gatling-snow-pea.png",
+    damage: 17,
+    shots: 4,
+    slowFactor: 0.45,
+    slowMs: 2600,
+    projectileClass: "snow",
+    fireEvery: 1250,
+    fusion: true
+  },
+  gatlingCherry: {
+    name: "Gatling Cherry",
+    note: "rapid splash",
+    cost: 350,
+    hp: 125,
+    image: "../assets/fusions/pvzf-gatling-cherry.png",
+    damage: 24,
+    shots: 3,
+    splashRadius: 0.72,
+    projectileClass: "cherry",
+    fireEvery: 1350,
+    fusion: true
+  },
+  gatlingDoom: {
+    name: "Gatling Doom",
+    note: "doom barrage",
+    cost: 425,
+    hp: 135,
+    image: "../assets/fusions/pvzf-gatling-doom.png",
+    damage: 42,
+    shots: 3,
+    splashRadius: 0.92,
+    projectileClass: "spike",
+    fireEvery: 1550,
+    fusion: true
+  },
+  gatlingPeaTurret: {
+    name: "Gatling Pea Turret",
+    note: "titan turret",
+    cost: 475,
+    hp: 190,
+    image: "../assets/fusions/pvzf-gatling-pea-turret.png",
+    damage: 28,
+    shots: 5,
+    fireEvery: 980,
+    projectileClass: "fire",
+    fusion: true,
+    titan: true
+  },
+  fortnessNut: {
+    name: "Fortness Nut",
+    note: "titan wall",
+    cost: 375,
+    hp: 1180,
+    image: "../assets/fusions/pvzf-fortness-nut.png",
+    fumeDamage: 30,
+    fumeRange: 2.45,
+    fireEvery: 1450,
+    fusion: true,
+    titan: true
+  },
+  melonCannon: {
+    name: "Melon Cannon",
+    note: "titan melon",
+    cost: 425,
+    hp: 175,
+    image: "../assets/fusions/pvzf-melon-cannon.png",
+    damage: 104,
+    splashDamage: 46,
+    splashRadius: 1.22,
+    splashRows: 1,
+    fireEvery: 2250,
+    lob: true,
+    projectileClass: "melon",
+    fusion: true,
+    titan: true
+  },
+  giantChomper: {
+    name: "Giant Chomper",
+    note: "titan bite",
+    cost: 450,
+    hp: 420,
+    image: "../assets/fusions/pvzf-giant-chomper.png",
+    chompDamage: 640,
+    chompRange: 1.45,
+    chompEvery: 5800,
+    chompSplashRadius: 1.25,
+    fusion: true,
+    titan: true
   }
 };
 
@@ -1084,7 +1250,17 @@ const fusionRecipes = [
   { parts: ["sunshroom", "fumeshroom"], result: "soyShroom", cost: 70 },
   { parts: ["cattail", "torchwood"], result: "torchKelp", cost: 125 },
   { parts: ["magnetshroom", "cactus"], result: "magnetCactus", cost: 95 },
-  { parts: ["tallnut", "magnetshroom"], result: "tallMagnetNut", cost: 95 }
+  { parts: ["tallnut", "magnetshroom"], result: "tallMagnetNut", cost: 95 },
+  { parts: ["repeater", "peashooter"], result: "gatlingPea", cost: 125 },
+  { parts: ["gatlingPea", "puffshroom"], result: "gatlingPeaShroom", cost: 95 },
+  { parts: ["gatlingPea", "hypnoshroom"], result: "hypnoGatlingPea", cost: 110 },
+  { parts: ["gatlingPea", "iceshroom"], result: "gatlingSnowPea", cost: 120 },
+  { parts: ["gatlingPea", "cherrybomb"], result: "gatlingCherry", cost: 130 },
+  { parts: ["gatlingPea", "doomshroom"], result: "gatlingDoom", cost: 150 },
+  { parts: ["gatlingPea", "torchwood"], result: "gatlingPeaTurret", cost: 175 },
+  { parts: ["peanut", "pumpkin"], result: "fortnessNut", cost: 160 },
+  { parts: ["gatlingPea", "melonpult"], result: "melonCannon", cost: 175 },
+  { parts: ["doomChomper", "tallnut"], result: "giantChomper", cost: 170 }
 ];
 
 const fusionRecipeMap = new Map(fusionRecipes.map((recipe) => [fusionKey(...recipe.parts), recipe]));
@@ -2176,6 +2352,7 @@ function renderPlant(plant) {
   plant.el.classList.toggle("is-armed", Boolean(plantTypes[plant.type].mine && performance.now() >= plant.armedAt));
   plant.el.classList.toggle("is-boosted", Boolean(plant.boosted));
   plant.el.classList.toggle("is-fusion", Boolean(plantTypes[plant.type].fusion));
+  plant.el.classList.toggle("is-titan", Boolean(plantTypes[plant.type].titan));
 }
 
 function pumpkinFusionAvailable(baseKey) {
