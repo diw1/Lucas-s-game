@@ -1,12 +1,12 @@
-import {drawScenery} from './scenery.js?v=mega2';
-import {talents,talentHit,bossIntent,resolveBossAction} from './combat.js?v=mega2';
-import {regions,regionAt,chests,quests,openChest,claimQuest} from './adventure.js?v=mega2';
-import {SAVE_KEY,readSave,writeSave,encodeSave,decodeSave} from './save.js?v=mega2';
-import {typeIcons,typeLabel,creatureTypes,matchup,completeBoss,evolutionCost,evolve,gainXP,companionName,bossAt,bossCreature,typeFactor,species,collectibleIds,bossTeam,makeCreature,attack,catchChance,tryCapture,touching,nextBossRound,strengths,directions,movementStep} from './rules.js?v=mega2';
-import {renderer,portrait} from './render.js?v=mega2';
-import {createWorld} from './world.js?v=mega2';
-import {bossSpecialEffect,strike,healEffect,captureEffect,switchEffect} from './effects.js?v=mega2';
-import {chooseCue,drawCueRing,drawCueBrackets} from './interaction.js?v=mega2';
+import {drawScenery} from './scenery.js?v=mega3';
+import {talents,talentHit,bossIntent,resolveBossAction} from './combat.js?v=mega3';
+import {regions,regionAt,chests,quests,openChest,claimQuest} from './adventure.js?v=mega3';
+import {SAVE_KEY,readSave,writeSave,encodeSave,decodeSave} from './save.js?v=mega3';
+import {typeIcons,typeLabel,creatureTypes,matchup,completeBoss,evolutionCost,evolve,gainXP,companionName,bossAt,bossCreature,typeFactor,species,collectibleIds,bossTeam,makeCreature,attack,catchChance,tryCapture,touching,nextBossRound,strengths,directions,movementStep} from './rules.js?v=mega3';
+import {renderer,portrait} from './render.js?v=mega3';
+import {createWorld} from './world.js?v=mega3';
+import {bossSpecialEffect,strike,healEffect,captureEffect,switchEffect} from './effects.js?v=mega3';
+import {chooseCue,drawCueRing,drawCueBrackets} from './interaction.js?v=mega3';
 const $=s=>document.querySelector(s),overlay=$('#overlay'),canvas=$('#world'),ctx=canvas.getContext('2d');
 const world=createWorld(),keys=new Set();
 const state={party:[],active:0,cubes:5,wins:0,badge:false,bossIndex:0,seen:[],visited:[],opened:[],claimed:[],forms:[],captures:0,effectiveWins:0,mode:'starter',battle:null,safeUntil:0};
@@ -124,10 +124,11 @@ async function turn(move,index){
 }
 $('#interact').onclick=interact;
 $('#cue-action').onclick=interact;
+const cueHasCard=cue=>!!cue&&(!!cue.action||cue.mode==='locked');
 function updateCue(cue,r){
-  currentCue=cue;cueElement.hidden=!cue;
+  currentCue=cue;cueElement.hidden=!cueHasCard(cue);
   document.querySelector('.explore-controls').classList.toggle('interaction-ready',!!cue?.action);
-  if(!cue){cueSignature='';return;}
+  if(!cueHasCard(cue)){cueSignature='';return;}
   const signature=[cue.target.name,cue.mode,cue.title].join('|');
   if(signature!==cueSignature){
     cueSignature=signature;cueElement.dataset.mode=cue.mode;
@@ -192,8 +193,8 @@ function frame(now){
   function label(text,x,z,y=1.6){const [px,py]=r.project(x,y,z);if(px<-80||px>w+80||py<-30||py>h+30)return;ctx.font='bold 12px Trebuchet MS';const tw=ctx.measureText(text).width;ctx.fillStyle='#fff9e8ed';ctx.fillRect(px-tw/2-8,py-17,tw+16,24);ctx.fillStyle='#294535';ctx.textAlign='center';ctx.fillText(text,px,py);}
   for(const c of chests)if(!state.opened.includes(c.id)&&cue?.target!==c)label('◆ TREASURE · E',c.x,c.z,1.2);
   if(cue?.target!==camp)label('CAMP',1.8,4,1.6);
-  if(cue?.target!==ranger)label(`◆ ${ranger.name}`,0,-5,2.1);
-  for(const c of wild)if(now>c.cooldown&&cue?.target!==c)label(`${c.rare?'✦ Rare ':''}${c.name} · ${typeLabel(c)}`,c.x,c.z,1.75);
+  if(!cueHasCard(cue)||cue.target!==ranger)label(`◆ ${ranger.name}`,0,-5,2.1);
+  for(const c of wild)if(now>c.cooldown&&(!cueHasCard(cue)||cue.target!==c))label(`${c.rare?'✦ Rare ':''}${c.name} · ${typeLabel(c)}`,c.x,c.z,1.75);
   if(state.party.length){const [px,py]=r.project(player.x,1.95,player.z);ctx.fillStyle='#fff9e8';ctx.beginPath();ctx.moveTo(px,py+9);ctx.lineTo(px-6,py);ctx.lineTo(px+6,py);ctx.fill();}
   updateCue(cue,r);
   requestAnimationFrame(frame);

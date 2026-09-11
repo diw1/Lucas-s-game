@@ -1,4 +1,4 @@
-import {species,makeCreature,collectibleIds} from './rules.js?v=mega2';
+import {species,makeCreature,collectibleIds} from './rules.js?v=mega3';
 export const SAVE_KEY='cube-companions-adventure-v1';
 const list=v=>Array.isArray(v)?v.filter(x=>typeof x==='string').slice(0,1000):[];
 const num=(v,f=0,max=1000000)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):f;
