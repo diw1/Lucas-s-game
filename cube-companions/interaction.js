@@ -1,9 +1,10 @@
 // Presentation only: the cue never replaces the camp's interaction target.
-export function chooseCue(player,state,camp,ranger,wild,now,chests=[]){
+export function chooseCue(player,state,camp,ranger,wild,now,chests=[],story=[]){
   if(state.mode!=='explore')return null;
   const distance=t=>Math.hypot(t.x-player.x,t.z-player.z);
   if(distance(camp)<1.8)return {target:camp,mode:'ready',key:'E',title:'Rest & refill',detail:'Heal your team and refill capture cubes.',action:true};
   const chest=chests.find(c=>!state.opened?.includes(c.id)&&distance(c)<1.8);if(chest)return {target:chest,mode:'ready',key:'E',title:'Open treasure',detail:'+3 cubes and +20 XP for every companion.',action:true};
+  const storyTarget=story.find(t=>distance(t)<1.8);if(storyTarget)return {target:storyTarget,mode:'ready',key:'E',title:storyTarget.actionTitle,detail:'A stop on your adventure route.',action:true};
   const target=[ranger,...wild.filter(t=>now>t.cooldown)].filter(t=>distance(t)<3.4).sort((a,b)=>distance(a)-distance(b))[0];
   if(!target)return null;
   if(target.kind==='trainer'&&state.party.length<2)return {target,mode:'locked',key:'!',title:'Catch a companion first',detail:'The boss needs you to bring at least two companions.'};

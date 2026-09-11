@@ -1,4 +1,4 @@
-import {regionAt} from './adventure.js?v=types18';
+import {regionAt} from './adventure.js?v=story2';
 // Bounded, deterministic decorations; tiny props never block the walking paths.
 export function drawScenery(r,player,time,reduced=false){
  const t=reduced?0:time*.001;

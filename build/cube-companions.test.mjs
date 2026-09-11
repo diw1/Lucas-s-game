@@ -2,6 +2,43 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeCreature,damage,attack,catchChance,tryCapture,bossTeam,nextBossRound,touching,movementStep,species} from '../cube-companions/rules.js';
 import {createWorld} from '../cube-companions/world.js';
+import {normalizeStory,currentStory,completeStoryEvent,completeStoryBattle,regionUnlocked,storyTargets,storyBoss} from '../cube-companions/story.js';
+
+const storyState=()=>({story:normalizeStory(),party:[makeCreature('ember')],cubes:5,bossIndex:7});
+test('story requires ordered tasks and distinct companions, and rewards only once',()=>{
+ const s=storyState();assert.equal(regionUnlocked(s,'lake'),false);
+ assert.equal(completeStoryEvent(s,'forest-seed'),null);
+ assert.ok(completeStoryEvent(s,'forest-guide'));assert.equal(s.party[0].xp,10);
+ assert.equal(completeStoryEvent(s,'forest-guide'),null);assert.equal(s.party[0].xp,10);
+ assert.equal(currentStory(s).next.id,'forest-team');s.party.push(makeCreature('ember'));
+ assert.equal(currentStory(s).next.id,'forest-team');s.party.push(makeCreature('bubble'));
+ assert.equal(currentStory(s).next.id,'forest-seed');
+});
+test('two chapters complete variable trainer rounds, award badges once and retain ladder progress',()=>{
+ const s=storyState();s.party.push(makeCreature('bubble'));
+ for(const target of storyTargets){
+  assert.equal(currentStory(s).next.target,target.id);
+  if(!target.team){assert.ok(completeStoryEvent(s,target.id));continue;}
+  s.battle={storyId:target.id,trainer:true,boss:storyBoss(target),round:0,enemy:makeCreature(target.team[0])};
+  assert.equal(completeStoryBattle(s),null);
+  let rounds=1;s.battle.enemy.hp=0;
+  while(nextBossRound(s.battle,s.party)){rounds++;assert.equal(completeStoryBattle(s),null);s.battle.enemy.hp=0;}
+  assert.equal(rounds,target.team.length);assert.ok(completeStoryBattle(s));assert.equal(completeStoryBattle(s),null);
+  if(target.id==='forest-boss'){assert.equal(regionUnlocked(s,'lake'),true);assert.equal(regionUnlocked(s,'volcano'),false);}
+ }
+ assert.equal(currentStory(s).complete,true);assert.equal(s.bossIndex,7);
+ for(const r of ['grove','lake','volcano','mine','fairy'])assert.equal(regionUnlocked(s,r),true);
+});
+test('lake task requires Water and save migration preserves legacy access and progress',()=>{
+ const s=storyState();s.story=normalizeStory({flags:['forest-boss','lake-guide']});
+ assert.equal(currentStory(s).next.id,'lake-team');s.party.push(makeCreature('mire'));
+ assert.equal(currentStory(s).next.id,'lake-crystal');
+ s.visited=['grove','mine'];s.party[0].xp=237;
+ const legacy=JSON.parse(encodeSave(s,{x:-30,z:0}));delete legacy.story;
+ const restored=decodeSave(JSON.stringify(legacy));assert.equal(restored.bossIndex,7);assert.equal(restored.party[0].xp,237);
+ assert.equal(regionUnlocked(restored,'mine'),true);assert.equal(regionUnlocked(restored,'lake'),false);
+ const modern=decodeSave(encodeSave(s,{x:0,z:30}));assert.equal(currentStory(modern).next.id,'lake-crystal');assert.equal(regionUnlocked(modern,'lake'),true);
+});
 
 test('capture thresholds include the guarantee boundary and reject a high roll at full HP',()=>{
   const c=makeCreature('pebble');

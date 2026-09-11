@@ -1,4 +1,4 @@
-import {typeIcons,typeText,strengths,typeFactor} from './types.js?v=types18';
+import {typeIcons,typeText,strengths,typeFactor} from './types.js?v=story2';
 export {typeIcons,typeText,strengths,typeFactor};
 export const species = {
   sprig: {name:'Spriglet',type:'grass',color:'#73af49',accent:'#d5e96a',max:44,power:12,move:'Vine Whip',description:'A leafy little fox with a fearless heart.'},
@@ -46,7 +46,7 @@ export function attack(attacker,defender,move='skill',guard=false){const n=damag
 export function tryCapture(enemy,roll=Math.random()){return roll<catchChance(enemy);}
 export function touching(player,target,now){return target.armed!==false&&now>=(target.cooldown||0)&&Math.hypot(player.x-target.x,player.z-target.z)<=1.05;}
 export function nextBossRound(battle,party){
-  if(!battle.trainer||battle.enemy.hp>0||battle.round>=bossTeam.length-1)return false;
+  if(!battle.trainer||battle.enemy.hp>0||battle.round>=(battle.boss?.team||bossTeam).length-1)return false;
   battle.round++;battle.enemy=battle.boss?bossCreature(battle.boss,battle.round):makeCreature(bossTeam[battle.round]);battle.heals=2;
   party.forEach(c=>c.hp=c.max);
   return true;

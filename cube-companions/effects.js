@@ -1,6 +1,6 @@
 // Battle effects finish before damage is applied. The controller locks all moves
 // until both attack animations complete, so rapid clicks cannot skip a turn.
-import {typeColors as colors} from './types.js?v=types18';
+import {typeColors as colors} from './types.js?v=story2';
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function animate(el,frames,ms){if(!el)return;await el.animate(frames,{duration:reduced()?70:ms,easing:'ease-in-out'}).finished;}
 function effect(arena,className,text=''){const e=document.createElement('span');e.className=className;e.textContent=text;e.setAttribute('aria-hidden','true');arena.append(e);return e;}

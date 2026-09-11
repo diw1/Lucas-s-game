@@ -1,5 +1,6 @@
-import {regionAt,regions,chests} from './adventure.js?v=types18';
-import { species } from './rules.js?v=types18';
+import {storyTargets} from './story.js?v=story2';
+import {regionAt,regions,chests} from './adventure.js?v=story2';
+import { species } from './rules.js?v=story2';
 
 const CHUNK_SIZE = 12;
 const SPECIES_IDS = ['sprig', 'ember', 'bubble', 'pebble', 'brawl', 'fairy', 'steel'];
@@ -55,7 +56,7 @@ function chunkTrees(cx, cz) {
     const x = cx * CHUNK_SIZE + 1.5 + unit(cx, cz, 50 + i) * 9;
     const z = cz * CHUNK_SIZE + 1.5 + unit(cx, cz, 60 + i) * 9;
     if (!outsideCenter(x, z)) continue;
-    if([...regions,...chests].some(p=>(p.x-x)**2+(p.z-z)**2<9))continue;
+    if([...regions,...chests,...storyTargets].some(p=>(p.x-x)**2+(p.z-z)**2<9))continue;
     if (encounters.some(w => distanceSquared(w, { x, z }) < 2.6 ** 2)) continue;
     if (LANDMARKS.some(([lx, lz]) => (x - lx) ** 2 + (z - lz) ** 2 < 3 ** 2)) continue;
     if (trees.some(([tx, tz]) => (x - tx) ** 2 + (z - tz) ** 2 < 3 ** 2)) continue;

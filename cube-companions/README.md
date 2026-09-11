@@ -62,3 +62,6 @@ New modules: save.js validates and persists versioned saves; adventure.js define
 - The type guide includes Chinese names, icons, an attack/dual-defense calculator and the full 18-type chart.
 - Type immunity deals zero damage, including Mega skills and boss attacks. Gentle Bump remains a deliberately typeless capture helper.
 - Reference: https://diamondpearl.pokemon.com/en-gb/trainersguide/fundamentals/battling/ . All 324 matrix cells are checked against the official chart in the regression tests.
+
+## Story adventure
+Forest and Lake chapters include guides, relics, practice trainers and regional bosses. The Story panel tracks the next objective and offers travel to the next stop. Grove Badge opens the lake; Tide Badge opens every region. Existing saves retain previously visited regions, companions, XP and independent boss-ladder progress. Story rewards are granted once. New saves begin in the grove.

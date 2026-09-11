@@ -1,18 +1,19 @@
-import {drawScenery} from './scenery.js?v=types18';
-import {talents,talentHit,bossIntent,resolveBossAction} from './combat.js?v=types18';
-import {regions,regionAt,chests,quests,openChest,claimQuest} from './adventure.js?v=types18';
-import {SAVE_KEY,readSave,writeSave,encodeSave,decodeSave} from './save.js?v=types18';
-import {attackType,typeIcons,typeText,typeLabel,creatureTypes,matchup,completeBoss,evolutionCost,evolve,gainXP,companionName,bossAt,bossCreature,typeFactor,species,collectibleIds,bossTeam,makeCreature,attack,catchChance,tryCapture,touching,nextBossRound,strengths,directions,movementStep} from './rules.js?v=types18';
-import {renderer,portrait} from './render.js?v=types18';
-import {createWorld} from './world.js?v=types18';
-import {bossSpecialEffect,strike,healEffect,captureEffect,switchEffect} from './effects.js?v=types18';
-import {chooseCue,drawCueRing,drawCueBrackets} from './interaction.js?v=types18';
+import {chapters,storyTargets,normalizeStory,currentStory,storySteps,storyReady,storyBoss,completeStoryEvent,completeStoryBattle,hasStoryEvent,regionUnlocked} from './story.js?v=story2';
+import {drawScenery} from './scenery.js?v=story2';
+import {talents,talentHit,bossIntent,resolveBossAction} from './combat.js?v=story2';
+import {regions,regionAt,chests,quests,openChest,claimQuest} from './adventure.js?v=story2';
+import {SAVE_KEY,readSave,writeSave,encodeSave,decodeSave} from './save.js?v=story2';
+import {attackType,typeIcons,typeText,typeLabel,creatureTypes,matchup,completeBoss,evolutionCost,evolve,gainXP,companionName,bossAt,bossCreature,typeFactor,species,collectibleIds,bossTeam,makeCreature,attack,catchChance,tryCapture,touching,nextBossRound,strengths,directions,movementStep} from './rules.js?v=story2';
+import {renderer,portrait} from './render.js?v=story2';
+import {createWorld} from './world.js?v=story2';
+import {bossSpecialEffect,strike,healEffect,captureEffect,switchEffect} from './effects.js?v=story2';
+import {chooseCue,drawCueRing,drawCueBrackets} from './interaction.js?v=story2';
 const $=s=>document.querySelector(s),overlay=$('#overlay'),canvas=$('#world'),ctx=canvas.getContext('2d');
 const world=createWorld(),keys=new Set();
-const state={party:[],active:0,cubes:5,wins:0,badge:false,bossIndex:0,seen:[],visited:[],opened:[],claimed:[],forms:[],captures:0,effectiveWins:0,mode:'starter',battle:null,safeUntil:0};
+const state={story:normalizeStory(),party:[],active:0,cubes:5,wins:0,badge:false,bossIndex:0,seen:[],visited:[],opened:[],claimed:[],forms:[],captures:0,effectiveWins:0,mode:'starter',battle:null,safeUntil:0};
 const player={x:0,z:3.5,heading:0,moving:false,runCycle:0},camera={x:0,z:3.5};
 const camp={x:0,z:3.5,kind:'camp',name:'Camp'},ranger={x:0,z:-5,kind:'trainer',name:'Ranger Fern',armed:true,cooldown:0};
-let nearby=null,last=0,toastTimer,currentCue=null,cueSignature='';
+let lastGateHint=0,nearby=null,last=0,toastTimer,currentCue=null,cueSignature='';
 const cueElement=$('#interaction-cue'),reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 const name=companionName;
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),4200);}
@@ -24,9 +25,9 @@ function updateHUD(){
   for(const c of state.party){const form=`${c.id}:${c.stage||0}${c.rare?':rare':''}`;if(!state.forms.includes(form))state.forms.push(form);if(!state.seen.includes(c.id))state.seen.push(c.id);}
   saveAdventure();
   const caught=state.party.length>1,boss=bossAt(state.bossIndex);ranger.name=`Boss ${boss.rank} · ${boss.name}`;
-  $('#objective').textContent=!state.party.length?'Choose your first companion':!caught?'Catch a wild companion':`Boss ${boss.rank} · ${boss.name}`;
-  $('#quest-detail').textContent=!caught?'Catch creatures to earn XP. Tap Evolve when ready!':`${state.bossIndex} bosses beaten. Next challenger waits north of camp. Your team keeps growing.`;
-  $('#progress').innerHTML=`<div class="steps"><div class="${state.party.length?'done':''}">${state.party.length?'✓':'○'} Choose a starter</div><div class="${caught?'done':''}">${caught?'✓':'○'} Catch a companion · ${new Set(state.party.map(c=>c.id)).size}/${collectibleIds.length}</div><div class="${state.badge?'done':''}">${state.badge?'◆':'○'} Bosses defeated: ${state.bossIndex}</div></div>`;
+  const route=currentStory(state);$('#objective').textContent=!state.party.length?'Choose your first companion':route.title;
+  $('#quest-detail').textContent=!state.party.length?'Your story starts in Home Grove.':route.detail;
+  $('#progress').innerHTML=`<div class="steps"><div class="${state.party.length?'done':''}">${state.party.length?'✓':'○'} Choose a starter</div><div class="${caught?'done':''}">${caught?'✓':'○'} Catch a companion · ${new Set(state.party.map(c=>c.id)).size}/${collectibleIds.length}</div><div class="${state.badge?'done':''}">${chapters.filter(c=>hasStoryEvent(state,c.end)).map(c=>c.badge).join(' · ')||'○ Story badges: 0/2'} · Ladder wins: ${state.bossIndex}</div></div>`;
   $('#party').innerHTML=state.party.map((c,i)=>`<button data-party="${i}" class="${i===state.active?'active':''}" ${state.mode!=='explore'?'disabled':''}><canvas data-id="${c.id}" data-stage="${c.stage||0}" data-rare="${!!c.rare}" aria-hidden="true"></canvas>${i===state.active?'▸ ':''}${name(c)}<small>${c.hp} / ${c.max} HP · ${typeLabel(c)}</small><small>${evolutionCost(c)===null?'Final evolution':`${c.xp} / ${evolutionCost(c)} XP`}</small><progress max="${evolutionCost(c)||1}" value="${evolutionCost(c)===null?1:c.xp}" aria-label="${name(c)} evolution experience"></progress></button>${evolutionCost(c)!==null?`<button class="evolve-button" data-evolve="${i}" ${state.mode!=='explore'||c.xp<evolutionCost(c)?'disabled':''}>✦ Evolve ${name(c)}</button>`:''}`).join('')+(state.party.length?`<div class="muted">◈ ${state.cubes} cubes · ${state.wins} ${state.wins===1?'win':'wins'}</div>`:'');
   $('#party').querySelectorAll('canvas').forEach(c=>portrait(c,c.dataset.id,+c.dataset.stage,c.dataset.rare==='true'));
   $('#party').querySelectorAll('[data-party]').forEach(b=>b.onclick=()=>{const i=+b.dataset.party;if(!state.party[i].hp)return toast('Rest at camp to revive this companion.');state.active=i;updateHUD();toast(`${name(state.party[i])} is leading the way.`);});
@@ -43,26 +44,27 @@ function starters(){
 }
 function resetAdventure(){
   saveBlocked=false;try{storage?.removeItem(SAVE_KEY);}catch{}
-  Object.assign(state,{party:[],active:0,cubes:5,wins:0,badge:false,bossIndex:0,seen:[],visited:[],opened:[],claimed:[],forms:[],captures:0,effectiveWins:0,mode:'starter',battle:null,safeUntil:0});
+  Object.assign(state,{story:normalizeStory(),party:[],active:0,cubes:5,wins:0,badge:false,bossIndex:0,seen:[],visited:[],opened:[],claimed:[],forms:[],captures:0,effectiveWins:0,mode:'starter',battle:null,safeUntil:0});
   Object.assign(player,{x:camp.x,z:camp.z,heading:0,moving:false,runCycle:0});Object.assign(camera,{x:camp.x,z:camp.z});
   Object.assign(ranger,{armed:true,cooldown:0});world.reset();keys.clear();nearby=null;clearTimeout(toastTimer);$('#toast').classList.remove('visible');updateHUD();starters();
 }
 function closePanel(){overlay.innerHTML='';state.mode='explore';state.safeUntil=performance.now()+1000;keys.clear();updateHUD();}
 function rest(){state.party.forEach(c=>c.hp=c.max);state.cubes=Math.max(state.cubes,5);updateHUD();toast('Team fully healed. At least 5 capture cubes ready!');}
 function returnCamp(){if(state.mode!=='explore')return;player.x=camp.x;player.z=camp.z;state.safeUntil=performance.now()+1800;keys.clear();rest();}
-function interact(){if(state.mode!=='explore')return;if(nearby?.kind==='chest'){if(openChest(state,nearby.id)){updateHUD();toast('Treasure! +3 cubes and +20 XP for every companion.');}}else if(nearby?.kind==='camp')rest();else returnCamp();}
+function interact(){if(state.mode!=='explore')return;if(nearby?.kind==='story')return interactStory(nearby);if(nearby?.kind==='chest'){if(openChest(state,nearby.id)){updateHUD();toast('Treasure! +3 cubes and +20 XP for every companion.');}}else if(nearby?.kind==='camp')rest();else returnCamp();}
 function startBattle(target){
   if(state.mode!=='explore'||!state.party[state.active]?.hp)return;
+  if(target.kind==='story'&&!storyReady(state,target.id))return;
   target.armed=false;
   if(target.kind==='trainer'&&state.party.length<2){toast('Fern: Catch a wild companion first, then touch me to challenge my team!');return;}
-  const trainer=target.kind==='trainer',boss=trainer?bossAt(state.bossIndex):null;
-  state.mode='battle';state.battle={target,enemy:trainer?bossCreature(boss,0):{...makeCreature(target.id),rare:!!target.rare},trainer,boss,round:0,log:trainer?`${boss.name}: Challenge ${boss.rank}. Let’s begin!`:'A wild companion approaches! Weaken it before throwing a cube.',turn:0,heals:2,talentUses:{},busy:false};
+  const trainer=target.kind==='trainer'||!!target.team,boss=target.team?storyBoss(target):trainer?bossAt(state.bossIndex):null;
+  state.mode='battle';state.battle={storyId:target.kind==='story'?target.id:null,target,enemy:trainer?bossCreature(boss,0):{...makeCreature(target.id),rare:!!target.rare},trainer,boss,round:0,log:trainer?`${boss.name}: Challenge ${boss.rank}. Let’s begin!`:'A wild companion approaches! Weaken it before throwing a cube.',turn:0,heals:2,talentUses:{},busy:false};
   keys.clear();player.moving=false;updateHUD();renderBattle();
 }
 function fighter(c,title,side){return `<div class="fighter" data-side="${side}"><span class="type">${title} · ${typeLabel(c)}</span><canvas data-id="${c.id}" data-stage="${c.stage||0}" data-rare="${!!c.rare}" aria-label="${name(c)}"></canvas><h2>${name(c)}</h2><div class="hp"><i style="width:${c.hp/c.max*100}%"></i></div><small class="hp-value">${c.hp} / ${c.max} HP</small></div>`;}
 function renderBattle(){
   const b=state.battle,a=state.party[state.active],chance=Math.round(catchChance(b.enemy)*100),effective=strengths[species[a.id].type]||[];
-  panel(`<div class="battle-head"><div><span class="eyebrow">${b.trainer?`BOSS · OPPONENT ${b.round+1} OF ${bossTeam.length}`:'WILD ENCOUNTER'}</span><h1>${b.trainer?`Boss ${b.boss.rank} · ${b.boss.name}`:'Make a new friend'}</h1></div><span class="muted">Turn ${b.turn+1}</span></div>${b.trainer?`<div class="boss-roster" aria-label="Boss team">${b.boss.team.map((id,i)=>`<span class="${i<b.round?'defeated':i===b.round?'current':''}">${i<b.round?'✓ ':''}${species[id].name}</span>`).join('')}</div>`:''}<div class="arena">${fighter(a,'Your companion','player')}<span class="versus">VS</span>${fighter(b.enemy,b.trainer?'Fern’s companion':'Wild companion','enemy')}</div>${b.trainer?`<div class="intent"><strong>Next: ${bossIntent(b).name}</strong><br>${bossIntent(b).detail}${b.enemyShield?' Shield active!':''}</div>`:''}<div class="log" role="status" aria-live="polite">${b.log}</div><div class="moves">${a.stage?`<button data-move="talent" ${(b.talentUses[state.active]||0)>=a.stage+1?'disabled':''}>✦ ${talents[species[a.id].type].name}<small>${talents[species[a.id].type].detail} · ${Math.max(0,a.stage+1-(b.talentUses[state.active]||0))} uses left</small></button>`:''}<button data-move="skill">${species[a.id].move}<small>${typeText(attackType(a,b.enemy))} · ${matchupText(matchup(a,b.enemy))}</small></button><button data-move="tap">Gentle Bump<small>8 damage · useful before capture</small></button><button data-move="guard" ${!b.heals?'disabled':''}>Guard & Recover<small>Heal 14 HP · block 60% · ${b.heals} left</small></button><button data-move="catch" ${b.trainer||!state.cubes?'disabled':''}>Throw Capture Cube<small>${b.trainer?'Trainer companions cannot be caught':`${state.cubes} left · ${chance}% catch chance`}</small></button></div><button id="type-guide">◎ Type matchups</button><div class="switches">${state.party.map((c,i)=>i!==state.active&&c.hp?`<button data-switch="${i}">Switch to ${name(c)}<small>${typeLabel(c)} · ${matchup(c,b.enemy)===0?'○ Immune':matchup(c,b.enemy)>1?"✦ Strong":matchup(c,b.enemy)<1?"◇ Resisted":"Normal"} ×${matchup(c,b.enemy)}</small></button>`:'').join('')}<button id="retreat">Retreat to grove</button></div><p class="battle-tip">Your ${typeLabel(a)} skill: ${matchupText(matchup(a,b.enemy))} Capture is guaranteed at 35% HP or less. Switching uses a turn.</p>`,'battle');
+  panel(`<div class="battle-head"><div><span class="eyebrow">${b.trainer?`BOSS · OPPONENT ${b.round+1} OF ${b.boss?.team.length||bossTeam.length}`:'WILD ENCOUNTER'}</span><h1>${b.trainer?`${b.storyId?'Story challenge':'Boss '+b.boss.rank} · ${b.boss.name}`:'Make a new friend'}</h1></div><span class="muted">Turn ${b.turn+1}</span></div>${b.trainer?`<div class="boss-roster" aria-label="Boss team">${b.boss.team.map((id,i)=>`<span class="${i<b.round?'defeated':i===b.round?'current':''}">${i<b.round?'✓ ':''}${species[id].name}</span>`).join('')}</div>`:''}<div class="arena">${fighter(a,'Your companion','player')}<span class="versus">VS</span>${fighter(b.enemy,b.trainer?b.boss.name+'’s companion':'Wild companion','enemy')}</div>${b.trainer?`<div class="intent"><strong>Next: ${bossIntent(b).name}</strong><br>${bossIntent(b).detail}${b.enemyShield?' Shield active!':''}</div>`:''}<div class="log" role="status" aria-live="polite">${b.log}</div><div class="moves">${a.stage?`<button data-move="talent" ${(b.talentUses[state.active]||0)>=a.stage+1?'disabled':''}>✦ ${talents[species[a.id].type].name}<small>${talents[species[a.id].type].detail} · ${Math.max(0,a.stage+1-(b.talentUses[state.active]||0))} uses left</small></button>`:''}<button data-move="skill">${species[a.id].move}<small>${typeText(attackType(a,b.enemy))} · ${matchupText(matchup(a,b.enemy))}</small></button><button data-move="tap">Gentle Bump<small>8 damage · useful before capture</small></button><button data-move="guard" ${!b.heals?'disabled':''}>Guard & Recover<small>Heal 14 HP · block 60% · ${b.heals} left</small></button><button data-move="catch" ${b.trainer||!state.cubes?'disabled':''}>Throw Capture Cube<small>${b.trainer?'Trainer companions cannot be caught':`${state.cubes} left · ${chance}% catch chance`}</small></button></div><button id="type-guide">◎ Type matchups</button><div class="switches">${state.party.map((c,i)=>i!==state.active&&c.hp?`<button data-switch="${i}">Switch to ${name(c)}<small>${typeLabel(c)} · ${matchup(c,b.enemy)===0?'○ Immune':matchup(c,b.enemy)>1?"✦ Strong":matchup(c,b.enemy)<1?"◇ Resisted":"Normal"} ×${matchup(c,b.enemy)}</small></button>`:'').join('')}<button id="retreat">Retreat to grove</button></div><p class="battle-tip">Your ${typeLabel(a)} skill: ${matchupText(matchup(a,b.enemy))} Capture is guaranteed at 35% HP or less. Switching uses a turn.</p>`,'battle');
   overlay.querySelectorAll('[data-move]').forEach(btn=>btn.onclick=()=>turn(btn.dataset.move));
   overlay.querySelectorAll('[data-switch]').forEach(btn=>btn.onclick=()=>turn('switch',+btn.dataset.switch));
   $('#retreat').onclick=()=>{if(b.busy)return;b.target.cooldown=performance.now()+4000;b.target.armed=false;closePanel();toast('Retreated safely. Move away before starting another battle.');};
@@ -74,12 +76,12 @@ function showHP(){const b=state.battle;for(const [side,c]of [['player',state.par
 function sayBattle(message){const el=$('.log');if(el)el.textContent=message;}
 function finish(title,message,badge=false){
   const b=state.battle;b.busy=false;b.target.cooldown=performance.now()+15000;b.target.armed=false;state.mode='result';updateHUD();
-  panel(`${badge?'<div class="badge">◆</div>':'<span class="eyebrow">ADVENTURE UPDATE</span>'}<h1>${title}</h1><p>${message}</p><button id="continue">${badge?'Continue to the next boss':'Keep exploring'}</button>`,'result');
-  $('#continue').onclick=closePanel;
+  panel(`${badge?'<div class="badge">◆</div>':'<span class="eyebrow">ADVENTURE UPDATE</span>'}<h1>${title}</h1><p>${message}</p><button id="continue">${b.storyId?'Continue the story':badge?'Continue to the next boss':'Keep exploring'}</button>`,'result');
+  $('#continue').onclick=()=>{closePanel();if(b.storyId)showStory();};
 }
 function roundWon(defeated){
   const b=state.battle;b.busy=false;state.mode='round';updateHUD();
-  panel(`<span class="eyebrow">BOSS · ${b.round} OF ${bossTeam.length} DEFEATED</span><h1>${defeated} defeated!</h1><p>Next up: ${name(b.enemy)} (${typeLabel(b.enemy)}). Your team is healed and recoveries are refilled for the next round.</p><canvas class="next-opponent" data-id="${b.enemy.id}" aria-label="${name(b.enemy)}"></canvas><button id="next-round">Battle ${name(b.enemy)}</button>`,'result');
+  panel(`<span class="eyebrow">BOSS · ${b.round} OF ${b.boss?.team.length||bossTeam.length} DEFEATED</span><h1>${defeated} defeated!</h1><p>Next up: ${name(b.enemy)} (${typeLabel(b.enemy)}). Your team is healed and recoveries are refilled for the next round.</p><canvas class="next-opponent" data-id="${b.enemy.id}" aria-label="${name(b.enemy)}"></canvas><button id="next-round">Battle ${name(b.enemy)}</button>`,'result');
   $('#next-round').onclick=()=>{state.mode='battle';b.log=`${b.boss.name} sends out ${name(b.enemy)}!`;updateHUD();renderBattle();};
 }
 async function turn(move,index){
@@ -108,6 +110,7 @@ async function turn(move,index){
     const defeated=name(b.enemy);gainXP(a,20);if(['skill','talent'].includes(move)&&matchup(a,b.enemy)>1)state.effectiveWins++;
     if(nextBossRound(b,state.party)){b.turn=0;b.talentUses={};b.enemyShield=false;roundWon(defeated);return;}
     state.wins++;state.cubes=Math.min(99,state.cubes+2);a.hp=a.max;
+    if(b.storyId){const reward=completeStoryBattle(state);const route=currentStory(state);return finish(reward?.badge?`${reward.badge} earned!`:`${b.boss.name} defeated!`,`${reward?.badge?(b.storyId==='forest-boss'?'The Sunseed lights the gateway. The lake trail is open! ':'The Tide Crystal shines again. Both chapters are complete; all regions are open! '):'Your practice paid off! '}${reward?`Your team earns ${reward.xp} XP each. `:''}${route.complete?route.detail:'Next: '+route.title}`,!!reward?.badge);}
     if(b.trainer){completeBoss(state);return finish(`Boss ${state.bossIndex} defeated!`,`${b.boss.name} awards your team 40 bonus XP each. Your companions and experience stay with you! Next: Boss ${state.bossIndex+1}, ${bossAt(state.bossIndex).name}, north of camp.`,true);}
     return finish('Battle won!',`${defeated} scampers away. Your lead companion earned 20 XP and is healed. You earned 2 capture cubes. Throw a cube before HP reaches zero to catch one.`);
   }
@@ -136,7 +139,7 @@ function updateCue(cue,r){
     cueElement.querySelector('.cue-name').textContent=cue.target.name;
     cueElement.querySelector('.cue-title').textContent=cue.title;
     cueElement.querySelector('.cue-detail').textContent=cue.detail;
-    $('#cue-action').hidden=!cue.action;$('#cue-action').textContent=cue.target.kind==='chest'?'Open treasure':'Rest & refill';
+    $('#cue-action').hidden=!cue.action;$('#cue-action').textContent=cue.target.kind==='story'?cue.target.actionTitle:cue.target.kind==='chest'?'Open treasure':'Rest & refill';
   }
   const [x,y]=r.project(cue.target.x,cue.target.kind==='trainer'?2:1.7,cue.target.z);
   const half=cueElement.offsetWidth/2;
@@ -147,7 +150,7 @@ function updateCue(cue,r){
 }
 $('#help').onclick=()=>{
   if(state.mode!=='explore')return;state.mode='help';
-  panel(`<span class="eyebrow">FIELD GUIDE</span><h1>Welcome to the endless grove.</h1><div class="help-list">Map: travel between five regions. Journal: quests, rewards, and the creature collection.<br>Treasure chests: approach and press E or click Open treasure. Each chest opens once.<br>Bosses announce their next action. Guard before a charged strike!<br>Evolution unlocks a special move: Super form gets 2 uses per encounter, Royal form gets 3, Mega gets 4.<br>Move straight: WASD, arrows, or on-screen arrows. The last direction pressed wins.<br>Touch a wild creature or Fern to battle automatically.<br>Click a companion card to change your lead.<br>Rest at camp or use Return to camp for healing and capture cubes.<br>Catch a companion, then face Fern’s five-creature team.<br>Each boss round heals your team. Beat all five opponents to unlock the next boss.<br>18 types: ${Object.keys(typeIcons).map(typeText).join(', ')}. Some companions have two types.<br>Catching earns 40 XP for your lead, even for familiar creatures. Wins earn 20 XP. Tap Evolve at 80 XP, then again at 160 XP, and finally Mega at 500 XP. Boss wins preserve your team and unlock the next challenge.</div><p>Your adventure is automatically saved in this browser. Reloading during a battle returns to the grove; the battle restarts.</p><button id="close-help">Back to the grove</button> <button id="export-save">Download save backup</button> <label class="import-label">Restore backup <input id="import-save" type="file" accept=".json,application/json"></label> <button id="new-adventure">New adventure</button>`);
+  panel(`<span class="eyebrow">FIELD GUIDE</span><h1>Welcome to the endless grove.</h1><div class="help-list">Story: follow the forest and lake chapters and earn two badges. Map: travel to unlocked regions. Journal: quests, rewards, and the creature collection.<br>Treasure chests: approach and press E or click Open treasure. Each chest opens once.<br>Bosses announce their next action. Guard before a charged strike!<br>Evolution unlocks a special move: Super form gets 2 uses per encounter, Royal form gets 3, Mega gets 4.<br>Move straight: WASD, arrows, or on-screen arrows. The last direction pressed wins.<br>Touch a wild creature or Fern to battle automatically.<br>Click a companion card to change your lead.<br>Rest at camp or use Return to camp for healing and capture cubes.<br>Catch a companion, then face Fern’s five-creature team.<br>Each boss round heals your team. Beat all five opponents to unlock the next boss.<br>18 types: ${Object.keys(typeIcons).map(typeText).join(', ')}. Some companions have two types.<br>Catching earns 40 XP for your lead, even for familiar creatures. Wins earn 20 XP. Tap Evolve at 80 XP, then again at 160 XP, and finally Mega at 500 XP. Boss wins preserve your team and unlock the next challenge.</div><p>Your adventure is automatically saved in this browser. Reloading during a battle returns to the grove; the battle restarts.</p><button id="close-help">Back to the grove</button> <button id="export-save">Download save backup</button> <label class="import-label">Restore backup <input id="import-save" type="file" accept=".json,application/json"></label> <button id="new-adventure">New adventure</button>`);
   $('#export-save').onclick=()=>{const blob=new Blob([encodeSave(state,player)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cube-companions-save.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);};
   $('#import-save').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>1000000)throw Error();const restored=decodeSave(await file.text());panel('<h1>Restore this backup?</h1><p>This replaces your current adventure. Download your current save first if you want to keep both.</p><button id="cancel-import">Keep current adventure</button><button id="confirm-import">Restore backup</button>');$('#cancel-import').onclick=closePanel;$('#confirm-import').onclick=()=>{const {player:position,...saved}=restored;saveBlocked=false;Object.assign(state,saved,{battle:null});Object.assign(player,position);Object.assign(camera,position);world.reset();for(const target of [ranger,...world.wildNear(player,4)])target.armed=false;closePanel();toast('Backup restored.');};}catch{toast('That file is not a valid save. Your adventure has not changed.');}};
   $('#close-help').onclick=closePanel;$('#new-adventure').onclick=()=>{panel('<h1>Start a new adventure?</h1><p>This replaces the saved team, quests and boss progress on this device.</p><button id="cancel-reset">Keep my adventure</button> <button id="confirm-reset">Start over</button>');$('#cancel-reset').onclick=closePanel;$('#confirm-reset').onclick=resetAdventure;};
@@ -160,7 +163,8 @@ function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=innerWidt
 function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;const w=innerWidth,h=innerHeight;
   const s=w<760?34:Math.min(60,w/23,h/14),radius=Math.ceil((w/s+h/(s*.48))/4)+4;
-  const trees=world.treesNear(player,radius),wild=world.wildNear(player,radius);
+  const trees=world.treesNear(player,radius),wild=world.wildNear(player,radius).filter(c=>regionUnlocked(state,regionAt(c.x,c.z).id));
+  const storyVisible=storyTargets.filter(t=>regionUnlocked(state,t.region)&&!(t.role==='relic'&&hasStoryEvent(state,t.id)));
   if(state.party.length){let changed=false;for(const c of wild.filter(c=>Math.hypot(c.x-player.x,c.z-player.z)<6)){if(!state.seen.includes(c.id)){state.seen.push(c.id);changed=true;}}if(changed)saveAdventure();}
   player.moving=false;
   const biome=regionAt(player.x,player.z);$('#region-name').textContent=biome.name;
@@ -168,22 +172,24 @@ function frame(now){
   if(state.mode==='explore'){
     const {dx,dz}=movementStep(keys,dt);
     if(dx||dz){const nx=player.x+dx,nz=player.z+dz;
-      if(!trees.some(([x,z])=>Math.hypot(nx-x,nz-z)<.65)){player.x=nx;player.z=nz;player.moving=true;player.heading=Math.atan2(dx,dz);player.runCycle+=dt*14;}
+      if(!regionUnlocked(state,regionAt(nx,nz).id)){if(now-lastGateHint>3500){toast('This trail opens through the story. Tap Story for your next step.');lastGateHint=now;}}
+      else if(!trees.some(([x,z])=>Math.hypot(nx-x,nz-z)<.65)){player.x=nx;player.z=nz;player.moving=true;player.heading=Math.atan2(dx,dz);player.runCycle+=dt*14;}
     }
   }
   for(const c of wild){c.moving=state.mode==='explore'&&now>c.cooldown;if(c.moving){const x=c.homeX+Math.sin(now*.0008+c.phase)*.65,z=c.homeZ+Math.cos(now*.0007+c.phase)*.65;c.heading=Math.atan2(x-c.x,z-c.z);c.x=x;c.z=z;}}
   for(const target of [ranger,...wild]){if(Math.hypot(target.x-player.x,target.z-player.z)>2)target.armed=true;if(state.mode==='explore'&&now>state.safeUntil&&touching(player,target,now))startBattle(target);}
-  nearby=Math.hypot(camp.x-player.x,camp.z-player.z)<1.8?camp:chests.find(c=>!state.opened.includes(c.id)&&Math.hypot(c.x-player.x,c.z-player.z)<1.8)||null;
-  $('#interact').disabled=state.mode!=='explore';$('#interact').textContent=nearby?.kind==='chest'?'E · Open treasure':nearby?'E · Rest & refill':'Return to camp';
+  nearby=Math.hypot(camp.x-player.x,camp.z-player.z)<1.8?camp:chests.find(c=>!state.opened.includes(c.id)&&Math.hypot(c.x-player.x,c.z-player.z)<1.8)||storyVisible.find(t=>Math.hypot(t.x-player.x,t.z-player.z)<1.8)||null;
+  $('#interact').disabled=state.mode!=='explore';$('#interact').textContent=nearby?.kind==='story'?`E · ${nearby.actionTitle}`:nearby?.kind==='chest'?'E · Open treasure':nearby?'E · Rest & refill':'Return to camp';
   camera.x+=(player.x-camera.x)*Math.min(1,dt*7);camera.z+=(player.z-camera.z)*Math.min(1,dt*7);
   ctx.clearRect(0,0,w,h);ctx.fillStyle='#9fc579';ctx.fillRect(0,0,w,h);
   const r=renderer(ctx,s,w/2-(camera.x-camera.z)*s,h*.57-(camera.x+camera.z)*s*.48),minX=Math.floor(camera.x)-radius,minZ=Math.floor(camera.z)-radius;
-  const cue=chooseCue(player,state,camp,ranger,wild,now,chests);
+  const cue=chooseCue(player,state,camp,ranger,wild,now,chests,storyVisible);
   for(let x=minX;x<=minX+radius*2;x++)for(let z=minZ;z<=minZ+radius*2;z++){const [px,py]=r.project(x,0,z);if(px<-s*2||px>w+s*2||py<-s||py>h+s)continue;r.box(x,-.35,z,1,.35,1,world.tileColor(x,z));}
   r.flush();
   drawCueRing(ctx,r,s,cue,now,reducedMotion.matches);
   drawScenery(r,player,now,reducedMotion.matches);
   for(const [x,z]of trees){r.box(x-.18,0,z-.18,.36,1.5,.36,'#8a6546');const biome=regionAt(x,z);if(biome.id==='mine'||biome.id==='volcano'){r.box(x-.55,.4,z-.5,1.1,1.1,1,biome.foliage);r.box(x-.25,1.5,z-.25,.5,.5,.5,'#f4dca4');}else{r.box(x-.65,1.15,z-.6,1.3,.9,1.2,biome.foliage);r.box(x-.43,2.05,z-.4,.86,.4,.8,biome.foliage);}}
+  drawStoryObjects(r,storyVisible,now);
   for(const chest of chests){const opened=state.opened.includes(chest.id);r.box(chest.x-.4,0,chest.z-.3,.8,.5,.6,opened?'#857656':'#d69730');r.box(chest.x-.44,.5,chest.z-.34,.88,.15,.68,opened?'#968665':'#f6d269');if(!opened)r.box(chest.x-.07,.2,chest.z+.31,.14,.2,.04,'#fff5b4');}
   r.box(1.3,0,3.5,1.4,.7,1,'#e6b963');r.box(1.2,.7,3.4,1.6,.18,1.2,'#d7744c');r.box(1.7,0,4.51,.5,.6,.02,'#705446');r.person(ranger.x,ranger.z,'#6d9361');
   for(const c of wild)if(now>c.cooldown)r.creature(c.id,c.x,0,c.z,.85,{rare:c.rare,heading:c.heading||0,moving:c.moving,runCycle:now*.008+c.phase});
@@ -194,6 +200,7 @@ function frame(now){
   for(const c of chests)if(!state.opened.includes(c.id)&&cue?.target!==c)label('◆ TREASURE · E',c.x,c.z,1.2);
   if(cue?.target!==camp)label('CAMP',1.8,4,1.6);
   if(!cueHasCard(cue)||cue.target!==ranger)label(`◆ ${ranger.name}`,0,-5,2.1);
+  for(const t of storyVisible)if(Math.hypot(t.x-player.x,t.z-player.z)<12&&(!cueHasCard(cue)||cue.target!==t))label(`${hasStoryEvent(state,t.id)?'✓':storyReady(state,t.id)?'★':'◇'} ${t.name}`,t.x,t.z,t.role==='relic'?1.1:2);
   for(const c of wild)if(now>c.cooldown&&(!cueHasCard(cue)||cue.target!==c))label(`${c.rare?'✦ Rare ':''}${c.name} · ${creatureTypes(c).map(t=>typeIcons[t]).join(' ')}`,c.x,c.z,1.75);
   if(state.party.length){const [px,py]=r.project(player.x,1.95,player.z);ctx.fillStyle='#fff9e8';ctx.beginPath();ctx.moveTo(px,py+9);ctx.lineTo(px-6,py);ctx.lineTo(px+6,py);ctx.fill();}
   updateCue(cue,r);
@@ -223,7 +230,7 @@ function showTypeGuide(){
 $('#types').onclick=showTypeGuide;
 
 function journalTab(title,body){if(state.mode!=='explore')return;state.mode='journal';keys.clear();panel(`<span class="eyebrow">ADVENTURE JOURNAL</span><h1>${title}</h1>${body}<button id="close-journal">Back to adventure</button>`);$('#close-journal').onclick=closePanel;}
-function showMap(){journalTab('Choose your next destination',`<p>Walk freely across the world, or travel to a region's trailhead. Each region has its own creatures and a treasure chest. Bosses wait north of Home Grove.</p><div class="region-grid">${regions.map(r=>`<button data-travel="${r.id}">${r.name}<small>${[...new Set(r.species.flatMap(id=>creatureTypes(id)))].map(t=>typeIcons[t]+' '+t).join(' · ')}${state.visited.includes(r.id)?' · Visited':''}</small></button>`).join('')}</div>`);overlay.querySelectorAll('[data-travel]').forEach(b=>b.onclick=()=>{const r=regions.find(r=>r.id===b.dataset.travel);player.x=r.x;player.z=r.z;camera.x=r.x;camera.z=r.z;closePanel();state.safeUntil=performance.now()+2200;toast(`Welcome to ${r.name}! Look for the gold treasure chest.`);});}
+function showMap(){journalTab('Choose your next destination',`<p>Walk freely across the world, or travel to a region's trailhead. Earn the Grove Badge to open the lake trail, then the Tide Badge to open the remaining regions. Previously visited areas stay open for returning players. The endless boss ladder remains north of camp.</p><div class="region-grid">${regions.map(r=>`<button data-travel="${r.id}" ${regionUnlocked(state,r.id)?'':'disabled'}>${regionUnlocked(state,r.id)?'':'🔒 '}${r.name}<small>${[...new Set(r.species.flatMap(id=>creatureTypes(id)))].map(t=>typeIcons[t]+' '+t).join(' · ')}${state.visited.includes(r.id)?' · Visited':''}</small></button>`).join('')}</div>`);overlay.querySelectorAll('[data-travel]').forEach(b=>b.onclick=()=>{const r=regions.find(r=>r.id===b.dataset.travel);if(!regionUnlocked(state,r.id))return;player.x=r.x;player.z=r.z;camera.x=r.x;camera.z=r.z;closePanel();state.safeUntil=performance.now()+2200;toast(`Welcome to ${r.name}! Look for the gold treasure chest.`);});}
 $('#map').onclick=()=>{if(state.mode==='explore')showMap();};
 
 function showJournal(){
@@ -233,3 +240,45 @@ function showJournal(){
  overlay.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{if(claimQuest(state,b.dataset.claim)){state.mode='explore';updateHUD();showJournal();}});
 }
 $('#journal').onclick=()=>{if(state.mode==='explore')showJournal();};
+
+function drawStoryObjects(r,targets,now){
+  for(const t of targets){
+    if(Math.hypot(t.x-player.x,t.z-player.z)>22)continue;
+    if(t.role==='relic'){
+      r.box(t.x-.5,0,t.z-.4,1,.22,.8,'#b3b6a0');
+      r.box(t.x-.17,.3,t.z-.17,.34,.42,.34,t.color);
+      r.box(t.x-.75,0,t.z-.6,.25,1.1,.3,'#b4bbad');r.box(t.x+.5,0,t.z-.6,.25,.6,.3,'#b4bbad');
+    }else r.person(t.x,t.z,t.color);
+    if(storyReady(state,t.id)){
+      const y=(t.role==='relic'?1.05:1.9)+(reducedMotion.matches?0:Math.sin(now*.003)*.07);
+      r.box(t.x-.1,y,t.z-.1,.2,.2,.2,'#fff2a4');
+    }
+  }
+  const route=currentStory(state),target=storyTargets.find(t=>t.id===route.next?.target),el=$('#route-compass');
+  if(!el)return;
+  if(!state.party.length){el.hidden=true;return;}el.hidden=false;
+  if(!target){el.textContent=route.complete?'✓ Two chapters complete':'★ '+route.title;return;}
+  const dx=target.x-player.x,dz=target.z-player.z,angle=Math.atan2((dx+dz)*.48,dx-dz),arrow=['→','↘','↓','↙','←','↖','↑','↗'][(Math.round(angle/(Math.PI/4))+8)%8];
+  el.textContent=`★ ${target.name} · ${Math.round(Math.hypot(dx,dz))} m ${arrow}`;
+}
+function showStory(){
+  if(state.mode!=='explore')return;state.mode='story';keys.clear();
+  const route=currentStory(state),target=storyTargets.find(t=>t.id===route.next?.target);
+  panel(`<span class="eyebrow">YOUR ADVENTURE · FOREST → LAKE</span><h1>${route.complete?'The trails are shining again':route.chapter.title}</h1><p>${route.complete?'The Sunseed and Tide Crystal are safe. Your companions, experience and badges stay with you.':route.chapter.subtitle}</p><div class="story-chapters">${chapters.map((c,i)=>`<article class="${hasStoryEvent(state,c.end)?'complete':route.chapter?.id===c.id?'current':''}"><strong>${hasStoryEvent(state,c.end)?'✓':'Chapter '+(i+1)} · ${c.title}</strong><small>${hasStoryEvent(state,c.end)?c.badge:c.subtitle}</small></article>`).join('')}</div>${route.complete?`<p>All regions are open. More chapters can be added later; for now explore, collect, evolve and climb the endless boss ladder north of camp.</p>`:`<ol class="story-steps">${route.steps.map(step=>`<li class="${step.done?'complete':step.id===route.next.id?'current':''}"><strong>${step.done?'✓ ':step.id===route.next.id?'★ ':''}${step.title}</strong><small>${step.detail}</small></li>`).join('')}</ol><div class="matchup-summary"><strong>Next: ${route.next.title}</strong><p>${route.next.detail}</p>${target?.team?`<p>Team preview: ${target.team.map(id=>`${species[id].name} (${typeLabel(id)})`).join(' · ')}</p>`:''}</div>`}<div class="story-actions">${target&&regionUnlocked(state,target.region)?'<button id="story-go">Go to next stop</button>':''}<button id="story-walk">${route.complete?'Keep exploring':'Follow the ★ marker'}</button></div><p class="muted">You can walk to every stop, or use Go to next stop for a quick trip. The original boss ladder is a separate optional challenge.</p>`);
+  $('#story-walk').onclick=closePanel;
+  if($('#story-go'))$('#story-go').onclick=()=>{player.x=target.x;player.z=target.z+1.4;Object.assign(camera,{x:player.x,z:player.z});for(const w of world.wildNear(player,4))w.armed=false;closePanel();state.safeUntil=performance.now()+2500;toast(`Meet ${target.name}. Press E or tap ${target.actionTitle}.`);};
+}
+function interactStory(target){
+  if(state.mode!=='explore')return;
+  state.mode='story';keys.clear();const ready=storyReady(state,target.id),done=hasStoryEvent(state,target.id),route=currentStory(state);
+  panel(`<span class="eyebrow">${target.name}</span><h1>${done?'Thank you, adventurer!':target.title}</h1><p>${done?'This stop is complete. Your next adventure is waiting.':ready?target.dialog:'First: '+route.title+'. '+route.detail}</p>${ready&&target.team?`<div class="story-team">${target.team.map(id=>`<article><canvas data-id="${id}" aria-label="${species[id].name}"></canvas><strong>${species[id].name}</strong><small>${typeLabel(id)}</small></article>`).join('')}</div><p>Your team heals between opponents. You can retreat and try again without losing your story progress.</p>`:''}<div class="story-actions">${ready?`<button id="story-confirm">${target.team?'Start challenge':target.role==='relic'?'Take the relic':'I will help'}</button>`:''}<button id="story-later">${ready?'Prepare my team':'Back to adventure'}</button></div>`);
+  $('#story-later').onclick=closePanel;
+  if($('#story-confirm'))$('#story-confirm').onclick=()=>{
+    closePanel();
+    if(target.team){if(!state.party[state.active]?.hp){toast('Rest at camp or choose a healthy companion first.');return;}startBattle(target);}
+    else{const reward=completeStoryEvent(state,target.id);updateHUD();if(reward)toast(`Story updated! +${reward.xp} XP for each companion and 2 cubes.`);showStory();}
+  };
+}
+$('#story').onclick=showStory;
+
+$('#route-compass').onclick=showStory;

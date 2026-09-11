@@ -1,4 +1,4 @@
-import {species,damage,attack} from './rules.js?v=types18';
+import {species,damage,attack} from './rules.js?v=story2';
 export const talents={
  poison:{name:'Venom Bloom',detail:'A powerful cloud of spores (1.6× skill damage).',kind:'burst'},
  fire:{name:'Blazing Burst',detail:'A powerful flame strike (1.6× skill damage).',kind:'burst'},

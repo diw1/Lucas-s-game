@@ -1,4 +1,4 @@
-import {species} from './rules.js?v=types18';
+import {species} from './rules.js?v=story2';
 const shade=(hex,f)=>'#'+hex.slice(1).match(/../g).map(v=>Math.min(255,Math.round(parseInt(v,16)*f)).toString(16).padStart(2,'0')).join('');
 const corners=(x,y,z,w,h,d)=>[[x,y,z],[x+w,y,z],[x+w,y,z+d],[x,y,z+d],[x,y+h,z],[x+w,y+h,z],[x+w,y+h,z+d],[x,y+h,z+d]];
 export function renderer(ctx,scale,ox,oy){
