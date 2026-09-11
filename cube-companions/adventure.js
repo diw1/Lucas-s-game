@@ -1,9 +1,9 @@
 export const regions=[
- {id:'grove',name:'Home Grove',x:0,z:3.5,colors:['#81ab68','#7ba562'],foliage:'#548650',species:['sprig','brawl']},
+ {id:'grove',name:'Home Grove',x:0,z:3.5,colors:['#81ab68','#7ba562'],foliage:'#548650',species:['sprig','brawl','venom','jab']},
  {id:'volcano',name:'Ember Volcano',x:30,z:0,colors:['#765854','#825d51'],foliage:'#dd7044',species:['ember','pebble']},
- {id:'lake',name:'Crystal Lake',x:0,z:30,colors:['#7fc3cb','#8bd2d1'],foliage:'#499f9e',species:['bubble','sprig']},
+ {id:'lake',name:'Crystal Lake',x:0,z:30,colors:['#7fc3cb','#8bd2d1'],foliage:'#499f9e',species:['bubble','sprig','mire','otter']},
  {id:'mine',name:'Iron Mountains',x:-30,z:0,colors:['#9093a5','#a4a5b3'],foliage:'#b4c9e2',species:['steel','pebble','brawl']},
- {id:'fairy',name:'Starlight Forest',x:0,z:-30,colors:['#b995bf','#ab8dbb'],foliage:'#df9acc',species:['fairy','sprig']}
+ {id:'fairy',name:'Starlight Forest',x:0,z:-30,colors:['#b995bf','#ab8dbb'],foliage:'#df9acc',species:['fairy','sprig','venom']}
 ];
 export function regionAt(x,z){if(Math.max(Math.abs(x),Math.abs(z))<16)return regions[0];return Math.abs(x)>Math.abs(z)?regions[x>0?1:3]:regions[z>0?2:4];}
 export const chests=regions.map(r=>({id:`chest-${r.id}`,x:r.x+3,z:r.z+2,kind:'chest',name:`${r.name} treasure`}));

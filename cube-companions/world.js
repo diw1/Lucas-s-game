@@ -1,5 +1,5 @@
-import {regionAt,regions,chests} from './adventure.js';
-import { species } from './rules.js';
+import {regionAt,regions,chests} from './adventure.js?v=mega2';
+import { species } from './rules.js?v=mega2';
 
 const CHUNK_SIZE = 12;
 const SPECIES_IDS = ['sprig', 'ember', 'bubble', 'pebble', 'brawl', 'fairy', 'steel'];

@@ -46,3 +46,12 @@ Browser checks and screenshots are kept in the ignored `output/playwright/` fold
 - Controls → New adventure offers a confirmation before replacing the saved adventure.
 
 New modules: save.js validates and persists versioned saves; adventure.js defines regions, chests and quest rewards; combat.js resolves boss intentions and evolution skills.
+
+## Mega & dual-type update
+- 11 starter/collectible species, including Poison, Water + Poison, Fighting + Poison, and Fighting + Water.
+- Visible type symbols in starter selection, party cards, encounters, battle and guide. Journal supports name/type search and an element filter.
+- Dual-type skill attacks choose the best of the attacker's elements, multiplying both defensive matchups. This is a simplified original type system; the in-game guide is authoritative.
+- Evolution costs are 80 / 160 / 500 additional XP. Mega is manual and has +100 extra skill power; Gentle Bump remains 8 damage for capture. Stage-specific family silhouettes, Mega burst animation, and animated trainer arms and legs.
+- Regional scenery includes flowers, mushrooms, reeds, lily pads, ripples, smoke, crystals, broken gateways and a lake boardwalk. Small scenery does not obstruct paths.
+- Existing version-one saves retain the same key and origin, with a one-time exact pre-update snapshot at `cube-companions-adventure-v1-before-mega`. Invalid saves are protected from automatic overwrite. Controls provides JSON export and confirmed restore. Storage is browser-local; hosting updates do not clear it.
+- Verified with legacy-save fixtures, all species/type pairs, all Mega-versus-wild pairs, upgrade backup preservation and browser restore/evolve/reload flows.

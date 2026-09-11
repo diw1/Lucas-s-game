@@ -1,5 +1,6 @@
-import {species,damage,attack} from './rules.js';
+import {species,damage,attack} from './rules.js?v=mega2';
 export const talents={
+ poison:{name:'Venom Bloom',detail:'A powerful cloud of spores (1.6× skill damage).',kind:'burst'},
  fire:{name:'Blazing Burst',detail:'A powerful flame strike (1.6× skill damage).',kind:'burst'},
  water:{name:'Healing Tide',detail:'Attack and restore up to 12 HP.',kind:'drain'},
  leaf:{name:'Leech Vines',detail:'Attack and absorb half the damage as HP.',kind:'leech'},
