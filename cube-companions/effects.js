@@ -1,6 +1,6 @@
 // Battle effects finish before damage is applied. The controller locks all moves
 // until both attack animations complete, so rapid clicks cannot skip a turn.
-const colors={poison:'#b47fdb',fire:'#f99b36',water:'#54d3ed',leaf:'#8ace48',stone:'#ba95d7',fighting:'#e16c5e',fairy:'#f2a9e0',steel:'#c1e5ef'};
+import {typeColors as colors} from './types.js?v=types18';
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function animate(el,frames,ms){if(!el)return;await el.animate(frames,{duration:reduced()?70:ms,easing:'ease-in-out'}).finished;}
 function effect(arena,className,text=''){const e=document.createElement('span');e.className=className;e.textContent=text;e.setAttribute('aria-hidden','true');arena.append(e);return e;}
@@ -11,6 +11,7 @@ export async function strike(side,type,factor=1,mega=false){
   const dir=side==='player'?1:-1,travel=Math.min(75,arena.clientWidth*.16);
   await animate(attacker,[{transform:'translate(0,0)'},{transform:`translate(${-dir*12}px,5px)`,offset:.2},{transform:`translate(${dir*travel}px,-12px)`,offset:.7},{transform:'translate(0,0)'}],420);
   const feedback=factor!==1?effect(arena,`effectiveness ${factor>1?'strong':'resisted'}`,factor>1?`✦ SUPER EFFECTIVE ×${factor}`:`◇ RESISTED ×${factor}`):null;
+  if(factor===0){if(feedback){feedback.textContent='○ IMMUNE · NO DAMAGE';feedback.style.left=other==='enemy'?'72%':'28%';await animate(feedback,[{opacity:0},{opacity:1,offset:.25},{opacity:0}],700);feedback.remove();}return;}
   if(feedback)feedback.style.left=other==='enemy'?'72%':'28%';
   const burst=effect(arena,'hit-burst',factor<1?'◇':'✦');burst.style.left=other==='enemy'?'75%':'25%';burst.style.color=colors[type]||'#f6de86';
   const sparks=Array.from({length:factor>1?12:factor<1?3:7},(_,i)=>{const e=effect(arena,'spark');e.style.left=burst.style.left;e.style.background=colors[type]||'#fff';return {e,dx:Math.cos(i/7*Math.PI*2)*48,dy:Math.sin(i/7*Math.PI*2)*45};});

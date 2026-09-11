@@ -6,7 +6,7 @@ With dependencies installed and Node 22.13+ on PATH, run `npm run dev` from the 
 
 ## Play
 
-- Choose any of the seven starting companions.
+- Choose any of the 21 starting companions.
 - WASD, arrow keys, or the on-screen arrows move in straight screen directions. When multiple directions are held, the most recently pressed direction wins; movement never combines into a diagonal.
 - Touch a wild creature to enter battle automatically. No E press is required for encounters.
 - Weaken a wild creature, then throw a capture cube. Capture is guaranteed at 35% HP or less. Gentle Bump deals 8 damage.
@@ -15,11 +15,11 @@ With dependencies installed and Node 22.13+ on PATH, run `npm run dev` from the 
 - Catch a companion, then touch Ranger Fern north of camp. Fern uses five opponents, one at a time: Embercub, Bubblit, Brawbun, Glimsy, and Ferrit.
 - Between boss rounds, your team is healed and the two Guard & Recover uses are refilled. Defeat all five to earn the Grove Badge.
 - Boss victories unlock the next ranked challenger at the same arena north of camp, preserving the party and XP. Five named bosses rotate with new team compositions; difficulty grows through rank 9 and then stays capped. Progress is automatically saved in this browser.
-- Choose any of the seven species as a starter. Successful captures (including duplicates released back into the grove) grant the lead 40 XP; knockouts grant 20 XP and boss victories grant every companion another 40 XP.
+- Choose any of the 21 species as a starter. Successful captures (including duplicates released back into the grove) grant the lead 40 XP; knockouts grant 20 XP and boss victories grant every companion another 40 XP.
 - Evolution is manual: tap Evolve at 80 XP for Super form, then spend 160 more XP for Royal form. Each form adds 18 maximum HP and 5 skill power, heals the companion, and adds visual armor/crown details.
 - Open Types in the grove or Type matchups during battle for the full chart and current matchup. Strong hits have a larger burst and stronger recoil; resisted hits have a small diamond burst and gentle recoil. Labels and battle text give the exact multiplier.
 
-Seven collectible types are available: leaf, fire, water, stone, fighting, fairy, and steel. Type advantages are shown during battle. Attacks include a lunge, an impact burst, and a reaction before damage; guard and capture also animate. Inputs are locked during each turn. Reduced-motion preferences shorten the effects.
+All 18 modern types are available, including distinct Grass, Rock and Ground types. Type advantages are shown during battle. Attacks include a lunge, an impact burst, and a reaction before damage; guard and capture also animate. Inputs are locked during each turn. Reduced-motion preferences shorten the effects.
 
 The grove generates continuously as you move, with a following camera and new creatures beyond the starting area. Distant chunks are discarded to keep memory bounded and regenerate when revisited. The team, XP, boss rank, collection, quests, opened chests and position persist in localStorage. Reloading leaves combat and returns to exploration; the current encounter restarts. Retreat provides a cooldown and requires separation before that encounter can trigger again. Losing heals the team at camp without losing the collection.
 
@@ -38,7 +38,7 @@ Browser checks and screenshots are kept in the ignored `output/playwright/` fold
 ## Exploration update
 
 - Map: walk or travel between Home Grove, Ember Volcano, Crystal Lake, Iron Mountains and Starlight Forest. Region terrain, scenery and spawn pools differ.
-- Journal: seven-species collection, discovered/caught state, evolution history and rare collection. Wild rare gold/violet variants are deterministic, about one in twenty spawns, and can coexist with a normal companion of the same species.
+- Journal: 21-species collection, discovered/caught state, evolution history and rare collection. Wild rare gold/violet variants are deterministic, about one in twenty spawns, and can coexist with a normal companion of the same species.
 - Five one-time treasure chests: approach, then use E or the visible Open treasure button. Each grants 3 cubes and 20 XP to every companion.
 - Five quests: three captures, five regions, an evolution, an effective finishing attack and three chests. Claim each reward once in Journal for 3 cubes and 40 team XP.
 - Boss intent is displayed before every turn: charge, powerful strike, then a quick attack, shield or heal depending on the challenger.
@@ -48,10 +48,17 @@ Browser checks and screenshots are kept in the ignored `output/playwright/` fold
 New modules: save.js validates and persists versioned saves; adventure.js defines regions, chests and quest rewards; combat.js resolves boss intentions and evolution skills.
 
 ## Mega & dual-type update
-- 11 starter/collectible species, including Poison, Water + Poison, Fighting + Poison, and Fighting + Water.
+- 21 starter/collectible species, including Poison, Water + Poison, Fighting + Poison, and Fighting + Water.
 - Visible type symbols in starter selection, party cards, encounters, battle and guide. Journal supports name/type search and an element filter.
-- Dual-type skill attacks choose the best of the attacker's elements, multiplying both defensive matchups. This is a simplified original type system; the in-game guide is authoritative.
+- Dual-type skill attacks choose the best of the attacker's elements, multiplying both defensive matchups. The type chart now matches the modern 18-type main-series chart (2×, 0.5× and 0×); this game keeps its own moves and stats.
 - Evolution costs are 80 / 160 / 500 additional XP. Mega is manual and has +100 extra skill power; Gentle Bump remains 8 damage for capture. Stage-specific family silhouettes, Mega burst animation, and animated trainer arms and legs.
 - Regional scenery includes flowers, mushrooms, reeds, lily pads, ripples, smoke, crystals, broken gateways and a lake boardwalk. Small scenery does not obstruct paths.
 - Existing version-one saves retain the same key and origin, with a one-time exact pre-update snapshot at `cube-companions-adventure-v1-before-mega`. Invalid saves are protected from automatic overwrite. Controls provides JSON export and confirmed restore. Storage is browser-local; hosting updates do not clear it.
-- Verified with legacy-save fixtures, all species/type pairs, all Mega-versus-wild pairs, upgrade backup preservation and browser restore/evolve/reload flows.
+- Verified with legacy-save fixtures, all species/type pairs, all Mega-versus-wild pairs including type immunity, upgrade backup preservation and browser restore/evolve/reload flows.
+
+## All 18 types
+- Grass and Rock are the canonical replacements for Leaf and Stone. Ground is separate. Existing creature IDs and save data are unchanged.
+- Normal, Electric, Ice, Ground, Flying, Psychic, Bug, Ghost, Dragon and Dark each have a starter, habitat, visual features and evolution talent.
+- The type guide includes Chinese names, icons, an attack/dual-defense calculator and the full 18-type chart.
+- Type immunity deals zero damage, including Mega skills and boss attacks. Gentle Bump remains a deliberately typeless capture helper.
+- Reference: https://diamondpearl.pokemon.com/en-gb/trainersguide/fundamentals/battling/ . All 324 matrix cells are checked against the official chart in the regression tests.

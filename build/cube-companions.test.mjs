@@ -13,34 +13,34 @@ test('capture thresholds include the guarantee boundary and reject a high roll a
 });
 test('element advantages, resistance, and gentle attacks behave differently',()=>{
   const fire=makeCreature('ember'),leaf=makeCreature('sprig'),water=makeCreature('bubble');
-  assert.equal(damage(fire,leaf),20);
-  assert.equal(damage(fire,water),10);
+  assert.equal(damage(fire,leaf),26);
+  assert.equal(damage(fire,water),7);
   assert.equal(damage(fire,water,'tap'),8);
-  assert.equal(damage(water,fire),17);
+  assert.equal(damage(water,fire),22);
 });
 test('guard reduces retaliation and attacks never create negative HP',()=>{
   const boss=makeCreature('moss'),a=makeCreature('ember');
-  assert.equal(damage(boss,a,'skill',true),4);
+  assert.equal(damage(boss,a,'skill',true),2);
   a.hp=2;attack(boss,a);assert.equal(a.hp,0);
 });
-test('every starter can weaken Pebblop to guaranteed capture without fainting',()=>{
+test('every starter can weaken the introductory Normal companion without fainting',()=>{
   for(const id of collectibleIds){
-    const a=makeCreature(id),wild=makeCreature('pebble');
-    while(catchChance(wild)<1){attack(a,wild);assert.ok(wild.hp>0);attack(wild,a);}
+    const a=makeCreature(id),wild=makeCreature('puff');
+    let heals=2;for(let turn=0;turn<20&&catchChance(wild)<1&&a.hp>0;turn++){if(a.hp<=damage(wild,a)&&heals){a.hp=Math.min(a.max,a.hp+14);heals--;attack(wild,a,'skill',true);continue;}const n=damage(a,wild);attack(a,wild,n>0&&n<wild.hp?'skill':'tap');assert.ok(wild.hp>0);attack(wild,a);}assert.equal(catchChance(wild),1);
     assert.ok(a.hp>0,`${id} must survive the introductory encounter`);
   }
 });
-test('five sequential boss rounds are winnable with every starter plus Pebblop',()=>{
+test('five boss rounds are winnable with every starter and a balanced caught team',()=>{
   for(const id of collectibleIds){
-    const party=[makeCreature(id),makeCreature('pebble')],b={trainer:true,round:0,heals:2,enemy:makeCreature(bossTeam[0])};
+    const party=[id,'pebble','sprig','ember','bubble'].map(makeCreature),b={trainer:true,boss:bossAt(0),turn:0,round:0,heals:2,enemy:makeCreature(bossTeam[0])};
     let completed=0;
     do{
-      let i=0;
+      let i=0;b.turn=0;
       for(let t=0;t<30&&b.enemy.hp>0;t++){
         const a=party[i];let guard=false;
-        if(a.hp<=a.max-14&&b.heals){a.hp+=14;b.heals--;guard=true;}else attack(a,b.enemy);
+        if(a.hp<=a.max-14&&b.heals){a.hp+=14;b.heals--;guard=true;}else attack(a,b.enemy,damage(a,b.enemy)<8?'tap':'skill');
         if(!b.enemy.hp)break;
-        attack(b.enemy,a,'skill',guard);
+        resolveBossAction(b,a,guard);b.turn++;
         if(!a.hp){i++;if(i===party.length)break;}
       }
       assert.equal(b.enemy.hp,0,`${id} team must beat round ${b.round+1}`);completed++;
@@ -100,13 +100,13 @@ test('boss charges before burst, guard helps, and shield and healing have distin
 test('evolution skills have distinct healing, shielding and burst effects',()=>{const leaf={...makeCreature('sprig'),stage:1,hp:10},enemy=makeCreature('bubble');talentHit(leaf,enemy);assert.ok(leaf.hp>10);const steel={...makeCreature('steel'),stage:1};assert.equal(talentHit(steel,makeCreature('ember')).guard,true);const fire={...makeCreature('ember'),stage:1};assert.ok(talentHit(fire,makeCreature('bubble')).damage>damage(fire,makeCreature('bubble')));});
 
 test('dual types combine defenses and choose the better attacking element',()=>{
- assert.equal(matchup(makeCreature('sprig'),makeCreature('mire')),1.125);
- assert.equal(matchup(makeCreature('jab'),makeCreature('steel')),1.5);
- assert.equal(matchup(makeCreature('pebble'),makeCreature('mire')),1.125);
- assert.equal(matchup(makeCreature('venom'),makeCreature('fairy')),1.5);
+ assert.equal(matchup(makeCreature('sprig'),makeCreature('mire')),1);
+ assert.equal(matchup(makeCreature('jab'),makeCreature('steel')),2);
+ assert.equal(matchup(makeCreature('pebble'),makeCreature('mire')),1);
+ assert.equal(matchup(makeCreature('venom'),makeCreature('fairy')),2);
 });
-test('every Mega can defeat ordinary wild creatures with a skill while tap stays gentle',()=>{
- for(const id of collectibleIds){const c=makeCreature(id);c.xp=740;evolve(c);evolve(c);evolve(c);assert.equal(c.stage,3);for(const target of collectibleIds){const d=makeCreature(target);assert.ok(damage(c,d)>=d.max,`${id} vs ${target}`);assert.equal(damage(c,d,'tap'),8);}}
+test('Mega defeats neutral or weak wild creatures while respecting resistance and immunity',()=>{
+ for(const id of collectibleIds){const c=makeCreature(id);c.xp=740;evolve(c);evolve(c);evolve(c);assert.equal(c.stage,3);for(const target of collectibleIds){const d=makeCreature(target);if(matchup(c,d)>=1)assert.ok(damage(c,d)>=d.max,`${id} vs ${target}`);if(matchup(c,d)===0)assert.equal(damage(c,d),0);assert.equal(damage(c,d,'tap'),8);}}
 });
 test('pre-Mega version-one saves retain Royal stats, XP, party, rewards and position',()=>{
  const old={version:1,party:[{id:'bubble',stage:2,xp:731,max:84,hp:39,rare:false},{id:'steel',stage:0,xp:20,max:54,hp:54,rare:true}],active:1,cubes:17,wins:12,bossIndex:4,seen:['bubble','steel'],visited:['grove','lake'],opened:['chest-lake'],claimed:['travel'],forms:['bubble:2'],captures:9,effectiveWins:3,player:{x:12,z:29}};
@@ -116,4 +116,41 @@ test('pre-Mega version-one saves retain Royal stats, XP, party, rewards and posi
 test('automatic upgrade backup is made once before changing the original save',()=>{
  const map=new Map([['cube-companions-adventure-v1','old exact bytes']]);const storage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v)};
  assert.equal(writeSave(storage,adventureState(),{x:0,z:0}),true);assert.equal(map.get('cube-companions-adventure-v1-before-mega'),'old exact bytes');writeSave(storage,adventureState(),{x:2,z:3});assert.equal(map.get('cube-companions-adventure-v1-before-mega'),'old exact bytes');
+});
+
+import {typeIds,typeNames,typeIcons} from '../cube-companions/types.js';
+import {talents} from '../cube-companions/combat.js';
+test('all 324 matchups agree with the official modern type chart',()=>{
+ // Transcribed from the official BDSP Trainer Guide, in typeIds order.
+ const rows=[
+ '1 1 1 1 1 1 1 1 1 1 1 1 .5 0 1 1 .5 1',
+ '1 .5 .5 1 2 2 1 1 1 1 1 2 .5 1 .5 1 2 1',
+ '1 2 .5 1 .5 1 1 1 2 1 1 1 2 1 .5 1 1 1',
+ '1 1 2 .5 .5 1 1 1 0 2 1 1 1 1 .5 1 1 1',
+ '1 .5 2 1 .5 1 1 .5 2 .5 1 .5 2 1 .5 1 .5 1',
+ '1 .5 .5 1 2 .5 1 1 2 2 1 1 1 1 2 1 .5 1',
+ '2 1 1 1 1 2 1 .5 1 .5 .5 .5 2 0 1 2 2 .5',
+ '1 1 1 1 2 1 1 .5 .5 1 1 1 .5 .5 1 1 0 2',
+ '1 2 1 2 .5 1 1 2 1 0 1 .5 2 1 1 1 2 1',
+ '1 1 1 .5 2 1 2 1 1 1 1 2 .5 1 1 1 .5 1',
+ '1 1 1 1 1 1 2 2 1 1 .5 1 1 1 1 0 .5 1',
+ '1 .5 1 1 2 1 .5 .5 1 .5 2 1 1 .5 1 2 .5 .5',
+ '1 2 1 1 1 2 .5 1 .5 2 1 2 1 1 1 1 .5 1',
+ '0 1 1 1 1 1 1 1 1 1 2 1 1 2 1 .5 1 1',
+ '1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 .5 0',
+ '1 1 1 1 1 1 .5 1 1 1 2 1 1 2 1 .5 1 .5',
+ '1 .5 .5 .5 1 2 1 1 1 1 1 1 2 1 1 1 .5 2',
+ '1 .5 1 1 1 1 2 .5 1 1 1 1 1 1 2 2 .5 1'];
+ assert.equal(typeIds.length,18);rows.forEach((row,i)=>{const values=row.split(' ').map(Number);assert.equal(values.length,18);values.forEach((f,j)=>assert.equal(typeFactor(typeIds[i],typeIds[j]),f,`${typeIds[i]} -> ${typeIds[j]}`));});
+});
+test('every type has icons, a translated name, a starter, an evolution talent and a wild habitat',()=>{
+ for(const type of typeIds){assert.ok(typeIcons[type]&&typeNames[type]&&talents[type]);const ids=collectibleIds.filter(id=>species[id].type===type||species[id].secondary===type);assert.ok(ids.length,type);assert.ok(regions.some(r=>r.species.some(id=>ids.includes(id))),type);for(const id of ids){const c=makeCreature(id);c.xp=80;evolve(c);assert.ok(Number.isFinite(talentHit(c,makeCreature('puff')).damage));}}
+});
+test('all eight immunities cause zero skill and talent damage, even for Mega and bosses',()=>{
+ for(const [a,d] of [['normal','ghost'],['fighting','ghost'],['electric','ground'],['poison','steel'],['ground','flying'],['psychic','dark'],['ghost','normal'],['dragon','fairy']]){
+ const aid=collectibleIds.find(id=>species[id].type===a&&!species[id].secondary),did=collectibleIds.find(id=>species[id].type===d&&!species[id].secondary),attacker={...makeCreature(aid),stage:3},defender=makeCreature(did),hp=defender.hp;
+ assert.equal(attack(attacker,defender),0);assert.equal(talentHit(attacker,defender).damage,0);assert.equal(resolveBossAction({trainer:true,boss:bossAt(0),turn:1,enemy:attacker},defender).damage,0);assert.equal(defender.hp,hp);assert.equal(damage(attacker,defender,'tap'),8);
+ }
+ assert.equal(typeFactor('fire','grass')*typeFactor('fire','bug'),4);assert.equal(typeFactor('fire','water')*typeFactor('fire','dragon'),.25);assert.equal(typeFactor('electric','water')*typeFactor('electric','ground'),0);
+ assert.equal(typeFactor('leaf','stone'),2);assert.equal(species.sprig.type,'grass');assert.equal(species.pebble.type,'rock');
 });

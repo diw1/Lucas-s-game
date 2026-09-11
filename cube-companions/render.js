@@ -1,4 +1,4 @@
-import {species} from './rules.js?v=mega3';
+import {species} from './rules.js?v=types18';
 const shade=(hex,f)=>'#'+hex.slice(1).match(/../g).map(v=>Math.min(255,Math.round(parseInt(v,16)*f)).toString(16).padStart(2,'0')).join('');
 const corners=(x,y,z,w,h,d)=>[[x,y,z],[x+w,y,z],[x+w,y,z+d],[x,y,z+d],[x,y+h,z],[x+w,y+h,z],[x+w,y+h,z+d],[x,y+h,z+d]];
 export function renderer(ctx,scale,ox,oy){
@@ -70,6 +70,16 @@ export function renderer(ctx,scale,ox,oy){
     else if(id==='bubble'){b(-.36,.37,-.38,.74,.35,.5,a.accent);b(-.24,1.08,-.1,.13,.13,.13,a.accent);}
     else if(id==='pebble'){b(-.16,1.08,-.07,.22,.22,.23,a.accent);}
     else{b(-.27,1.08,-.09,.15,.28,.19,a.accent);b(.13,1.08,-.09,.15,.28,.19,a.accent);b(-.12,.38,-.58,.22,.24,.35,a.accent);}
+    const grow=1+stage*.35;
+    if(id==='sky'||id==='drake'){for(const side of [-1,1])b(side*.45-.17*grow,.55,-.22,.34*grow,.18+stage*.06,.48,a.accent);b(-.1,.77,.34,.2,.13,.25,a.accent);if(id==='drake'){b(-.1,.3,-.85,.2,.15,.65,a.accent);for(const side of [-1,1])b(side*.2-.04,1.08,-.1,.08,.25+stage*.1,.1,a.accent);}}
+    if(id==='volt'){for(let i=0;i<3+stage;i++)b(-.08+(i%2)*.14,.3+i*.13,-.5-i*.05,.14,.14,.14,a.accent);}
+    if(id==='frost'){for(const side of [-1,1])b(side*.4-.12*grow,.15,.05,.24*grow,.1,.45,a.accent);for(let i=0;i<=stage;i++)b(-.2+i*.12,1.08,-.1,.1,.2+i*.05,.13,a.accent);}
+    if(id==='dune'){for(const side of [-1,1]){b(side*.4-.12*grow,.14,.18,.24*grow,.23,.35,a.accent);b(side*.4-.06,.18,.54,.12,.1,.13,'#f2e7cc');}}
+    if(id==='grub'){for(let i=0;i<2+stage;i++)b(-.2,.12,-.3-i*.22,.4,.28,.3,i%2?a.accent:a.color);for(const side of [-1,1])b(side*.18-.025,1.08,-.1,.05,.24+stage*.07,.05,a.accent);}
+    if(id==='prism'){b(-.09,1.13,.04,.18,.18,.18,'#f5e097');for(const side of [-1,1])b(side*(.46+stage*.09)-.07,.7,-.1,.14,.14,.14,a.accent);}
+    if(id==='wisp'){for(let i=0;i<2+stage;i++)b(-.12,.12+i*.06,-.38-i*.14,.24-i*.02,.13,.18,a.accent);if(stage)for(const side of [-1,1])b(side*.4-.08,.5,-.1,.16,.4,.14,a.accent);}
+    if(id==='shade'){for(const side of [-1,1])b(side*.2-.06,1.08,-.08,.12,.32+stage*.1,.12,a.accent);b(-.13,.3,-.7,.26,.2,.45+stage*.1,a.accent);}
+    if(id==='puff'){b(-.3,.63,-.22,.65,.15,.6,a.accent);b(-.15,.3,-.7,.3,.25,.38,a.accent);if(stage)for(const side of [-1,1])b(side*.4-.12,.25,.02,.24,.35+stage*.08,.32,a.accent);}
     // Keep tiny face voxels with their supporting face, so its center-depth
     // never paints over an eye. A creature facing away shows no floating eyes.
     if(head.front){const details=head.front.details=[];b(-.18,.82,.334,.105,.115,.025,'#25373c',details);b(.12,.82,.334,.105,.115,.025,'#25373c',details);b(-.06,.71,.337,.12,.055,.025,a.accent,details);}

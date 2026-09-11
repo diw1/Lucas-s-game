@@ -1,9 +1,11 @@
+import {typeIcons,typeText,strengths,typeFactor} from './types.js?v=types18';
+export {typeIcons,typeText,strengths,typeFactor};
 export const species = {
-  sprig: {name:'Spriglet',type:'leaf',color:'#73af49',accent:'#d5e96a',max:44,power:12,move:'Vine Whip',description:'A leafy little fox with a fearless heart.'},
+  sprig: {name:'Spriglet',type:'grass',color:'#73af49',accent:'#d5e96a',max:44,power:12,move:'Vine Whip',description:'A leafy little fox with a fearless heart.'},
   ember: {name:'Embercub',type:'fire',color:'#e78243',accent:'#ffd15e',max:48,power:13,move:'Spark Pounce',description:'Warm paws. Big courage. Slightly singed ears.'},
   bubble: {name:'Bubblit',type:'water',color:'#54b6d1',accent:'#b4eef2',max:48,power:11,move:'Bubble Burst',description:'A calm cube turtle that never gives up.'},
-  pebble: {name:'Pebblop',type:'stone',color:'#a599bc',accent:'#e4d8ed',max:38,power:10,move:'Rock Roll',description:'A round-hearted rock in a very square world.'},
-  moss: {name:'Mossjaw',type:'leaf',color:'#4e895a',accent:'#c8d66d',max:64,power:12,move:'Grove Slam',description:'The ranger’s loyal grove guardian.'},
+  pebble: {name:'Pebblop',type:'rock',color:'#a599bc',accent:'#e4d8ed',max:38,power:10,move:'Rock Roll',description:'A round-hearted rock in a very square world.'},
+  moss: {name:'Mossjaw',type:'grass',color:'#4e895a',accent:'#c8d66d',max:64,power:12,move:'Grove Slam',description:'The ranger’s loyal grove guardian.'},
   brawl: {name:'Brawbun',type:'fighting',color:'#c36d62',accent:'#f2ccb6',max:46,power:12,move:'Comet Punch',description:'Small paws, a mighty punch, and a very bouncy step.'},
   fairy: {name:'Glimsy',type:'fairy',color:'#d783bd',accent:'#f9dfee',max:42,power:12,move:'Starlight Swirl',description:'A little daydream with a pocket full of starlight.'},
   steel: {name:'Ferrit',type:'steel',color:'#839caf',accent:'#d3edf0',max:54,power:11,move:'Iron Charge',description:'An iron-clad friend with a soft spot for adventure.'}
@@ -14,17 +16,29 @@ Object.assign(species,{
  jab:{name:'Jabtoad',type:'fighting',secondary:'poison',color:'#9878b5',accent:'#c6e66e',max:56,power:12,move:'Venom Jab',size:1.2,description:'A stout toad with huge boxing paws. Fighting + Poison.'},
  otter:{name:'Tidekick',type:'fighting',secondary:'water',color:'#5a9dbd',accent:'#e5d2a2',max:48,power:12,move:'Surf Kick',size:.9,description:'A speedy river otter with a paddle tail. Fighting + Water.'}
 });
-export const collectibleIds=['sprig','ember','bubble','pebble','brawl','fairy','steel','venom','mire','jab','otter'];
-export const typeIcons={leaf:'🌿',fire:'🔥',water:'💧',stone:'🪨',fighting:'🥊',fairy:'✨',steel:'⚙️',poison:'☠️'};
+Object.assign(species,{
+ puff:{name:'Pufflet',type:'normal',color:'#c9b99b',accent:'#f4e5c7',max:46,power:12,move:'Cozy Tackle',size:.85,description:'A fluffy little cub with a curled tail. Normal · 一般.'},
+ volt:{name:'Voltkit',type:'electric',color:'#e5c641',accent:'#fff09a',max:44,power:12,move:'Spark Dash',size:.8,description:'A bright-eared kitten with a lightning tail. Electric · 电.'},
+ frost:{name:'Frostseal',type:'ice',color:'#8dced9',accent:'#e5faff',max:50,power:12,move:'Ice Shard',size:1.05,description:'A frosty seal with crystal flippers. Ice · 冰.'},
+ dune:{name:'Dunemole',type:'ground',color:'#bc936b',accent:'#e5c695',max:54,power:12,move:'Sand Quake',size:1.05,description:'A sturdy digger with broad paws. Ground · 地面, different from Rock.'},
+ sky:{name:'Skydove',type:'flying',color:'#a5bce2',accent:'#eef0fa',max:44,power:12,move:'Gust Wings',size:.85,description:'A little bird with big sky-blue wings. Flying · 飞行.'},
+ prism:{name:'Prismew',type:'psychic',color:'#d688bb',accent:'#f5c7e9',max:44,power:12,move:'Mind Pulse',size:.85,description:'A floating dreamer with a shining forehead gem. Psychic · 超能力.'},
+ grub:{name:'Grubloom',type:'bug',color:'#a6b64c',accent:'#e5eea2',max:46,power:12,move:'Silk Strike',size:.75,description:'A tiny caterpillar with long feelers. Bug · 虫.'},
+ wisp:{name:'Wispurr',type:'ghost',color:'#8e80b3',accent:'#d1c6f0',max:44,power:12,move:'Spirit Spark',size:.8,description:'A playful spirit with a wispy tail. Ghost · 幽灵.'},
+ drake:{name:'Drakeling',type:'dragon',color:'#8e83c9',accent:'#d7c7ef',max:54,power:12,move:'Dragon Roar',size:1.15,description:'A proud little dragon with horns and a long tail. Dragon · 龙.'},
+ shade:{name:'Shadeling',type:'dark',color:'#69657e',accent:'#b9a0c6',max:48,power:12,move:'Night Pounce',size:.9,description:'A quiet night fox with tall pointed ears. Dark · 恶.'}
+});
+export const collectibleIds=['sprig','ember','bubble','pebble','brawl','fairy','steel','venom','mire','jab','otter','puff','volt','frost','dune','sky','prism','grub','wisp','drake','shade'];
 export const creatureTypes=c=>{const s=species[typeof c==='string'?c:c.id];return [s.type,s.secondary].filter(Boolean);};
-export const typeLabel=c=>creatureTypes(c).map(t=>`${typeIcons[t]} ${t}`).join(' + ');
+export const typeLabel=c=>creatureTypes(c).map(t=>typeText(t)).join(' + ');
+export const attackType=(a,d)=>creatureTypes(a).reduce((best,t)=>creatureTypes(d).reduce((f,v)=>f*typeFactor(t,v),1)>creatureTypes(d).reduce((f,v)=>f*typeFactor(best,v),1)?t:best);
 export const matchup=(a,d)=>Math.max(...creatureTypes(a).map(t=>creatureTypes(d).reduce((f,v)=>f*typeFactor(t,v),1)));
 export const bossTeam=['ember','bubble','brawl','fairy','steel'];
-export const strengths={fire:['leaf','steel'],leaf:['water'],water:['fire','stone'],stone:['fire','poison'],fighting:['stone','steel'],fairy:['fighting'],steel:['fairy','stone','poison'],poison:['leaf','fairy']};
 export const makeCreature = id => ({id,hp:species[id].max,max:species[id].max,xp:0,stage:0});
 export function damage(attacker,defender,move='skill',guard=false){
   const a=species[attacker.id],d=species[defender.id];
   const factor=move==='skill'?matchup(attacker,defender):1;
+  if(factor===0)return 0;
   return Math.max(1,Math.round((move==='skill'?a.power+(attacker.stage||0)*5+(attacker.stage===3?100:0)+(attacker.bonus||0):8)*factor*(guard?.4:1)));
 }
 export const catchChance = enemy => enemy.hp/enemy.max<=.35?1:enemy.hp/enemy.max<=.6?.7:.25;
@@ -44,7 +58,6 @@ export function movementStep(pressed,dt){
   const [sx,sy]=directions[key];return {dx:(sx+sy)*dt*3.2,dz:(sy-sx)*dt*3.2};
 }
 
-export const typeFactor=(a,d)=>strengths[a]?.includes(d)?1.5:strengths[d]?.includes(a)?.75:1;
 export const evolutionCost=c=>[80,160,500,null][c.stage||0];
 export const companionName=c=>(c.rare?'✦ Rare ':'')+['','Super ','Royal ','Mega '][c.stage||0]+species[c.id].name;
 export function gainXP(c,amount){c.xp=(c.xp||0)+amount;}

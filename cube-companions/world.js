@@ -1,9 +1,10 @@
-import {regionAt,regions,chests} from './adventure.js?v=mega3';
-import { species } from './rules.js?v=mega3';
+import {regionAt,regions,chests} from './adventure.js?v=types18';
+import { species } from './rules.js?v=types18';
 
 const CHUNK_SIZE = 12;
 const SPECIES_IDS = ['sprig', 'ember', 'bubble', 'pebble', 'brawl', 'fairy', 'steel'];
 const STARTERS = [
+  ['puff', -4, 4],
   ['pebble', -4, 1], ['sprig', 4, 1], ['bubble', -3, -3],
   ['ember', 4, -3], ['brawl', -7, -1], ['fairy', 7, 4], ['steel', -5, -7],
 ];
