@@ -140,6 +140,10 @@ h1 {
   background: linear-gradient(180deg, #fffbed, #ffe3df);
 }
 
+.game-card.future {
+  background: linear-gradient(180deg, #f8f5df, #dceee0);
+}
+
 @media (max-width: 820px) {
   .hero,
   .game-grid {

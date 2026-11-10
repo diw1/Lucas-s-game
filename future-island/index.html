@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eaf4ed">
+  <meta name="description" content="和 Lucas 一起探索爸爸送给未来的长期投资礼物。一个关于定投、公司篮子和涨跌的亲子小游戏。">
+  <title>Lucas 的未来小岛 · Future Island</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ctext y='32' font-size='32'%3E🌱%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="游戏大厅 Game hub"><span class="brand-icon">✦</span><span>LUCAS'S WORLD<small id="brand-sub">一份送给未来的礼物</small></span></a>
+      <nav aria-label="游戏设置">
+        <button id="sound" class="quiet" aria-pressed="false">◖ 读给我听</button>
+        <button id="language" class="quiet">English</button>
+        <button id="parent" class="quiet">给爸爸</button>
+      </nav>
+    </header>
+    <main id="game" tabindex="-1"></main>
+    <footer><span id="footer-note">用叶币学习，用时间想象。这里没有真钱。</span><span id="save-state"></span></footer>
+  </div>
+  <dialog id="parent-dialog" aria-labelledby="parent-title"></dialog>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
