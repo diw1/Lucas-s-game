@@ -1633,8 +1633,6 @@ const dom = {
   fusionGuide: document.querySelector("#fusionGuide"),
   fusionBook: document.querySelector("#fusionBook"),
   fusionBookStatus: document.querySelector("#fusionBookStatus"),
-  fusionBookList: document.querySelector("#fusionBookList"),
-  toggleFusionBookButton: document.querySelector("#toggleFusionBookButton"),
   creativeTools: document.querySelector("#creativeTools"),
   creativeButtons: Array.from(document.querySelectorAll("[data-creative-action]")),
   modeButtons: Array.from(document.querySelectorAll("[data-mode]")),
@@ -1680,7 +1678,6 @@ const state = {
   discoveredFusions: loadDiscoveredFusions(),
   campaignUpgrades: loadCampaignUpgrades(),
   pinnedFusionRecipe: null,
-  fusionBookOpen: false,
   pendingVictory: false,
   unlockedLevels: loadUnlockedLevels(),
   waveActive: false,
@@ -1696,6 +1693,8 @@ const state = {
 
 let tileSize = 0;
 let audioContext = null;
+
+const workbench = { category: "all", context: "sunflower", recipeFilter: "related", inspect: false, plan: null };
 
 function loadUnlockedLevels() {
   try {
@@ -1792,6 +1791,125 @@ function activePlantKeys() {
   return state.loadout.length ? state.loadout : ["sunflower"];
 }
 
+function selectMaterial(key, keepPlan = false) {
+  if (!activePlantKeys().includes(key)) return;
+  if (!keepPlan) {
+    workbench.plan = null;
+    state.pinnedFusionRecipe = null;
+    workbench.context = key;
+    workbench.recipeFilter = "related";
+  }
+  state.selectedPlant = key;
+  state.selectedTool = null;
+  workbench.inspect = false;
+  document.querySelector("#inspectPlantButton").setAttribute("aria-pressed", "false");
+  document.querySelector("#sandboxAction").value = "plant";
+  refreshSeedCards();
+  refreshToolButtons();
+  renderFusionPlan();
+  refreshCreativeTools();
+}
+
+function filterPlantLibrary() {
+  const query = document.querySelector("#plantSearch").value.trim().toLowerCase();
+  let visible = 0;
+  dom.seedBank.querySelectorAll(".seed-card").forEach((card) => {
+    const type = plantTypes[card.dataset.plant];
+    const category = workbench.category;
+    const matches = category === "all" || category === "sun" && type.producesSun || category === "attack" && (type.fireEvery || type.chompDamage) || category === "defense" && (type.hp >= 250 || type.shell || type.redirects) || category === "instant" && (type.instant || type.mine || type.squash);
+    card.hidden = !matches || !`${type.name} ${type.note}`.toLowerCase().includes(query);
+    if (!card.hidden) visible++;
+  });
+  document.querySelector("#plantCount").textContent = `${visible}/${activePlantKeys().length}`;
+  document.querySelector("#plantEmpty").hidden = visible > 0;
+  document.querySelectorAll("[data-category]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.category === workbench.category)));
+}
+
+// Recipes form a single build chain: one existing plant plus one seed at each step.
+function fusionBuildSteps(key, visited = new Set()) {
+  if (activePlantKeys().includes(key)) return [{ key, result: key, cost: plantTypes[key].cost }];
+  if (visited.has(key)) return null;
+  visited.add(key);
+  const recipe = fusionRecipes.find((entry) => entry.result === key);
+  if (!recipe) return null;
+  let [base, ingredient] = recipe.parts;
+  if (plantTypes[ingredient].fusion || plantTypes[base].instant && !plantTypes[ingredient].instant) [base, ingredient] = [ingredient, base];
+  if (!activePlantKeys().includes(ingredient)) return null;
+  const steps = fusionBuildSteps(base, visited);
+  return steps ? [...steps, { key: ingredient, result: key, cost: recipe.cost }] : null;
+}
+
+function planFusion(recipe) {
+  let steps = fusionBuildSteps(recipe.result);
+  if (!steps) {
+    setMessage("This recipe needs materials outside this plant hand.");
+    return;
+  }
+  let existing = null;
+  // Prefer the most advanced live intermediate already on the board.
+  for (let index = steps.length - 2; index >= 0; index--) {
+    existing = state.plants.find((plant) => plant.type === steps[index].result && plant.hp > 0);
+    if (existing) { steps = steps.slice(index + 1); break; }
+  }
+  workbench.plan = { target: recipe.result, steps, index: 0, row: existing?.row ?? null, col: existing?.col ?? null };
+  state.pinnedFusionRecipe = fusionKey(...recipe.parts);
+  document.querySelector("#plantSearch").value = "";
+  workbench.category = "all";
+  filterPlantLibrary();
+  selectMaterial(steps[0].key, true);
+  const selectedCard = dom.seedBank.querySelector(`[data-plant="${steps[0].key}"]`);
+  if (selectedCard) dom.seedBank.scrollTop = Math.max(0, selectedCard.offsetTop - dom.seedBank.offsetTop - 8);
+  if (window.matchMedia("(max-width: 750px)").matches) document.querySelector("#arena").scrollIntoView({ block: "start" });
+  setMessage(existing ? `${plantTypes[recipe.result].name}: continue at row ${existing.row + 1}, column ${existing.col + 1}.` : `${plantTypes[recipe.result].name}: ${plantTypes[steps[0].key].name} ready.`);
+}
+
+function advanceFusionPlan(plant) {
+  const plan = workbench.plan;
+  if (!plan || plan.index >= plan.steps.length) return;
+  if (plan.row !== null && (plant.row !== plan.row || plant.col !== plan.col)) return;
+  if (plant.type !== plan.steps[plan.index].result) return;
+  plan.row = plant.row;
+  plan.col = plant.col;
+  plan.index++;
+  if (plan.index < plan.steps.length) {
+    selectMaterial(plan.steps[plan.index].key, true);
+  } else {
+    workbench.context = plant.type;
+    state.pinnedFusionRecipe = null;
+    refreshSeedCards();
+    renderFusionPlan();
+  }
+}
+
+function renderFusionPlan() {
+  const el = document.querySelector("#fusionPlan");
+  const plan = workbench.plan;
+  el.hidden = !plan || !modeConfigs[state.mode].fusion;
+  if (el.hidden) return;
+  const complete = plan.index === plan.steps.length;
+  const cost = plan.steps.slice(plan.index).reduce((total, step) => total + step.cost, 0);
+  const location = plan.row === null ? "Choose a block" : `Row ${plan.row + 1} / Col ${plan.col + 1}`;
+  el.innerHTML = `<div class="plan-heading"><strong>${complete ? "Complete: " : "Building: "}${plantTypes[plan.target].name}</strong><span>${complete ? "Ready" : `${cost} sun remaining`}</span><button type="button" class="plan-cancel" aria-label="Close fusion plan" title="Close fusion plan">&times;</button></div><div class="plan-steps">${plan.steps.map((step, index) => `<div class="plan-step ${index < plan.index ? "is-done" : index === plan.index ? "is-current" : ""}"><span class="step-number">${index < plan.index ? "&#10003;" : index + 1}</span><img src="${plantTypes[step.key].image}" alt="" /><span>${plantTypes[step.key].name}<small>${step.cost} sun</small></span></div>`).join("")}</div><div class="plan-location">${complete ? "Fusion complete" : location}</div>`;
+  el.querySelector(".plan-cancel").addEventListener("click", () => {
+    workbench.plan = null;
+    state.pinnedFusionRecipe = null;
+    el.hidden = true;
+    refreshSeedCards();
+  });
+}
+
+function refreshBoardHighlights() {
+  const plan = workbench.plan;
+  const activePlan = plan && plan.index < plan.steps.length;
+  const planting = !state.selectedTool && !workbench.inspect && document.querySelector("#sandboxAction").value === "plant";
+  dom.battlefield.querySelectorAll(".cell").forEach((cell) => {
+    const row = Number(cell.dataset.row), col = Number(cell.dataset.col);
+    const plant = getPlantAt(row, col);
+    cell.classList.toggle("is-plan-target", Boolean(activePlan && row === plan.row && col === plan.col));
+    cell.classList.toggle("can-fuse", Boolean(plant && planting && modeConfigs[state.mode].fusion && fusionRecipeMap.has(fusionKey(plant.type, state.selectedPlant))));
+  });
+}
+
 function makeSeedBank() {
   dom.seedBank.innerHTML = "";
   activePlantKeys().forEach((key) => {
@@ -1800,22 +1918,22 @@ function makeSeedBank() {
     card.className = "seed-card";
     card.type = "button";
     card.dataset.plant = key;
+    card.title = `${type.name} - ${type.note} - ${type.cost} sun`;
+    card.setAttribute("aria-label", `${type.name}, ${type.cost} sun`);
     card.innerHTML = `
       <img src="${type.image}" alt="" />
       <span>${type.name}<small>${type.note}</small></span>
       <strong>${type.cost}</strong>
     `;
     card.addEventListener("click", () => {
-      state.selectedPlant = key;
-      state.selectedTool = null;
-      refreshSeedCards();
-      refreshToolButtons();
-      refreshFusionGuide();
+      selectMaterial(key);
+      if (window.matchMedia("(max-width: 750px)").matches) document.querySelector("#arena").scrollIntoView({ block: "start" });
       setMessage(selectionMessage(key));
       playSound("click");
     });
     dom.seedBank.append(card);
   });
+  filterPlantLibrary();
 }
 
 function makeFusionGuide() {
@@ -1828,88 +1946,30 @@ function makeFusionGuide() {
   fusionRecipes.forEach((recipe) => {
     const [first, second] = recipe.parts;
     const result = plantTypes[recipe.result];
-    const item = document.createElement("div");
+    const item = document.createElement("button");
+    item.type = "button";
     item.className = "fusion-recipe";
     item.dataset.first = first;
     item.dataset.second = second;
     item.dataset.result = recipe.result;
     item.dataset.cost = recipe.cost;
     item.dataset.recipe = fusionKey(first, second);
+    item.setAttribute("aria-label", `Build ${result.name}`);
     item.innerHTML = `
-      <img src="${plantTypes[first].image}" alt="" />
-      <span>+</span>
-      <img src="${plantTypes[second].image}" alt="" />
-      <span>=</span>
       <img class="fusion-result" src="${result.image}" alt="" />
-      <strong>${result.name}<small>${recipe.cost}</small><em>New</em></strong>
+      <span class="recipe-title"><strong>${result.name}</strong><small>${result.titan ? "Titan" : plantTypes[first].fusion || plantTypes[second].fusion ? "Advanced" : "Fusion"} &middot; ${recipe.cost} sun</small></span>
+      <span class="recipe-materials"><span><img src="${plantTypes[first].image}" alt="" />${plantTypes[first].name}</span><b>+</b><span><img src="${plantTypes[second].image}" alt="" />${plantTypes[second].name}</span></span>
+      <span class="recipe-status"></span>
     `;
     item.addEventListener("click", () => {
-      state.selectedPlant = first;
-      state.selectedTool = null;
-      state.pinnedFusionRecipe = item.dataset.recipe;
-      refreshSeedCards();
-      refreshToolButtons();
-      refreshFusionGuide();
-      setMessage(`Recipe selected: plant ${plantTypes[first].name}, then fuse with ${plantTypes[second].name}.`);
+      planFusion(recipe);
       playSound("click");
     });
     dom.fusionGuide.append(item);
   });
   refreshFusionGuide();
-  makeFusionBook();
 }
 
-function makeFusionBook() {
-  if (!dom.fusionBookList || !modeConfigs[state.mode].fusion) return;
-  dom.fusionBookList.innerHTML = "";
-  dom.fusionBookStatus.textContent = `${state.discoveredFusions.size}/${fusionRecipes.length} found`;
-  dom.toggleFusionBookButton.textContent = state.fusionBookOpen ? "Close" : "Open";
-  dom.fusionBookList.classList.toggle("is-hidden", !state.fusionBookOpen);
-  if (!state.fusionBookOpen) return;
-
-  const visibleRecipes = state.selectedPlant && fusionRecipesFor(state.selectedPlant).length
-    ? fusionRecipesFor(state.selectedPlant)
-    : fusionRecipes;
-
-  visibleRecipes.forEach((recipe) => {
-    const [first, second] = recipe.parts;
-    const result = plantTypes[recipe.result];
-    const discovered = state.discoveredFusions.has(recipe.result);
-    const item = document.createElement("button");
-    item.type = "button";
-    item.className = `book-recipe${discovered ? "" : " is-hidden-recipe"}`;
-    item.innerHTML = `
-      <img src="${plantTypes[first].image}" alt="" />
-      <span>+</span>
-      <img src="${plantTypes[second].image}" alt="" />
-      <span>=</span>
-      <img src="${result.image}" alt="" />
-      <strong>${discovered ? result.name : "Unknown"}<small>${recipe.cost}</small></strong>
-    `;
-    item.addEventListener("click", () => {
-      state.selectedPlant = first;
-      state.pinnedFusionRecipe = fusionKey(first, second);
-      refreshSeedCards();
-      refreshFusionGuide();
-      makeFusionBook();
-      setMessage(`Book picked: ${plantTypes[first].name} + ${plantTypes[second].name}.`);
-      playSound("click");
-    });
-    dom.fusionBookList.append(item);
-  });
-
-  const gift = document.createElement("div");
-  gift.className = "book-recipe";
-  gift.innerHTML = `
-    <img src="${plantTypes.gift.image}" alt="" />
-    <span>+</span>
-    <img src="${plantTypes.sunflower.image}" alt="" />
-    <span>=</span>
-    <img src="${plantTypes.sunshooter.image}" alt="" />
-    <strong>Gift rolls a related fusion<small>random</small></strong>
-  `;
-  dom.fusionBookList.prepend(gift);
-}
 
 function fusionPartnersFor(key) {
   return fusionRecipes
@@ -1931,22 +1991,34 @@ function selectionMessage(key) {
 }
 
 function refreshFusionGuide() {
-  if (!dom.fusionGuide || !modeConfigs[state.mode].fusion) return;
-  const selectedRecipes = fusionRecipesFor(state.selectedPlant);
-  const shouldFilter = selectedRecipes.length > 0;
-  Array.from(dom.fusionGuide.querySelectorAll(".fusion-recipe")).forEach((item) => {
-    const active = item.dataset.first === state.selectedPlant || item.dataset.second === state.selectedPlant;
-    const affordable = state.sun >= Number(item.dataset.cost || 0);
-    const pinned = state.pinnedFusionRecipe === item.dataset.recipe;
-    const discovered = state.discoveredFusions.has(item.dataset.result);
-    item.classList.toggle("is-active", active);
-    item.classList.toggle("is-pinned", pinned);
-    item.classList.toggle("is-disabled", !affordable);
-    item.classList.toggle("is-discovered", discovered);
-    item.classList.toggle("is-filtered-out", shouldFilter && !active);
+  const enabled = Boolean(modeConfigs[state.mode].fusion);
+  dom.fusionBook.classList.toggle("is-hidden", !enabled);
+  dom.fusionGuide.classList.toggle("is-hidden", !enabled);
+  if (!enabled) return;
+  const context = workbench.context;
+  const query = document.querySelector("#recipeSearch").value.trim().toLowerCase();
+  const contextType = plantTypes[context];
+  document.querySelector("#recipeContextName").textContent = workbench.recipeFilter === "related" ? contextType.name : workbench.recipeFilter === "titan" ? "Titan plants" : "All fusions";
+  document.querySelector("#recipeContextImage").src = contextType.image;
+  dom.fusionBookStatus.textContent = `${state.discoveredFusions.size}/${fusionRecipes.length} found`;
+  let visible = 0;
+  dom.fusionGuide.querySelectorAll(".fusion-recipe").forEach((item) => {
+    const recipe = fusionRecipeMap.get(item.dataset.recipe);
+    const related = recipe.parts.includes(context);
+    const matchesFilter = workbench.recipeFilter === "related" ? related : workbench.recipeFilter === "titan" ? plantTypes[recipe.result].titan : true;
+    const names = [...recipe.parts, recipe.result].map((key) => plantTypes[key].name).join(" ").toLowerCase();
+    item.hidden = !matchesFilter || !names.includes(query);
+    if (!item.hidden) visible++;
+    item.classList.toggle("is-pinned", state.pinnedFusionRecipe === item.dataset.recipe);
+    item.classList.toggle("is-discovered", state.discoveredFusions.has(recipe.result));
+    item.querySelector(".recipe-status").textContent = state.discoveredFusions.has(recipe.result) ? "Discovered" : "Undiscovered";
+    item.setAttribute("aria-pressed", String(state.pinnedFusionRecipe === item.dataset.recipe));
   });
-  dom.fusionGuide.dataset.filterPlant = shouldFilter ? plantTypes[state.selectedPlant].name : "";
-  makeFusionBook();
+  document.querySelector("#recipeCount").textContent = `${visible} recipes`;
+  document.querySelector("#recipeEmpty").hidden = visible > 0;
+  document.querySelectorAll("[data-recipe-filter]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.recipeFilter === workbench.recipeFilter)));
+  renderFusionPlan();
+  refreshBoardHighlights();
 }
 
 function makeBoard() {
@@ -1990,11 +2062,19 @@ function isEndMob(kind) {
 }
 
 function syncTileSize() {
-  const rect = dom.battlefield.getBoundingClientRect();
-  tileSize = rect.width / COLS;
+  tileSize = dom.battlefield.clientWidth / COLS;
+  dom.battlefield.parentElement.style.setProperty("--tile", `${tileSize}px`);
 }
 
 function resetGame() {
+  workbench.plan = null;
+  workbench.inspect = false;
+  workbench.category = "all";
+  workbench.recipeFilter = "related";
+  document.querySelector("#plantSearch").value = "";
+  document.querySelector("#recipeSearch").value = "";
+  document.querySelector("#inspectPlantButton").setAttribute("aria-pressed", "false");
+  document.querySelector("#fusionPlan").hidden = true;
   sandboxTerrainEdits.clear();
   document.querySelector("#sandboxAction").value = "plant";
   const difficulty = currentDifficulty();
@@ -2003,6 +2083,7 @@ function resetGame() {
   state.base = difficulty.base + upgradeLevel("base");
   state.wave = 1;
   state.selectedPlant = activePlantKeys().includes(state.selectedPlant) ? state.selectedPlant : "sunflower";
+  workbench.context = state.selectedPlant;
   state.selectedTool = null;
   state.plants = [];
   state.enemies = [];
@@ -2062,7 +2143,7 @@ function refreshHud() {
         : modeConfigs[state.mode].fusion
         ? `Fusion Dex ${state.discoveredFusions.size}/${fusionRecipes.length}`
         : state.mode === "creative"
-        ? "All plants, 1500 starting sun."
+        ? "All plants / 10,000 starting sun"
         : `${activePlantKeys().length} random plants this run.`;
   }
 }
@@ -2074,11 +2155,17 @@ function refreshSeedCards() {
   Array.from(dom.seedBank.querySelectorAll(".seed-card")).forEach((card) => {
     const key = card.dataset.plant;
     card.classList.toggle("is-selected", !state.selectedTool && state.selectedPlant === key);
+    card.setAttribute("aria-pressed", String(!state.selectedTool && state.selectedPlant === key));
     card.classList.toggle("is-disabled", state.sun < plantTypes[key].cost);
     card.classList.toggle("is-fusion-partner", fusionPartners.has(key));
     card.classList.toggle("is-recipe-part", pinnedParts.has(key));
   });
+  const selected = plantTypes[state.selectedPlant];
+  const detail = document.querySelector("#selectedPlantInfo");
+  const type = state.selectedTool ? toolTypes[state.selectedTool] : selected;
+  detail.innerHTML = `<img src="${type.image}" alt="" /><div><strong>${type.name}</strong><small>${state.selectedTool ? "Garden tool" : `${selected.hp} HP / ${selected.note}`}</small></div>`;
   refreshFusionGuide();
+  refreshBoardHighlights();
 }
 
 function refreshToolButtons() {
@@ -2125,6 +2212,9 @@ function refreshOptionButtons() {
 function refreshCreativeTools() {
   dom.creativeTools.classList.toggle("is-hidden", !isSandbox());
   dom.creativeTools.querySelector('[data-creative-action="gift"]').hidden = !modeConfigs[state.mode].fusion;
+  const action = document.querySelector("#sandboxAction").value;
+  document.querySelector("#groundControl").hidden = action !== "terrain";
+  document.querySelector("#mobControl").hidden = action !== "enemy";
 }
 
 function currentLevel() {
@@ -2169,10 +2259,26 @@ function getTntAt(row, col) {
 
 function placePlant(row, col) {
   if (state.gameOver) return;
+  if (workbench.inspect) {
+    const plant = getPlantAt(row, col);
+    if (!plant) { setMessage("No plant on this block."); return; }
+    workbench.context = plant.type;
+    workbench.recipeFilter = "related";
+    document.querySelector("#recipeSearch").value = "";
+    refreshFusionGuide();
+    setMessage(`${plantTypes[plant.type].name}: ${Math.ceil(plant.hp)}/${plant.maxHp} HP${plant.shellHp > 0 ? ` + ${plant.shellHp} Pumpkin armor` : ""}.`);
+    return;
+  }
   if (isSandbox() && useSandboxCell(row, col)) return;
 
   if (state.selectedTool) {
     useToolAt(row, col);
+    return;
+  }
+
+  const plan = workbench.plan;
+  if (plan && plan.index < plan.steps.length && plan.row !== null && (row !== plan.row || col !== plan.col)) {
+    setMessage(`Continue this fusion at row ${plan.row + 1}, column ${plan.col + 1}.`);
     return;
   }
 
@@ -2235,6 +2341,8 @@ function placePlant(row, col) {
   state.plants.push(plant);
   grantOreBonus(row, col);
   renderPlant(plant);
+  advanceFusionPlan(plant);
+  refreshBoardHighlights();
 
   if (state.selectedPlant === "gift") {
     setMessage(`Gift opened into ${placedType.name}.`);
@@ -2242,10 +2350,10 @@ function placePlant(row, col) {
     floatingText(placedType.name, col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.2);
   } else if (placedType.instant && placedType.rowBlast) {
     setMessage("Jalapeno planted. The whole row is about to burn.");
-    setTimeout(() => detonateJalapeno(plant), 520);
+    schedulePlantDetonation(plant, true);
   } else if (placedType.instant) {
     setMessage("Cherry Bomb planted. Big boom incoming.");
-    setTimeout(() => detonateCherry(plant), 520);
+    schedulePlantDetonation(plant, false);
   } else if (placedType.mine) {
     setMessage("Potato Mine is hiding. It needs a moment to arm.");
   } else {
@@ -2292,6 +2400,8 @@ function tryFusePlant(plant, ingredientKey) {
   state.discoveredFusions.add(recipe.result);
   saveDiscoveredFusions();
   state.pinnedFusionRecipe = null;
+  advanceFusionPlan(plant);
+  workbench.context = plant.type;
   refreshHud();
   refreshSeedCards();
   refreshFusionGuide();
@@ -2300,9 +2410,9 @@ function tryFusePlant(plant, ingredientKey) {
     setMessage(`New Fusion Dex: ${resultType.name}.`);
   }
   if (resultType.instant && resultType.rowBlast) {
-    setTimeout(() => detonateJalapeno(plant), 520);
+    schedulePlantDetonation(plant, true);
   } else if (resultType.instant) {
-    setTimeout(() => detonateCherry(plant), 520);
+    schedulePlantDetonation(plant, false);
   }
   playSound("boost");
   return true;
@@ -3222,6 +3332,15 @@ function detonateCherry(plant) {
   setMessage(`${type.name} cleared nearby blocks.`);
 }
 
+function schedulePlantDetonation(plant, rowBlast) {
+  const typeAtPlanting = plant.type;
+  setTimeout(() => {
+    if (!state.plants.includes(plant) || plant.type !== typeAtPlanting || plant.hp <= 0) return;
+    if (rowBlast) detonateJalapeno(plant);
+    else detonateCherry(plant);
+  }, 520);
+}
+
 function detonateJalapeno(plant) {
   if (state.gameOver) return;
   const type = plantTypes[plant.type];
@@ -3366,6 +3485,14 @@ function removeDeadPlants() {
     plant.el?.remove();
     return false;
   });
+  const plan = workbench.plan;
+  if (plan && plan.index < plan.steps.length && plan.row !== null && !getPlantAt(plan.row, plan.col)) {
+    workbench.plan = null;
+    state.pinnedFusionRecipe = null;
+    renderFusionPlan();
+    refreshBoardHighlights();
+    setMessage("Fusion interrupted: the plant was lost.");
+  }
 }
 
 function removeDeadTnts() {
@@ -3651,10 +3778,31 @@ dom.soundButton.addEventListener("click", () => {
   }
 });
 
-dom.toggleFusionBookButton.addEventListener("click", () => {
-  state.fusionBookOpen = !state.fusionBookOpen;
-  makeFusionBook();
-  playSound("click");
+document.querySelector("#plantSearch").addEventListener("input", filterPlantLibrary);
+document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => {
+  workbench.category = button.dataset.category;
+  filterPlantLibrary();
+}));
+document.querySelector("#recipeSearch").addEventListener("input", () => {
+  if (document.querySelector("#recipeSearch").value.trim()) workbench.recipeFilter = "all";
+  refreshFusionGuide();
+});
+document.querySelectorAll("[data-recipe-filter]").forEach((button) => button.addEventListener("click", () => {
+  workbench.recipeFilter = button.dataset.recipeFilter;
+  refreshFusionGuide();
+}));
+document.querySelector("#inspectPlantButton").addEventListener("click", () => {
+  workbench.inspect = !workbench.inspect;
+  document.querySelector("#inspectPlantButton").setAttribute("aria-pressed", String(workbench.inspect));
+  refreshBoardHighlights();
+});
+document.querySelector("#sandboxAction").addEventListener("change", () => {
+  workbench.inspect = false;
+  workbench.plan = null;
+  document.querySelector("#inspectPlantButton").setAttribute("aria-pressed", "false");
+  refreshCreativeTools();
+  refreshFusionGuide();
+  refreshBoardHighlights();
 });
 
 dom.creativeButtons.forEach((button) => {
@@ -3712,8 +3860,15 @@ for (const terrain of Object.values(TERRAIN)) {
 for (const [kind, type] of Object.entries(enemyTypes)) {
   document.querySelector("#sandboxEnemy").add(new Option(type.label, kind));
 }
-dom.seedBank.addEventListener("click", () => { document.querySelector("#sandboxAction").value = "plant"; });
-dom.toolButtons.forEach((button) => button.addEventListener("click", () => { document.querySelector("#sandboxAction").value = "plant"; }));
+dom.toolButtons.forEach((button) => button.addEventListener("click", () => {
+  document.querySelector("#sandboxAction").value = "plant";
+  workbench.inspect = false;
+  workbench.plan = null;
+  document.querySelector("#inspectPlantButton").setAttribute("aria-pressed", "false");
+  document.querySelector("#fusionPlan").hidden = true;
+  refreshCreativeTools();
+  refreshBoardHighlights();
+}));
 
 resetGame();
 requestAnimationFrame(gameLoop);

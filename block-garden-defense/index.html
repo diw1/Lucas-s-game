@@ -4,192 +4,65 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lucas's Block Garden Defense</title>
-    <link rel="stylesheet" href="styles.css?v=sandbox-20261113" />
+    <link rel="stylesheet" href="styles.css?v=fusion-workbench-20261114" />
+    <link rel="stylesheet" href="workbench.css?v=fusion-workbench-20261114" />
   </head>
   <body>
-    <a class="back-home" href="../index.html" aria-label="Back to games">← Games</a>
     <main class="game-shell">
       <header class="hud">
-        <div class="title-lockup">
-          <p class="eyebrow">Private mini prototype</p>
-          <h1>Lucas's Block Garden Defense</h1>
-        </div>
-
+        <a class="back-home" href="../index.html" aria-label="Back to games">&#8592; Games</a>
+        <div class="title-lockup"><img src="../assets/fusions/sunshooter.png" alt="" /><div><p class="eyebrow">Lucas's</p><h1>Block Garden Defense</h1></div></div>
         <div class="status-strip" aria-label="Game status">
-          <div class="status-pill">
-            <span>Sun</span>
-            <strong id="sunCount">225</strong>
-          </div>
-          <div class="status-pill">
-            <span>Wave</span>
-            <strong id="waveCount">1/10</strong>
-          </div>
-          <div class="status-pill">
-            <span>Base</span>
-            <strong id="baseCount">3</strong>
-          </div>
+          <div class="status-pill sun-pill"><img src="../assets/ui/pvz-sun.png" alt="" /><span>Sun</span><strong id="sunCount">200</strong></div>
+          <div class="status-pill"><span>Wave</span><strong id="waveCount">1/6</strong></div>
+          <div class="status-pill"><span>Base</span><strong id="baseCount">3</strong></div>
         </div>
-
-        <button id="restartButton" class="icon-button" type="button" title="Restart" aria-label="Restart">↻</button>
+        <button id="restartButton" class="icon-button" type="button" title="Restart" aria-label="Restart">&#8635;</button>
       </header>
-
-      <section class="setup-panel" aria-label="Game setup and tools">
-        <div class="control-group">
-          <span>Mode</span>
-          <div class="segmented-control" role="group" aria-label="Choose mode">
-            <button class="option-button is-selected" type="button" data-mode="campaign">Campaign</button>
-            <button class="option-button" type="button" data-mode="creative">Creative</button>
-            <button class="option-button" type="button" data-mode="creativefusion">Creative Fusion</button>
-            <button class="option-button" type="button" data-mode="fusion">Fusion</button>
-          </div>
-          <small id="modeStatus" class="unlock-status">6 random plants this run.</small>
-        </div>
-
-        <div class="control-group">
-          <span>Level</span>
-          <div class="segmented-control" role="group" aria-label="Choose level">
-            <button class="option-button" type="button" data-level="garden">Garden</button>
-            <button class="option-button" type="button" data-level="mine">Mine Rush</button>
-            <button class="option-button is-selected" type="button" data-level="night">Night Siege</button>
-            <button class="option-button" type="button" data-level="fusionlab">Fusion Lab</button>
-          </div>
-          <small id="unlockStatus" class="unlock-status">Clear Garden to unlock Mine Rush.</small>
-        </div>
-
-        <div class="control-group">
-          <span>Difficulty</span>
-          <div class="segmented-control" role="group" aria-label="Choose difficulty">
-            <button class="option-button" type="button" data-difficulty="easy">Easy</button>
-            <button class="option-button is-selected" type="button" data-difficulty="normal">Normal</button>
-            <button class="option-button" type="button" data-difficulty="hard">Hard</button>
-          </div>
-        </div>
-
-        <div class="tool-belt" aria-label="Minecraft tools">
-          <button class="tool-button" type="button" data-tool="tnt">
-            <img src="../assets/minecraft/tools/tnt.png" alt="" />
-            <span>TNT</span>
-            <strong>125</strong>
-          </button>
-          <button class="tool-button" type="button" data-tool="diamond">
-            <img src="../assets/minecraft/tools/diamond.png" alt="" />
-            <span>Boost</span>
-            <strong>150</strong>
-          </button>
-          <button class="tool-button" type="button" data-tool="golem">
-            <img src="../assets/minecraft/tools/iron-golem.png" alt="" />
-            <span>Golem</span>
-            <strong>200</strong>
-          </button>
-          <button class="tool-button" type="button" data-tool="shovel">
-            <img src="../assets/minecraft/tools/shovel.png" alt="" />
-            <span>Sell</span>
-            <strong>½</strong>
-          </button>
-          <button id="soundButton" class="tool-button sound-toggle" type="button" aria-label="Toggle sound" title="Sound">
-            <span aria-hidden="true">♪</span>
-          </button>
-        </div>
+      <section class="setup-panel" aria-label="Game setup">
+        <div class="control-group mode-group"><span>Mode</span><div class="segmented-control" role="group" aria-label="Choose mode">
+          <button class="option-button" type="button" data-mode="campaign">Campaign</button><button class="option-button" type="button" data-mode="creative">Creative</button><button class="option-button" type="button" data-mode="creativefusion">Creative Fusion</button><button class="option-button" type="button" data-mode="fusion">Fusion</button>
+        </div></div>
+        <div class="control-group"><span>Level</span><div class="segmented-control" role="group" aria-label="Choose level"><button class="option-button" type="button" data-level="garden">Garden</button><button class="option-button" type="button" data-level="mine">Mine Rush</button><button class="option-button" type="button" data-level="night">Night Siege</button><button class="option-button" type="button" data-level="fusionlab">Fusion Lab</button></div></div>
+        <div class="control-group"><span>Difficulty</span><div class="segmented-control" role="group" aria-label="Choose difficulty"><button class="option-button" type="button" data-difficulty="easy">Easy</button><button class="option-button" type="button" data-difficulty="normal">Normal</button><button class="option-button" type="button" data-difficulty="hard">Hard</button></div></div>
       </section>
-
-      <section class="terrain-legend" aria-label="Block guide">
-        <div class="legend-item">
-          <span class="legend-swatch terrain-grass" aria-hidden="true"></span>
-          <strong>Grass</strong>
-          <small>normal planting</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-dirt" aria-hidden="true"></span>
-          <strong>Dirt</strong>
-          <small>Sunflowers make sun faster</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-stone" aria-hidden="true"></span>
-          <strong>Stone</strong>
-          <small>no plants, TNT works</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-ore" aria-hidden="true"></span>
-          <strong>Ore</strong>
-          <small>first use gives +50 sun</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-mud" aria-hidden="true"></span>
-          <strong>Mud</strong>
-          <small>mobs move slower</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-water" aria-hidden="true"></span>
-          <strong>Water</strong>
-          <small>only water plants</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-nether" aria-hidden="true"></span>
-          <strong>Nether</strong>
-          <small>fire plants hit harder</small>
-        </div>
-        <div class="legend-item">
-          <span class="legend-swatch terrain-end" aria-hidden="true"></span>
-          <strong>End</strong>
-          <small>End mobs move faster</small>
-        </div>
-      </section>
-
-      <section id="fusionBook" class="fusion-book is-hidden" aria-label="Fusion book">
-        <div class="book-header">
-          <strong>Fusion Book</strong>
-          <span id="fusionBookStatus">0/0 found</span>
-          <button id="toggleFusionBookButton" class="mini-button" type="button">Open</button>
-        </div>
-        <div id="fusionBookList" class="fusion-book-list"></div>
-      </section>
-
-      <section id="creativeTools" class="creative-tools is-hidden" aria-label="Creative fusion tools">
+      <div class="run-info"><span id="modeStatus"></span><span id="unlockStatus"></span></div>
+      <section id="creativeTools" class="creative-tools is-hidden" aria-label="Sandbox tools">
+        <strong>Sandbox</strong>
         <label>Action <select id="sandboxAction"><option value="plant">Plants</option><option value="terrain">Terrain</option><option value="enemy">Zombies &amp; mobs</option></select></label>
-        <label>Ground <select id="sandboxTerrain"></select></label>
-        <label>Mob <select id="sandboxEnemy"></select></label>
-        <button class="mini-button" type="button" data-creative-action="sun">+10,000 Sun</button>
-        <button class="mini-button" type="button" data-creative-action="gift">Gift</button>
-        <button class="mini-button" type="button" data-creative-action="mob">Mob</button>
-        <button class="mini-button" type="button" data-creative-action="boss">Boss</button>
-        <button class="mini-button" type="button" data-creative-action="clear">Clear</button>
+        <label id="groundControl">Ground <select id="sandboxTerrain"></select></label><label id="mobControl">Mob <select id="sandboxEnemy"></select></label>
+        <button class="mini-button" type="button" data-creative-action="sun">+10,000 Sun</button><button class="mini-button" type="button" data-creative-action="gift">Gift</button><button class="mini-button" type="button" data-creative-action="mob">Random mob</button><button class="mini-button" type="button" data-creative-action="boss">Random boss</button><button class="mini-button" type="button" data-creative-action="clear">Clear mobs</button>
       </section>
-
-      <section id="fusionGuide" class="fusion-guide is-hidden" aria-label="Fusion recipes"></section>
-
-      <section class="play-surface" aria-label="Game board">
-        <aside id="seedBank" class="seed-bank" aria-label="Plant cards"></aside>
-
-        <div class="battlefield-wrap">
-          <div id="battlefield" class="battlefield" aria-label="Five lane lawn"></div>
-          <div id="projectileLayer" class="projectile-layer" aria-hidden="true"></div>
-          <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
-        </div>
-      </section>
-
-      <section class="message-row" aria-live="polite">
-        <p id="message">Pick a plant, then click a grass block.</p>
-        <button id="pauseNextWaveButton" class="secondary-button is-hidden" type="button">Pause</button>
-        <button id="startWaveButton" class="primary-button" type="button">Start Wave</button>
-      </section>
-
-      <div id="endOverlay" class="end-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
-        <div class="end-card">
-          <p id="endKicker">Game over</p>
-          <h2 id="endTitle">The base fell.</h2>
-          <button id="playAgainButton" class="primary-button" type="button">Play Again</button>
-        </div>
+      <div class="workspace">
+        <aside id="plantLibrary" class="plant-library" aria-label="Plant library">
+          <div class="panel-heading"><h2>Plants</h2><span id="plantCount"></span></div>
+          <input id="plantSearch" class="search-input" type="search" placeholder="Search plants..." aria-label="Search plants" autocomplete="off" />
+          <div id="plantCategories" class="filter-tabs" role="group" aria-label="Plant categories"><button type="button" data-category="all" aria-pressed="true">All</button><button type="button" data-category="sun" aria-pressed="false">Sun</button><button type="button" data-category="attack" aria-pressed="false">Attack</button><button type="button" data-category="defense" aria-pressed="false">Defense</button><button type="button" data-category="instant" aria-pressed="false">Traps &amp; bombs</button></div>
+          <div id="seedBank" class="seed-bank" aria-label="Plant cards"></div><p id="plantEmpty" class="empty-state" hidden>No matching plants.</p><div id="selectedPlantInfo" class="selection-detail"></div>
+        </aside>
+        <section id="arena" class="arena" aria-label="Game board">
+          <div class="arena-toolbar"><div class="tool-belt" aria-label="Garden tools">
+            <button class="tool-button" type="button" data-tool="tnt" title="TNT"><img src="../assets/minecraft/tools/tnt.png" alt="" /><span>TNT</span><strong>125</strong></button><button class="tool-button" type="button" data-tool="diamond" title="Diamond boost"><img src="../assets/minecraft/tools/diamond.png" alt="" /><span>Boost</span><strong>150</strong></button><button class="tool-button" type="button" data-tool="golem" title="Iron Golem"><img src="../assets/minecraft/tools/iron-golem.png" alt="" /><span>Golem</span><strong>200</strong></button><button class="tool-button" type="button" data-tool="shovel" title="Sell plant for half its value"><img src="../assets/minecraft/tools/shovel.png" alt="" /><span>Sell</span><strong>1/2</strong></button>
+          </div><button id="inspectPlantButton" class="mini-button" type="button" aria-pressed="false">Inspect</button><button id="soundButton" class="icon-button sound-toggle" type="button" aria-label="Toggle sound" title="Sound">&#9834;</button></div>
+          <div id="fusionPlan" class="fusion-plan" hidden></div>
+          <div class="battlefield-wrap"><div id="battlefield" class="battlefield" aria-label="Five lane lawn"></div><div id="projectileLayer" class="projectile-layer" aria-hidden="true"></div><div id="fxLayer" class="fx-layer" aria-hidden="true"></div></div>
+          <section class="message-row" aria-live="polite"><p id="message">Pick a plant.</p><button id="pauseNextWaveButton" class="secondary-button is-hidden" type="button">Pause</button><button id="startWaveButton" class="primary-button" type="button">Start Wave</button></section>
+          <details class="terrain-details"><summary>Ground effects</summary><section class="terrain-legend" aria-label="Block guide">
+            <div class="legend-item"><span class="legend-swatch terrain-grass"></span><strong>Grass</strong><small>Normal planting</small></div><div class="legend-item"><span class="legend-swatch terrain-dirt"></span><strong>Dirt</strong><small>Faster sun production</small></div><div class="legend-item"><span class="legend-swatch terrain-stone"></span><strong>Stone</strong><small>No plants; TNT works</small></div><div class="legend-item"><span class="legend-swatch terrain-ore"></span><strong>Ore</strong><small>First use: +50 sun</small></div><div class="legend-item"><span class="legend-swatch terrain-mud"></span><strong>Mud</strong><small>Slower mobs</small></div><div class="legend-item"><span class="legend-swatch terrain-water"></span><strong>Water</strong><small>Water plants only</small></div><div class="legend-item"><span class="legend-swatch terrain-nether"></span><strong>Nether</strong><small>Stronger fire attacks</small></div><div class="legend-item"><span class="legend-swatch terrain-end"></span><strong>End</strong><small>Faster End mobs</small></div>
+          </section></details>
+        </section>
+        <aside id="fusionBook" class="fusion-book is-hidden" aria-label="Fusion recipes">
+          <div class="panel-heading"><h2>Fusion Lab</h2><span id="fusionBookStatus"></span></div>
+          <input id="recipeSearch" class="search-input" type="search" placeholder="Search recipes or materials..." aria-label="Search fusion recipes" autocomplete="off" />
+          <div id="recipeFilters" class="filter-tabs" role="group" aria-label="Recipe filters"><button type="button" data-recipe-filter="related" aria-pressed="true">Related</button><button type="button" data-recipe-filter="all" aria-pressed="false">All recipes</button><button type="button" data-recipe-filter="titan" aria-pressed="false">Titan</button></div>
+          <div class="recipe-context"><img id="recipeContextImage" src="../assets/characters/sunflower.png" alt="" /><strong id="recipeContextName">Sunflower</strong><span id="recipeCount"></span></div>
+          <div id="fusionGuide" class="fusion-guide"></div><p id="recipeEmpty" class="empty-state" hidden>No matching recipes.</p>
+        </aside>
       </div>
-
-      <div id="upgradeOverlay" class="upgrade-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle">
-        <div class="upgrade-card">
-          <p>Campaign reward</p>
-          <h2 id="upgradeTitle">Choose an upgrade</h2>
-          <div id="upgradeChoices" class="upgrade-choices"></div>
-        </div>
-      </div>
+      <nav class="mobile-nav" aria-label="Game panels"><a href="#arena">Garden</a><a href="#plantLibrary">Plants</a><a id="mobileFusionLink" href="#fusionBook">Fusion Lab</a></nav>
+      <div id="endOverlay" class="end-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle"><div class="end-card"><p id="endKicker">Game over</p><h2 id="endTitle">The base fell.</h2><button id="playAgainButton" class="primary-button" type="button">Play Again</button></div></div>
+      <div id="upgradeOverlay" class="upgrade-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle"><div class="upgrade-card"><p>Campaign reward</p><h2 id="upgradeTitle">Choose an upgrade</h2><div id="upgradeChoices" class="upgrade-choices"></div></div></div>
     </main>
-
-    <script src="script.js?v=sandbox-20261113"></script>
+    <script src="script.js?v=fusion-workbench-20261114"></script>
   </body>
 </html>
