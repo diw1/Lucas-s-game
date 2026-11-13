@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lucas's Block Garden Defense</title>
-    <link rel="stylesheet" href="styles.css?v=pvzf-titans-20260629" />
+    <link rel="stylesheet" href="styles.css?v=sandbox-20261113" />
   </head>
   <body>
     <a class="back-home" href="../index.html" aria-label="Back to games">← Games</a>
@@ -145,6 +145,10 @@
       </section>
 
       <section id="creativeTools" class="creative-tools is-hidden" aria-label="Creative fusion tools">
+        <label>Action <select id="sandboxAction"><option value="plant">Plants</option><option value="terrain">Terrain</option><option value="enemy">Zombies &amp; mobs</option></select></label>
+        <label>Ground <select id="sandboxTerrain"></select></label>
+        <label>Mob <select id="sandboxEnemy"></select></label>
+        <button class="mini-button" type="button" data-creative-action="sun">+10,000 Sun</button>
         <button class="mini-button" type="button" data-creative-action="gift">Gift</button>
         <button class="mini-button" type="button" data-creative-action="mob">Mob</button>
         <button class="mini-button" type="button" data-creative-action="boss">Boss</button>
@@ -186,6 +190,6 @@
       </div>
     </main>
 
-    <script src="script.js?v=pvzf-titans-20260629"></script>
+    <script src="script.js?v=sandbox-20261113"></script>
   </body>
 </html>

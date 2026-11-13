@@ -53,7 +53,7 @@ const modeConfigs = {
     name: "Creative",
     loadoutSize: null,
     allPlants: true,
-    initialSun: 1500,
+    initialSun: 10000,
     base: 12,
     spawnGapBonus: 100,
     rewardMultiplier: 1.15
@@ -64,7 +64,7 @@ const modeConfigs = {
     allPlants: true,
     fusion: true,
     creative: true,
-    initialSun: 3000,
+    initialSun: 10000,
     base: 18,
     spawnGapBonus: -60,
     rewardMultiplier: 1.15,
@@ -1969,6 +1969,7 @@ function makeBoard() {
 }
 
 function terrainAt(row, col) {
+  if (isSandbox() && sandboxTerrainEdits.has(`${row}:${col}`)) return sandboxTerrainEdits.get(`${row}:${col}`);
   const rowMap = currentLevel().terrain[row] || "";
   return TERRAIN[rowMap[col]] || "grass";
 }
@@ -1994,6 +1995,8 @@ function syncTileSize() {
 }
 
 function resetGame() {
+  sandboxTerrainEdits.clear();
+  document.querySelector("#sandboxAction").value = "plant";
   const difficulty = currentDifficulty();
   chooseLoadout();
   state.sun = difficulty.initialSun + upgradeLevel("sun") * 50;
@@ -2120,7 +2123,8 @@ function refreshOptionButtons() {
 }
 
 function refreshCreativeTools() {
-  dom.creativeTools.classList.toggle("is-hidden", state.mode !== "creativefusion");
+  dom.creativeTools.classList.toggle("is-hidden", !isSandbox());
+  dom.creativeTools.querySelector('[data-creative-action="gift"]').hidden = !modeConfigs[state.mode].fusion;
 }
 
 function currentLevel() {
@@ -2165,6 +2169,7 @@ function getTntAt(row, col) {
 
 function placePlant(row, col) {
   if (state.gameOver) return;
+  if (isSandbox() && useSandboxCell(row, col)) return;
 
   if (state.selectedTool) {
     useToolAt(row, col);
@@ -3445,8 +3450,14 @@ function toggleNextWavePause() {
 }
 
 function runCreativeAction(action) {
-  if (state.mode !== "creativefusion") return;
+  if (!isSandbox()) return;
+  if (action === "sun") {
+    grantSunBurst(10000);
+    setMessage("Added 10,000 sun.");
+    return;
+  }
   if (action === "gift") {
+    document.querySelector("#sandboxAction").value = "plant";
     state.selectedPlant = "gift";
     state.selectedTool = null;
     refreshSeedCards();
@@ -3659,6 +3670,50 @@ window.addEventListener("resize", () => {
   syncTileSize();
   renderAll();
 });
+
+const sandboxTerrainEdits = new Map();
+function isSandbox() {
+  return state.mode === "creative" || state.mode === "creativefusion";
+}
+
+function useSandboxCell(row, col) {
+  const action = document.querySelector("#sandboxAction").value;
+  if (action === "terrain") {
+    const terrain = document.querySelector("#sandboxTerrain").value;
+    const plant = getPlantAt(row, col);
+    if (plant && (terrain === "stone" || !canPlantOnTerrain(plant.type, terrain))) {
+      setMessage("Sell the plant before changing this ground.");
+      return true;
+    }
+    sandboxTerrainEdits.set(`${row}:${col}`, terrain);
+    const cell = getCell(row, col);
+    cell.className = `cell terrain-${terrain}${col === 0 ? " base-lane" : ""}`;
+    cell.dataset.terrain = terrain;
+    if (plant) {
+      plant.terrain = terrain;
+      const type = plantTypes[plant.type];
+      plant.sunEvery = terrain === "dirt" && type.producesSun ? Math.round(type.sunEvery * 0.72) : type.sunEvery;
+    }
+    setMessage(`Ground changed to ${terrain}.`);
+    return true;
+  }
+  if (action === "enemy") {
+    const kind = document.querySelector("#sandboxEnemy").value;
+    spawnEnemy(kind, { row, x: col * tileSize });
+    setMessage(`${enemyTypes[kind].label} placed.`);
+    return true;
+  }
+  return false;
+}
+
+for (const terrain of Object.values(TERRAIN)) {
+  document.querySelector("#sandboxTerrain").add(new Option(terrain[0].toUpperCase() + terrain.slice(1), terrain));
+}
+for (const [kind, type] of Object.entries(enemyTypes)) {
+  document.querySelector("#sandboxEnemy").add(new Option(type.label, kind));
+}
+dom.seedBank.addEventListener("click", () => { document.querySelector("#sandboxAction").value = "plant"; });
+dom.toolButtons.forEach((button) => button.addEventListener("click", () => { document.querySelector("#sandboxAction").value = "plant"; }));
 
 resetGame();
 requestAnimationFrame(gameLoop);
