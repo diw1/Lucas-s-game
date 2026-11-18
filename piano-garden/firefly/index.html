@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ec">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23255447'/%3E%3Cpath d='M10 10h12l-2 14h-8z' fill='%23ffd273'/%3E%3Cpath d='M13 10V7a3 3 0 0 1 6 0v3M11 26h10' fill='none' stroke='%23ffd273' stroke-width='2'/%3E%3C/svg%3E">
+  <title>萤火琴谷 · Firefly Vale</title>
+  <link rel="stylesheet" href="vale.css">
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" class="symbols" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M6 10v10h12V10M10 20v-6h4v6"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-3-2-6-2-10-1v14c4-1 7-1 10 1 3-2 6-2 10-1V5c-4-1-7-1-10 1zm0 0v14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" fill="currentColor" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8"/></symbol>
+    <symbol id="i-lamp" viewBox="0 0 24 24"><path d="m6 8 3-3h6l3 3-2 11H8L6 8zm0 0h12M8 21h8m-6-16V4a2 2 0 0 1 4 0v1"/><path d="M12 10c.2 2 2 2.5 2 4.2a2 2 0 0 1-4 0c0-1.1.6-2.4 2-4.2z" fill="currentColor" stroke="none"/></symbol>
+  </svg>
+  <header class="topbar"><div class="wrap nav">
+    <a class="home" href="../../index.html"><svg class="ico"><use href="#i-home"/></svg><span id="homeText">Lucas 的游戏厅</span></a>
+    <span class="nav-sep">/</span><span class="crumb">Firefly Vale</span>
+    <button id="language" class="language" type="button">English</button>
+  </div></header>
+  <main class="wrap">
+    <header class="heading">
+      <div><h1 id="title">萤火琴谷</h1><p id="tagline">弹一小段，陪小狐狸点亮回家的路。</p></div>
+      <span class="book-label"><svg class="ico"><use href="#i-book"/></svg>Piano Adventures <b>Level 1</b></span>
+    </header>
+    <div class="world">
+      <section class="scene-card" aria-labelledby="sceneName">
+        <div class="land"><canvas id="landscape" width="480" height="184" role="img" aria-label="小狐狸身边的森林、溪水和灯笼"></canvas>
+          <span class="lamp-score"><svg class="ico"><use href="#i-lamp"/></svg><b id="lampCount">0 / 4</b></span>
+        </div>
+        <div class="scene-caption"><div><span id="sceneEyebrow" class="eyebrow"></span><h2 id="sceneName"></h2></div><div id="lampTrack" class="lamps" aria-hidden="true"></div></div>
+      </section>
+      <nav class="map" aria-labelledby="mapTitle">
+        <div class="map-heading"><h2 id="mapTitle">选一站</h2>
+          <div class="map-tabs" id="mapTabs" role="group" aria-label="选择教材页码">
+            <button type="button" data-band="early" data-pages="8–29">8–29 页</button>
+            <button type="button" data-band="current" data-pages="35–45">35–45 页</button>
+            <button type="button" data-band="later" data-pages="46–55">46–55 页</button>
+          </div>
+        </div>
+        <div id="lessonList"></div>
+      </nav>
+    </div>
+    <section class="practice" aria-labelledby="practiceTitle">
+      <div class="practice-top"><div><span class="eyebrow" id="practiceLabel"></span><h2 id="practiceTitle"></h2></div>
+        <div class="demo-buttons"><button class="light-btn" id="chord" type="button" hidden></button><button class="main-btn" id="demo" type="button"><svg class="ico"><use href="#i-play"/></svg><span></span></button></div>
+      </div>
+      <div id="playArea">
+        <div class="score-box">
+          <div id="staff"></div>
+          <div class="score-info"><p id="instruction"></p><button class="text-btn" id="hints" type="button"></button></div>
+        </div>
+        <div class="key-row"><div id="keyboard" aria-label="Piano"></div></div>
+        <div class="feedback-row"><p id="feedback" role="status" aria-live="polite"></p><button class="light-btn" id="mic" aria-pressed="false" type="button"><svg class="ico"><use href="#i-mic"/></svg><span></span></button></div>
+        <p id="micInfo" class="mic-info" hidden></p>
+      </div>
+      <div id="reward" class="reward" hidden>
+        <span class="reward-icon"><svg class="ico"><use href="#i-lamp"/></svg></span><div><h3 id="rewardTitle"></h3><p id="rewardCopy"></p></div>
+        <div class="reward-actions"><button id="advance" class="main-btn" type="button"></button><button id="replay" class="text-btn" type="button"></button></div>
+      </div>
+      <div id="earQuiz" hidden></div>
+    </section>
+    <details class="book-task" id="bookDetails">
+      <summary><svg class="ico"><use href="#i-book"/></svg><span id="bookLabel"></span><span class="chevron">⌄</span></summary>
+      <div class="book-inner"><p id="bookTask"></p><p id="bookNote"></p><a href="https://cloud.pianoadventures.com/products/piano-adventures-level-1-lesson-book-play-along-audio/" id="backing" target="_blank" rel="noopener noreferrer"></a></div>
+    </details>
+  </main>
+  <script src="lessons.js" defer></script>
+  <script src="scene.js" defer></script>
+  <script src="audio.js" defer></script>
+  <script src="ear.js" defer></script>
+  <script src="game.js" defer></script>
+</body>
+</html>
