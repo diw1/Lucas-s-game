@@ -147,16 +147,16 @@
     const root = node('section','scene');
     const heading = node('header','heading');
     const back = node('a','back'); back.href = '#map';
-    back.innerHTML = icon('map'); back.append('返回世界地图');
+    back.innerHTML = icon('map'); back.append('Back to the map');
     const title = node('h1','title',place.name);
     const description = node('p','description',place.description);
     heading.append(back,title,description);
     if (place.treehouse) {
       const views = node('nav','views');
-      views.setAttribute('aria-label','切换树屋视角');
+      views.setAttribute('aria-label','Treehouse views');
       for (const part of window.LucasPlaces.filter(p => p.treehouse)) {
         const link = treeLink('view',part.id);
-        link.textContent = part.name;
+        link.textContent = part.treehouse.view;
         if (part.id === place.id) link.setAttribute('aria-current','page');
         views.append(link);
       }
@@ -165,18 +165,18 @@
 
     const layout = node('div','layout');
     const painting = node('section','painting');
-    painting.setAttribute('aria-label', place.name + '互动原画');
+    painting.setAttribute('aria-label', place.name + ' interactive painting');
     const tools = node('div','tools');
     const credit = node('span','credit'); credit.innerHTML = icon('brush');
-    credit.append('Lucas 的原画');
-    const markers = action('markers','隐藏标记','mark');
+    credit.append('Art by Lucas');
+    const markers = action('markers','Hide markers','mark');
     markers.setAttribute('aria-pressed','true');
     tools.append(credit,markers);
     const mat = node('div','mat');
     const canvas = node('div','canvas');
     canvas.style.setProperty('--visit-ratio', place.size[0] / place.size[1]);
     const img = node('img','art');
-    img.src = place.src; img.alt = place.name + '，Lucas 绘'; img.width = place.size[0]; img.height = place.size[1];
+    img.src = place.src; img.alt = place.name + ', painted by Lucas'; img.width = place.size[0]; img.height = place.size[1];
     img.draggable = false;
     const targets = node('div','targets'), effects = node('div','effects');
     effects.setAttribute('aria-hidden','true');
@@ -188,20 +188,20 @@
       const {to,action,where,bounds:[x,y,w,h]} = place.treehouse;
       const portal = treeLink('portal',to);
       portal.style.cssText = 'left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%';
-      portal.setAttribute('aria-label',action+'，'+where);
+      portal.setAttribute('aria-label',action+' using the '+where);
       const sign = node('span','portal-sign');
       sign.innerHTML = icon(place.id === 'canopy' ? 'door' : 'ladder');
       sign.append(action);
       portal.append(sign); canvas.append(portal);
     }
     mat.append(canvas);
-    const caption = node('p','caption',place.treehouse ? '点画中事物收集发现，点'+place.treehouse.where+'就能'+place.treehouse.action+'。' : '点画里的物件，看看它会做什么。');
+    const caption = node('p','caption',place.treehouse ? 'Tap the painting to discover its secrets, or use the '+place.treehouse.where+' to '+place.treehouse.action.toLowerCase()+'.' : 'Tap something in the painting and see what happens.');
     painting.append(tools,mat,caption);
 
     const side = node('aside','side');
     const notebook = node('section','notebook');
     const notebookHead = node('div','notebook-head');
-    const notesTitle = node('h2','subtitle','画中发现');
+    const notesTitle = node('h2','subtitle','Discoveries');
     const count = node('span','count');
     notebookHead.append(notesTitle,count);
     const meter = node('div','meter');
@@ -210,22 +210,22 @@
     const note = node('div','note');
     const noteCaption = node('div','note-caption');
     noteCaption.innerHTML = icon('brush');
-    const noteTag = node('span','tag','探索手记');
-    const noteTitle = node('h3','note-title','从哪里开始？');
-    const noteBody = node('p','note-body','点一下原画里的小圆点，或者从下方挑一条线索。');
+    const noteTag = node('span','tag','Field notes');
+    const noteTitle = node('h3','note-title','Where shall we start?');
+    const noteBody = node('p','note-body','Tap a dot in the painting, or pick a clue below.');
     noteCaption.append(noteTag);
     note.append(noteCaption,noteTitle,noteBody);
     const list = node('div','list');
-    const listLabel = node('p','list-label','发现线索');
+    const listLabel = node('p','list-label','Pick a clue');
     notebook.append(notebookHead,meter,note,listLabel,list);
     if (place.id === 'picnic') {
       const story = node('a','picture-book'); story.href = 'picnic.html#world';
       story.innerHTML = icon('book');
-      story.append(node('span','book-label','野餐绘本'));
+      story.append(node('span','book-label','Open the picnic storybook'));
       notebook.append(story);
     }
     const roads = node('section','roads'); const roadsHead = node('h2','roads-head');
-    roadsHead.innerHTML = icon('step'); roadsHead.append('从这里出发'); roads.append(roadsHead);
+    roadsHead.innerHTML = icon('step'); roadsHead.append('Nearby places'); roads.append(roadsHead);
     place.neighbors.forEach(id => {
       const dest = window.LucasPlaces.find(p => p.id === id);
       const a = node('a','road'); a.href = '#place/' + id;
@@ -260,15 +260,15 @@
         row.classList.toggle('visit-found',seen);
         row.classList.toggle('visit-selected',selected === spot.id);
         row.querySelector('.visit-row-bullet').innerHTML = seen ? icon('check') : String(index+1);
-        row.setAttribute('aria-label',spot.name + (seen ? '，回看发现' : '，查看寻找线索'));
+        row.setAttribute('aria-label',spot.name + (seen ? ', revisit discovery' : ', get a clue'));
         buttons.forEach((button,j) => {
           button.classList.toggle('visit-found',seen);
           if (j === 0) button.querySelector('.visit-dot').innerHTML = seen ? icon('check') : '+';
-          button.setAttribute('aria-label','探索' + spot.name + (seen ? '，已发现' : ''));
+          button.setAttribute('aria-label','Explore ' + spot.name + (seen ? ', already found' : ''));
         });
       });
       count.textContent = found + ' / ' + place.spots.length;
-      count.setAttribute('aria-label','已发现 ' + found + ' 项，共 ' + place.spots.length + ' 项');
+      count.setAttribute('aria-label',found + ' of ' + place.spots.length + ' discoveries found');
       meterFill.style.width = (found / place.spots.length * 100) + '%';
       return found;
     }
@@ -282,18 +282,18 @@
       selected = spot.id;
       const total = renderState();
       const finished = !wasSeen && total === place.spots.length;
-      setNote(finished ? '本画的发现已集齐' : '已写入手记',spot.name,spot.reply,true);
+      setNote(finished ? 'Painting complete!' : 'In your notebook',spot.name,spot.reply,true);
       animate(effects,img,bounds,spot,api.sound());
       window.clearTimeout(timer);
       toast.textContent = spot.reply; toast.hidden = false;
       toast.classList.toggle('visit-toast-above', bounds[1] > 50);
       timer = window.setTimeout(() => {toast.hidden = true;}, 3000);
-      live.textContent = (finished ? '本画的发现已集齐。' : wasSeen ? '' : '发现了' + spot.name + '。') + spot.reply;
+      live.textContent = (finished ? 'You found everything in this painting! ' : wasSeen ? '' : 'Found: ' + spot.name + '. ') + spot.reply;
     }
     function hint(spot) {
       if (api.has(place.id,spot.id)) { reply(spot, primaryBounds(spot),false); return; }
       selected = spot.id;
-      renderState(); setNote('寻找线索',spot.name,spot.clue,false);
+      renderState(); setNote('Your clue',spot.name,spot.clue,false);
       const button = entries.get(spot.id).buttons[0];
       targets.querySelectorAll('.visit-hinted').forEach(el => el.classList.remove('visit-hinted'));
       button.classList.add('visit-hinted');
@@ -326,10 +326,10 @@
     markers.addEventListener('click',() => {
       showMarkers = !showMarkers; canvas.classList.toggle('visit-no-markers',!showMarkers);
       markers.setAttribute('aria-pressed', String(showMarkers));
-      markers.querySelector('span').textContent = showMarkers ? '隐藏标记' : '显示标记';
+      markers.querySelector('span').textContent = showMarkers ? 'Hide markers' : 'Show markers';
     });
     const initial = renderState();
-    if (initial === place.spots.length) setNote('本画的发现已集齐',place.stamp,'点画里的老朋友，随时可以再和它们玩一次。',true);
+    if (initial === place.spots.length) setNote('Painting complete!',place.stamp,'Tap your old friends in the painting to play with them again.',true);
   }
   window.LucasVisit = Object.freeze({show});
 })();

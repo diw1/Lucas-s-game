@@ -5,8 +5,8 @@
   const spot = (id, name, x, y, w, h, reply, effect, clue, marks = []) =>
     ({id, name, x, y, w, h, reply, effect, clue, marks});
   const treehouse = {
-    canopy: {view:'外景',to:'hollow',action:'进屋',where:'树屋木门',bounds:[46.5,54,9,28]},
-    hollow: {view:'内景',to:'canopy',action:'出门',where:'底层木梯',bounds:[63.4,65.3,12,22]}
+    canopy: {view:'Outside',to:'hollow',action:'Go inside',where:'wooden door',bounds:[46.5,54,9,28]},
+    hollow: {view:'Inside',to:'canopy',action:'Go outside',where:'lower ladder',bounds:[63.4,65.3,12,22]}
   };
   const place = (id, name, size, description, stamp, neighbors, trails, spots) => ({
     id, name, description, stamp, neighbors, trails, spots, size, treehouse:treehouse[id],
@@ -14,71 +14,71 @@
   });
 
   window.LucasPlaces = [
-    place('picnic', '树下的野餐', [880, 1108],
-      '格子野餐布铺好了，树下还留着一个位子。你想先和谁打个招呼？', '苹果树下',
-      ['canopy', 'reef'], {'canopy':'顺着树枝，去拜访黄色树屋里的邻居。','reef':'沿野餐布的蓝边走，一直走到海边。'}, [
-        spot('cat','小猫',54.3,26.7,11,14,'小猫眯起眼，拿脑袋蹭了蹭你的手心。','purr','看看树干右边，谁戴着黄领巾？'),
-        spot('bee','蜜蜂',13.7,33.4,14,10,'嗡——蜜蜂绕着你的手指画了一个圈，又飞去找花了。','buzz','树干左边飞着两位穿条纹衫的客人。',[[13.4,40.3,11,7]]),
-        spot('apple','苹果',29.7,28.2,7.5,9,'你轻轻摇了一下树枝，红苹果晃了晃。','drop','树枝下面，哪颗红果子已经熟透了？',[[17.6,24.8,5.7,7],[74.3,10.7,5.5,5.7]]),
-        spot('fruit','果篮',32.2,40.1,17,16,'你拨开一片叶子。篮底还藏着一颗圆滚滚的水果！','rustle','找找布上编得一格一格的篮子。',[[24.7,50.2,17,12],[73,45,14,12]]),
-        spot('cake','蛋糕',90.6,46.5,12,9,'小叉子切下了彩色的一角。这一块留给你。','sprinkle','野餐布右侧有一块穿着彩条衣服的点心。'),
-        spot('flower','小花',65.1,20.1,8,7,'风穿过粉色花瓣，把淡淡的花香送到野餐布边。','petals','树枝上有几朵粉红色的小花。',[[6.1,21.5,6,7],[35.7,18.9,7,7],[53.9,2.9,7,5],[3.9,10.3,6,6],[88.6,7.3,8,8],[24.8,3.6,7,7]])
+    place('picnic', 'Orchard Picnic', [880, 1108],
+      'The picnic blanket is ready, and there’s a spot for you under the tree. Who would you like to meet first?', 'Under the Apple Tree',
+      ['canopy', 'reef'], {'canopy':'Follow the branches to the yellow treehouse.','reef':'Follow the blue edge of the blanket down to the sea.'}, [
+        spot('cat','Picnic kitten',54.3,26.7,11,14,'The kitten closes its eyes and nudges its head into your hand.','purr','Look to the right of the tree trunk. Who’s wearing a yellow scarf?'),
+        spot('bee','Bumblebees',13.7,33.4,14,10,'Bzzzz! A bee loops around your finger, then flies off to find a flower.','buzz','Two little guests in striped shirts are flying to the left of the tree.',[[13.4,40.3,11,7]]),
+        spot('apple','Red apple',29.7,28.2,7.5,9,'You give the branch a gentle shake. A ripe red apple wobbles on its stem.','drop','Which red fruit hanging from a branch looks ready to pick?',[[17.6,24.8,5.7,7],[74.3,10.7,5.5,5.7]]),
+        spot('fruit','Fruit basket',32.2,40.1,17,16,'You lift a leaf. There’s one more plump fruit tucked into the bottom of the basket!','rustle','Look for the woven baskets on the blanket.',[[24.7,50.2,17,12],[73,45,14,12]]),
+        spot('cake','Layer cake',90.6,46.5,12,9,'A little fork cuts through the colourful layers. This slice is yours.','sprinkle','Find the treat wearing rainbow stripes on the right of the blanket.'),
+        spot('flower','Apple blossom',65.1,20.1,8,7,'A breeze carries the scent of pink petals all the way to the picnic blanket.','petals','Look for pink blossoms among the branches.',[[6.1,21.5,6,7],[35.7,18.9,7,7],[53.9,2.9,7,5],[3.9,10.3,6,6],[88.6,7.3,8,8],[24.8,3.6,7,7]])
       ]),
-    place('canopy', '树屋外景', [788,788],
-      '考拉抱着树干，楼上的邻居从阳台探出头。推开黄房子的小木门，进去看看他们的家。','树顶访客',
-      ['picnic','hollow'], {'picnic':'顺着树干滑下来，野餐还没散。','hollow':'推开阳台旁边的木门，进屋看一看。'},[
-        spot('koala','抱树考拉',27,89,26,20,'考拉换了一只手抱树，腾出爪子向你挥了挥。','wave','顺着树干往下找一对圆耳朵。'),
-        spot('window','屋顶圆窗',77,16,15,16,'笃、笃。圆窗里传出两声轻轻的回音。','knock','三角屋顶上有一扇像眼睛的小窗。'),
-        spot('neighbor','阳台邻居',82,45,15,16,'阳台上探出一对小耳朵。邻居轻声说：「明天也来玩呀！」','peek','黄房子右边的栏杆后，有谁在等你？')
+    place('canopy', 'Forest Treehouse (Outside)', [788,788],
+      'A koala hugs the trunk while a neighbour peeks over the balcony. The little wooden door leads inside.','Canopy Visitor',
+      ['picnic','hollow'], {'picnic':'Climb down the tree. There’s still time for a picnic.','hollow':'Push open the wooden door beside the balcony.'},[
+        spot('koala','Tree-hugging koala',27,89,26,20,'The koala changes its grip and gives you a wave with its free paw.','wave','Look for two round ears near the foot of the tree.'),
+        spot('window','Round attic window',77,16,15,16,'Tap, tap. Two little echoes come back from the round window.','knock','There’s a window shaped like an eye in the triangular roof.'),
+        spot('neighbor','Balcony neighbour',82,45,15,16,'Two little ears pop up over the railing. “Come and play again tomorrow!”','peek','Who’s waiting behind the railing on the right of the house?')
       ]),
-    place('hollow','树屋内景',[888,888],
-      '黄色树屋里面亮着一串小灯。蓝被子晒得暖暖的，底层的木梯通向屋外。','树屋夜灯',
-      ['canopy','bakery'], {'canopy':'沿底层木梯出门，和树下的考拉碰面。','bakery':'闻到了面包香？出门去找兔子师傅。'},[
-        spot('bed','蓝色小床',59,26.5,22,15,'你拍拍蓝被子，床垫噗地弹了一下。今晚一定睡得香。','sleep','看看树屋最高一层的蓝色角落。'),
-        spot('squirrel','抱橡果的松鼠',10,83,20,24,'松鼠把橡果抱得更紧了：「这颗是我给冬天存的！」','rustle','左边树根旁，谁抱着自己的小宝贝？'),
-        spot('pig','粉色小猪',91.7,82,17,21,'小猪抖抖耳朵，沿着树根哼起了散步的小调。','hum','树干右边露出了一只粉红鼻子。')
+    place('hollow','Forest Treehouse (Inside)',[888,888],
+      'Little lights glow inside the yellow treehouse. The blue quilt is warm from the sun. The ladder downstairs leads back outside.','Treehouse Nightlight',
+      ['canopy','bakery'], {'canopy':'Climb down the ladder to meet the koala outside.','bakery':'Smell fresh bread? Follow your nose to the rabbit baker.'},[
+        spot('bed','Blue bed',59,26.5,22,15,'You pat the blue quilt. The mattress gives a little bounce. Someone’s going to sleep well tonight.','sleep','Look for a cosy patch of blue on the top floor.'),
+        spot('squirrel','Acorn squirrel',10,83,20,24,'The squirrel hugs its acorn tighter. “I’m saving this one for winter!”','rustle','Who’s holding a tiny treasure by the roots on the left?'),
+        spot('pig','Pink piglet',91.7,82,17,21,'The piglet wiggles its ears and hums a tune as it strolls along the roots.','hum','A little pink snout peeks out to the right of the trunk.')
       ]),
-    place('bakery','兔子面包房',[940,940],
-      '柜台刚刚开张。兔子在招呼客人，猫咪守着烤炉，门口还拴着一只气球。','新鲜出炉',
-      ['hollow','stage'], {'hollow':'拎上热面包，送到树屋里面的小桌上。','stage':'沿着面包店外的歌声去听演出。'},[
-        spot('rabbit','兔子面包师',32,52,24,26,'兔子晃晃长耳朵，递来一只热乎乎的小圆面包。','hop','柜台后有一位长耳朵面包师。'),
-        spot('baker','猫咪面包师',72,38,20,18,'猫咪把烤盘往前推了推：「这一炉，刚刚好。」','steam','抬头看看柜台右侧的小厨师帽。'),
-        spot('balloon','蓝色气球',81,17,23,26,'蓝气球扭扭胖肚子，系着它的细线跟着晃了晃。','bob','找找画的右上角，谁正在往天花板飘？')
+    place('bakery','Bunny Bakery',[940,940],
+      'The bakery has just opened. Rabbit greets the customers, Cat tends the oven, and a blue balloon bobs by the door.','Fresh from the Oven',
+      ['hollow','stage'], {'hollow':'Take a warm roll back to the little table in the treehouse.','stage':'Follow the music outside the bakery to the show.'},[
+        spot('rabbit','Rabbit baker',32,52,24,26,'Rabbit wiggles those long ears and hands you a warm, round bread roll.','hop','Who’s that long-eared baker behind the counter?'),
+        spot('baker','Cat baker',72,38,20,18,'Cat slides the tray towards you. “This batch is just right!”','steam','Look for a little chef’s hat on the right side of the counter.'),
+        spot('balloon','Blue balloon',81,17,23,26,'The blue balloon bobs up and down. Its string gives a little wiggle too.','bob','What’s floating towards the ceiling in the top right corner?')
       ]),
-    place('stage','星光舞台',[1072,858],
-      '帷幕拉开，粉色歌手坐好了。舞台边的灯和草丛里的小观众也准备好了。','星光掌声',
-      ['bakery','castle'], {'bakery':'演出间歇，去面包房买一口点心。','castle':'等舞台灯暗下来，去追远处的蝙蝠。'},[
-        spot('singer','粉色歌手',51.5,47.4,37,42,'歌手张开嘴：「啦——啦啦！」最后一个音一路滚到了草地上。','song','舞台中央坐着谁？'),
-        spot('lamp','蘑菇灯',94,41,12,29,'蘑菇灯亮了一下，替台上的朋友打出一束追光。','glow','舞台右边有一盏戴着红点帽子的灯。'),
-        spot('snail','蜗牛观众',64,84,13,16,'蜗牛驮着螺旋小屋往前挪了一点。现在它坐在第一排。','trail','舞台下面，草地上有个小小的螺旋。')
+    place('stage','Starlight Stage',[1072,858],
+      'The curtain is up. The pink singer is ready, the lights are in place, and a tiny fan is waiting in the grass.','Starlight Applause',
+      ['bakery','castle'], {'bakery':'Pop into the bakery for a snack between songs.','castle':'When the lights go down, follow the bats to the castle.'},[
+        spot('singer','Pink singer',51.5,47.4,37,42,'“La, la, laaa!” The last note rolls right off the stage and into the grass.','song','Who’s sitting in the middle of the stage?'),
+        spot('lamp','Mushroom lamp',94,41,12,29,'The mushroom lamp lights up and shines a spotlight on the singer.','glow','A lamp with a red, spotty cap stands to the right of the stage.'),
+        spot('snail','Snail in the audience',64,84,13,16,'The snail inches forward with its spiral house. Now it has a front-row seat.','trail','Look for a little spiral in the grass below the stage.')
       ]),
-    place('castle','南瓜古堡',[1040,838],
-      '金色天空下，古堡的窗户亮着灯。屋檐上有客人，屋檐下也有。','南瓜月夜',
-      ['stage','cat'], {'stage':'跟着挥动的翅膀回到舞台边。','cat':'穿过门廊，找找花园里的蓝眼睛。'},[
-        spot('bat','黑蝙蝠',17,24,18,17,'蝙蝠舒展双翅，在尖塔上空悄悄转了个弯。','flutter','抬头找一找黑色的小翅膀。'),
-        spot('gate','城堡大门',40,72,16,24,'咚、咚。门后的小幽灵回敲了两下，当作今晚的暗号。','knock','最高的尖塔下面有一道拱门。'),
-        spot('pumpkin','南瓜灯',91,18,17,23,'南瓜灯眨了一下眼，露出一个歪歪的大笑脸。','glow','右上角哪个橙色家伙笑得最开心？')
+    place('castle','Pumpkin Castle',[1040,838],
+      'Castle windows glow against a golden sky. Look above the rooftops and down by the door to see who’s visiting.','Pumpkin Moon',
+      ['stage','cat'], {'stage':'Follow the flutter of wings back to the stage.','cat':'Walk through the archway and look for blue eyes in the garden.'},[
+        spot('bat','Little black bat',17,24,18,17,'The bat stretches its wings and banks quietly around a tower.','flutter','Look up for a pair of little black wings.'),
+        spot('gate','Castle gate',40,72,16,24,'Knock, knock. A little ghost knocks twice from the other side. That’s tonight’s secret code!','knock','There’s an archway below the tallest tower.'),
+        spot('pumpkin','Pumpkin lantern',91,18,17,23,'The pumpkin winks at you and flashes a big, crooked grin.','glow','Which orange face in the top right has the widest smile?')
       ]),
-    place('cat','蓝眼猫花园',[686,686],
-      '花园里的猫咪安静地坐着。凑近一点，就能看见它额头的小花和亮晶晶的眼睛。','蓝眼猫爪',
-      ['castle','parade'], {'castle':'从花园的小径回到古堡门前。','parade':'绕过花丛，跟着彩带去看庆典。'},[
-        spot('blossom','额头蓝花',35,28,14,13,'蓝花轻轻颤了一下。猫咪决定让它再多坐一会儿。','petals','左耳边藏着一朵蓝色小花。'),
-        spot('eye','湖蓝眼睛',62,38,21,15,'猫咪朝你眨眨眼。蓝色里闪过一粒小星星。','twinkle','看看那双像小湖一样的眼睛。',[[33,39,18,14]]),
-        spot('nose','粉红鼻尖',44,60,15,12,'猫咪动了动鼻尖：「我闻到你的野餐了！」','purr','沿着几根长胡须找它们碰头的地方。')
+    place('cat','Kitten Garden',[686,686],
+      'The garden kitten sits perfectly still. Come closer to see the flower by its ear and the sparkle in its blue eyes.','Blue-Eyed Paw Print',
+      ['castle','parade'], {'castle':'Take the garden path back to the castle gate.','parade':'Walk around the flower beds and follow the ribbons to the parade.'},[
+        spot('blossom','Blue flower',35,28,14,13,'The blue flower trembles. The kitten decides to let it perch there a little longer.','petals','There’s a tiny blue flower near the ear on the left.'),
+        spot('eye','Lake-blue eyes',62,38,21,15,'The kitten blinks at you. A tiny star glints in its blue eyes.','twinkle','Look for two eyes as blue as little lakes.',[[33,39,18,14]]),
+        spot('nose','Pink nose',44,60,15,12,'The kitten twitches its nose. “I can smell your picnic!”','purr','Follow the long whiskers to the spot where they meet.')
       ]),
-    place('parade','彩带庆典',[684,504],
-      '彩旗在头顶飘，奖杯在两旁闪。今天的庆典，给每一位来到画里的朋友留了位置。','彩带冠军',
-      ['cat','reef'], {'cat':'沿着落在草地上的彩带走回猫咪花园。','reef':'坐上庆典的小船，驶向珊瑚海湾。'},[
-        spot('cup','冠军奖杯',23,28,16,24,'奖杯叮的一响，金色的光从杯沿跳了出去。','chime','左边有只写着「1」的大杯子。'),
-        spot('guest','粉色主角',53,38,27,35,'粉色朋友在彩旗下面摇了摇。人群跟着拍起手来。','confetti','看一看彩旗下最圆的那位朋友。'),
-        spot('prize','星星奖座',76,23,16,36,'你轻点奖座，顶上的星星像刚擦过一样发亮。','twinkle','右边的奖座上有什么在闪？')
+    place('parade','Ribbon Parade',[684,504],
+      'Flags flutter overhead and trophies gleam on both sides. There’s room at today’s parade for everyone who steps into the painting.','Ribbon Champion',
+      ['cat','reef'], {'cat':'Follow the ribbons in the grass back to the kitten’s garden.','reef':'Hop aboard the parade boat and sail to Coral Cove.'},[
+        spot('cup','Champion’s cup',23,28,16,24,'Ting! A speck of golden light skips off the rim of the cup.','chime','Look on the left for the big cup with a number 1.'),
+        spot('guest','Pink parade star',53,38,27,35,'The round pink guest sways under the flags. Everyone starts clapping along.','confetti','Who is the roundest guest under the flags?'),
+        spot('prize','Star trophy',76,23,16,36,'You tap the trophy. The star on top gleams as if it’s just been polished.','twinkle','What’s sparkling on top of the prize on the right?')
       ]),
-    place('reef','珊瑚海湾',[674,472],
-      '海水里冒着一串串气泡。蓝鲸和海龟从头顶游过，沙地上还有位横着走的朋友。','珊瑚潮汐',
-      ['parade','picnic'], {'parade':'跟着水面的彩旗游回庆典。','picnic':'踩着沙滩回岸上，去树下吃野餐。'},[
-        spot('whale','蓝鲸',22,14,34,25,'蓝鲸摆了摆尾巴，鼻尖上方冒出一串亮亮的气泡。','bubbles','在画的左上角，谁带着一条大尾巴？'),
-        spot('turtle','海龟',49,12,22,23,'海龟轻蹬后腿，背着花纹龟壳向下一片珊瑚游去。','swim','海面附近有一块会游泳的花纹小盾牌。'),
-        spot('crab','红螃蟹',67,71,30,24,'红螃蟹举起双钳，横着走了两步。沙底留下一排小脚印。','scuttle','沙地上，谁正举着两只红钳子？')
+    place('reef','Coral Cove',[674,472],
+      'Bubbles rise through the water. A blue whale and a sea turtle swim overhead, and someone is scuttling sideways across the sand.','Coral Tide',
+      ['parade','picnic'], {'parade':'Follow the flags along the water back to the parade.','picnic':'Pad across the sand and join the picnic under the tree.'},[
+        spot('whale','Blue whale',22,14,34,25,'The blue whale swishes its tail. A string of bright bubbles rises above its nose.','bubbles','Who has a big tail in the top left corner of the painting?'),
+        spot('turtle','Sea turtle',49,12,22,23,'The turtle kicks its flippers and carries its patterned shell towards the next patch of coral.','swim','Look near the surface for a patterned shield that swims.'),
+        spot('crab','Red crab',67,71,30,24,'The red crab raises both claws and sidesteps twice, leaving a trail of tiny footprints in the sand.','scuttle','Who’s holding up two red claws on the sandy bottom?')
       ])
   ];
 })();

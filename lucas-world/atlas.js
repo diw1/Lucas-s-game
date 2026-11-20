@@ -49,9 +49,9 @@
   }
   function refreshSound() {
     const button = el("sound");
-    button.innerHTML = glyph(sound ? "volume" : "mute") + "<span>"+(sound ? "声音开" : "声音关")+"</span>";
+    button.innerHTML = glyph(sound ? "volume" : "mute") + "<span>"+(sound ? "Sound on" : "Sound off")+"</span>";
     button.setAttribute("aria-pressed",String(sound));
-    button.setAttribute("aria-label",sound ? "关闭声音" : "打开声音");
+    button.setAttribute("aria-label",sound ? "Turn sound off" : "Turn sound on");
   }
   el("sound").addEventListener("click",() => {
     sound = !sound;
@@ -59,15 +59,15 @@
     window.PicnicFX.chime(sound);
   });
   const mailRoute = [
-    ["picnic","第一封信放在野餐布上。点点画里的朋友，帮小猫捎句话。"],
-    ["canopy","小猫邀树屋的朋友来野餐。点点屋里屋外，把邀请送到。"],
-    ["hollow","考拉从屋外捎来一片叶子。推开树屋的门，让屋里的朋友猜猜它的香气。"],
-    ["bakery","树屋里的朋友想用一颗橡果，换一份刚出炉的小面包。"],
-    ["stage","面包师把点心包好了，请你捎给正在舞台上排练的朋友。"],
-    ["castle","舞台上的演员想办一场夜间演出。到南瓜城堡敲一敲门吧。"],
-    ["cat","城堡寄来了一张星星贴纸。到花园里，把它送给蓝眼睛的小猫。"],
-    ["parade","花园小猫想把一朵花送给庆典上的朋友。快去听听欢呼声。"],
-    ["reef","庆典的最后一张邀请函，要交给珊瑚海湾里的朋友。"]
+    ["picnic","Your first letter is on the picnic blanket. Tap a friend in the painting to pick up the kitten’s message."],
+    ["canopy","The kitten is inviting the treehouse neighbours to a picnic. Give the invitation to a friend outside."],
+    ["hollow","Koala sent a fragrant leaf. Open the treehouse door and see if anyone inside knows its scent."],
+    ["bakery","The treehouse friends would like to trade an acorn for a warm bread roll."],
+    ["stage","The baker has wrapped a snack for a friend rehearsing on stage. Can you take it over?"],
+    ["castle","The performers are planning a night-time show. Knock on the door at Pumpkin Castle!"],
+    ["cat","The castle sent a star sticker. Take it to the blue-eyed kitten in the garden."],
+    ["parade","The garden kitten picked a flower for a friend at the parade. Follow the cheering!"],
+    ["reef","The last parade invitation is for the friends who live in Coral Cove."]
   ];
   function mailStep() {
     const raw = read(keys.mail);
@@ -81,15 +81,15 @@
     const onRoute = n >= 0 && n < mailRoute.length;
     const id = onRoute ? mailRoute[n][0] : null;
     const done = n === mailRoute.length;
-    el("mail-title").textContent = onRoute ? "寄往 · "+byId.get(id).name : done ? "九封信，都送到了！" : "小猫有一封信";
-    el("mail-body").textContent = onRoute ? mailRoute[n][1] : done ? "从树下的野餐到珊瑚海湾，岛上的朋友都收到了问候。" : "从野餐布旁出发，把朋友的问候一站一站送遍小岛。";
-    el("mail-button").innerHTML = glyph(done ? "book" : "mail")+(done ? "看看旅行护照" : onRoute ? "去"+byId.get(id).name : "领取第一封信");
+    el("mail-title").textContent = onRoute ? "To: "+byId.get(id).name : done ? "All nine letters delivered!" : "A letter from the kitten";
+    el("mail-body").textContent = onRoute ? mailRoute[n][1] : done ? "From the apple tree to Coral Cove, every island friend has received a letter." : "Start by the picnic blanket and carry letters from one island friend to the next.";
+    el("mail-button").innerHTML = glyph(done ? "book" : "mail")+(done ? "Open your passport" : onRoute ? "Visit "+byId.get(id).name : "Pick up the first letter");
     const belt = el("delivery-belt");
     belt.hidden = current !== "visit" || n < 0;
     if (belt.hidden) return;
-    if (done) { belt.innerHTML = "<span>"+glyph("mail")+" 邮路走完了，九封信都已送达。</span><a href='#passport'>翻开旅行护照</a>"; return; }
+    if (done) { belt.innerHTML = "<span>"+glyph("mail")+" Your postal round is complete. All nine letters are home!</span><a href='#passport'>Open your passport</a>"; return; }
     const atDestination = currentPlace?.id === id;
-    belt.innerHTML = "<span>"+glyph("mail")+(atDestination ? "你带着寄往这里的信。点一下原画里的事物，就能把信送到。" : "邮袋里有一封寄往「"+byId.get(id).name+"」的信。")+"</span>"+(atDestination ? "" : "<a href='#place/"+id+"'>去送信</a>");
+    belt.innerHTML = "<span>"+glyph("mail")+(atDestination ? "You have a letter for this stop. Tap something in the painting to deliver it." : "Your mailbag has a letter for "+byId.get(id).name+".")+"</span>"+(atDestination ? "" : "<a href='#place/"+id+"'>Deliver it</a>");
   }
   el("mail-button").addEventListener("click",() => {
     let n = mailStep();
@@ -106,10 +106,10 @@
       else write("lucas.world.find."+id+"."+spotId,"yes");
     }
     const n = mailStep();
-    let note = fresh && earned(place) ? "盖上了「"+place.stamp+"」原画印章！" : "";
+    let note = fresh && earned(place) ? "You earned the "+place.stamp+" stamp!" : "";
     if (n >= 0 && n < mailRoute.length && mailRoute[n][0] === id) {
       write(keys.mail,String(n+1));
-      note += (note ? " " : "") + (n+1 === mailRoute.length ? "最后一封信也送到了！" : "信送到了！下一站是"+byId.get(mailRoute[n+1][0]).name+"。");
+      note += (note ? " " : "") + (n+1 === mailRoute.length ? "You delivered the last letter!" : "Letter delivered! Next stop: "+byId.get(mailRoute[n+1][0]).name+".");
     }
     if (note) notify(note);
     renderMail();
@@ -120,11 +120,11 @@
     for (const place of places) {
       if (place.id === "hollow") continue; // Both sides of the treehouse share its island entrance.
       const [x,y,w,h] = destinations[place.id];
-      const landmarkName = place.id === "canopy" ? "森林树屋" : place.name;
+      const landmarkName = place.id === "canopy" ? "Forest Treehouse" : place.name;
       const pin = document.createElement("a");
       const complete = earned(place) && (place.id !== "canopy" || earned(byId.get("hollow")));
       pin.className = "map-pin"+(complete ? " earned" : "");
-      pin.href = "#place/"+place.id; pin.setAttribute("aria-label","走进"+landmarkName);
+      pin.href = "#place/"+place.id; pin.setAttribute("aria-label","Explore "+landmarkName);
       pin.style.cssText = "left:"+x+"%;top:"+y+"%;width:"+w+"%;height:"+h+"%";
       pin.innerHTML = '<span class="pin-label">'+glyph(complete ? "check" : "pin")+landmarkName+'</span>';
       pins.append(pin);
@@ -140,10 +140,10 @@
     if (gallery) {
       a.className = "gallery-card";
       a.style.setProperty("--tint",tints[place.id]);
-      a.innerHTML = '<div class="gallery-art"><img src="'+place.src+'" loading="lazy" alt=""></div><div class="gallery-meta"><h2>'+place.name+'</h2><span>'+n+' / '+max+' 个发现</span></div>';
+      a.innerHTML = '<div class="gallery-art"><img src="'+place.src+'" loading="lazy" alt=""></div><div class="gallery-meta"><h2>'+place.name+'</h2><span>'+n+' / '+max+' found</span></div>';
     } else {
       a.className = "passport-card"+(earned(place) ? " earned" : "");
-      a.innerHTML = '<span class="stamp-portrait"><img src="'+place.src+'" loading="lazy" alt=""></span><span><h2>'+place.name+'</h2><p>'+place.stamp+'</p><small>'+(n === max ? "已盖章" : "已找到 "+n+" / "+max)+"</small></span>";
+      a.innerHTML = '<span class="stamp-portrait"><img src="'+place.src+'" loading="lazy" alt=""></span><span><h2>'+place.name+'</h2><p>'+place.stamp+'</p><small>'+(n === max ? "Stamped" : "Found "+n+" / "+max)+"</small></span>";
     }
     return a;
   }
@@ -153,20 +153,20 @@
     if (!gallery) {
       const discoveries = places.reduce((s,p) => s+foundCount(p),0);
       const all = places.reduce((s,p) => s+p.spots.length,0);
-      el("passport-summary").textContent = "已收集 "+places.filter(earned).length+" / "+places.length+" 枚原画印章，发现 "+discoveries+" / "+all+" 处小秘密。找齐一幅画里的秘密，就能盖上它的印章。";
+      el("passport-summary").textContent = places.filter(earned).length+" of "+places.length+" stamps collected · "+discoveries+" of "+all+" discoveries found. Find every secret in a painting to earn its stamp.";
     }
   }
   const api = Object.freeze({has,discover,sound:() => sound,go:id => { if (byId.has(id)) location.hash = "place/"+id; }});
   const dialog = el("map-dialog"), frame = el("map-card"), zoom = el("zoom");
   function restoreMap() {
     el("map-home").append(frame); document.body.classList.remove("map-zoom");
-    zoom.innerHTML = glyph("expand"); zoom.setAttribute("aria-label","放大地图"); zoom.title = "放大地图";
+    zoom.innerHTML = glyph("expand"); zoom.setAttribute("aria-label","Enlarge map"); zoom.title = "Enlarge map";
     if (current === "map") zoom.focus({preventScroll:true});
   }
   zoom.addEventListener("click",() => {
     if (dialog.open) { dialog.close(); return; }
     el("map-enlarged").append(frame); dialog.showModal(); document.body.classList.add("map-zoom");
-    zoom.innerHTML = glyph("close"); zoom.setAttribute("aria-label","收起地图"); zoom.title = "收起地图";
+    zoom.innerHTML = glyph("close"); zoom.setAttribute("aria-label","Close enlarged map"); zoom.title = "Close enlarged map";
     zoom.focus({preventScroll:true});
   });
   dialog.addEventListener("close",restoreMap);
@@ -185,7 +185,7 @@
     document.querySelectorAll("[data-section]").forEach(a => {
       if (a.dataset.section === current) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
     });
-    document.title = current === "map" ? "Lucas's World" : (currentPlace?.name || (current === "gallery" ? "原画集" : "旅行护照"))+" · Lucas's World";
+    document.title = current === "map" ? "Lucas's World" : (currentPlace?.name || (current === "gallery" ? "Gallery" : "Passport"))+" · Lucas's World";
     if (current === "map") drawMap();
     else if (current === "visit") window.LucasVisit.show(el("visit-mount"),currentPlace,api);
     else showCollection(current === "gallery");

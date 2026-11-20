@@ -127,3 +127,10 @@
 @media(prefers-reduced-motion:reduce) {
   .visit-scene *,.visit-scene *::before,.visit-scene *::after {scroll-behavior:auto!important;animation:none!important;transition:none!important}
 }
+
+@media(max-width:570px) {
+  .visit-credit,.visit-markers {font-size:.78rem}
+  .visit-notebook-head,.visit-tools {flex-wrap:wrap}
+  .visit-portal-sign {padding:.22rem .35rem}
+  .visit-title {font-size:clamp(1.95rem,8vw,2.35rem)}
+}

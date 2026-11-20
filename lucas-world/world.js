@@ -25,12 +25,12 @@
 
   // Each target has its own bounds in each painting. All coordinates are percentages of the artwork.
   const items = [
-    {id:"cat",name:"小猫",hint:"谁系着黄色的小领巾，坐在树下等你？",story:"小猫眯起眼，轻轻把脑袋蹭进你的手心。",again:"再摸摸它",say:["喵呜！一起野餐吧。","呼噜噜……好舒服！","喵，你又来啦！"],world:[31.2,49.5,13,29],painting:[54.3,26.7,11,14]},
-    {id:"bee",name:"蜜蜂",hint:"树梢边传来嗡嗡声，找找穿条纹衫的小客人。",story:"蜜蜂绕了一个小圈，把花香带到了野餐布上。",again:"再飞一圈",say:["嗡嗡！跟我去采花蜜。","飞一圈，再转个弯！"],world:[83.2,21.7,10,21],painting:[13.7,33.4,14,10]},
-    {id:"apple",name:"苹果",hint:"有个红彤彤的小家伙，正挂在树枝上晒太阳。",story:"枝头摇了摇，一颗红苹果咕噜噜地滚下来。",again:"摇摇苹果树",say:["扑通！苹果熟啦。","再接住一颗！"],world:[50.3,25.4,8,12],painting:[29.7,28.2,7.5,9]},
-    {id:"fruit",name:"果篮",hint:"哪只编织篮里，挤满了圆滚滚的水果？",story:"掀开篮子，葡萄和苹果挤在一起，满满都是果香。",again:"翻翻果篮",say:["葡萄、苹果，分你一份！","篮底还藏着一颗！"],world:[52.3,54,17,28],painting:[32.2,40.1,17,16]},
-    {id:"cake",name:"蛋糕",hint:"野餐布上有一块彩色的点心，数数它有几层。",story:"切下一小角，每一层都是不一样的甜。",again:"再切一小块",say:["给你留了最甜的一块！","一层奶油，一层惊喜！"],world:[84.1,62.5,10,18],painting:[90.6,46.5,12,9]},
-    {id:"flower",name:"小花",hint:"找一朵粉色的小花，轻轻碰一碰它的花瓣。",story:"花瓣乘着风打了个转，像在向你招手。",again:"让花瓣飞起来",say:["一片花瓣，送给你！","风来了，跳个舞吧！"],world:[7.4,85.2,7.6,13],painting:[65.1,20.1,8,7]}
+    {id:"cat",name:"Kitten",hint:"Who’s wearing a yellow neckerchief under the tree?",story:"The kitten closes its eyes and nudges its head against your hand.",again:"Pet the kitten again",say:["Meow! Sit with me!","Purrr. Right there!","Meow! You’re back!"],world:[31.2,49.5,13,29],painting:[54.3,26.7,11,14]},
+    {id:"bee",name:"Honeybee",hint:"Hear that buzz in the branches? Look for a guest in stripes.",story:"The bee loops over the blanket. A little cloud of pollen drifts behind it.",again:"Fly another loop",say:["Bzzz! Come find some nectar!","Around we go!"],world:[83.2,21.7,10,21],painting:[13.7,33.4,14,10]},
+    {id:"apple",name:"Apple",hint:"What’s round, red and basking in the sun on a branch?",story:"The branch gives a shake. A ripe red apple drops and rolls toward you.",again:"Shake the tree",say:["Plop! A ripe one!","Catch the next one!"],world:[50.3,25.4,8,12],painting:[29.7,28.2,7.5,9]},
+    {id:"fruit",name:"Fruit basket",hint:"Which woven basket is piled high with fruit?",story:"You peek into the basket. The grapes are tucked up against the apples.",again:"Peek inside again",say:["Help yourself to some fruit!","One more at the bottom!"],world:[52.3,54,17,28],painting:[32.2,40.1,17,16]},
+    {id:"cake",name:"Layer cake",hint:"Can you spot the treat with layers of different colors?",story:"You slice off a little corner. Each layer tastes a little different.",again:"Cut another slice",say:["The sweetest slice is yours!","Cream, cake, then cream again!"],world:[84.1,62.5,10,18],painting:[90.6,46.5,12,9]},
+    {id:"flower",name:"Blossom",hint:"Find a pink blossom and give its petals a gentle tap.",story:"A breeze sets the petals spinning like tiny waving hands.",again:"Send the petals flying",say:["A petal for you!","Here comes the breeze!"],world:[7.4,85.2,7.6,13],painting:[65.1,20.1,8,7]}
   ];
   // Other clearly drawn examples of the same object also respond to a tap.
   const extras = {
@@ -64,12 +64,12 @@
       const slot = document.createElement("button");
       slot.className = "slot" + (collected ? " found" : "") + (item.id === activeId ? " selected" : "");
       slot.innerHTML = stamp(item.id) + '<span class="slot-label">' + item.name + '</span>';
-      slot.setAttribute("aria-label", item.name + (collected ? "，查看发现" : "，查看线索"));
+      slot.setAttribute("aria-label", item.name + (collected ? ", read your discovery" : ", get a clue"));
       slot.addEventListener("click", () => selectEntry(item));
       el("stamp-grid").append(slot);
       const entry = document.createElement("button");
       entry.className = "journal-entry" + (collected ? " found" : "");
-      entry.innerHTML = stamp(item.id) + "<span><b>" + item.name + "</b><small>" + (collected ? item.story : "尚未发现 · 去画里找找") + "</small></span>";
+      entry.innerHTML = stamp(item.id) + "<span><b>" + item.name + "</b><small>" + (collected ? item.story : "Still hiding in the picture") + "</small></span>";
       entry.addEventListener("click", () => { location.hash = scene; showView(scene); selectEntry(item, true); });
       el("journal-grid").append(entry);
     }
@@ -78,12 +78,12 @@
     activeId = null;
     hintId = item?.id || null;
     const complete = found.size === items.length;
-    el("hint-label").textContent = !item && complete ? "六枚印章集齐啦！" : "探索小提示";
-    el("hint-text").textContent = item ? item.hint : "这场野餐的六位老朋友，都住进了你的手记。";
+    el("hint-label").textContent = !item && complete ? "All six stamps!" : "Picnic clue";
+    el("hint-text").textContent = item ? item.hint : "All six picnic discoveries now have a place in your journal.";
     el("next-hint").hidden = !item && complete;
     el("note-action").hidden = !complete || !!item;
     if (!item && complete) {
-      el("note-action").textContent = "翻开我的手记 →";
+      el("note-action").textContent = "Open my journal";
       el("note-action").onclick = () => { location.hash = "book"; };
     }
     if (locate && item) highlight(item.id);
@@ -92,11 +92,11 @@
   function showDiscovery(item) {
     activeId = item.id;
     hintId = null;
-    el("hint-label").textContent = "已盖章 · " + item.name;
+    el("hint-label").textContent = "Stamp collected · " + item.name;
     el("hint-text").textContent = item.story;
     el("next-hint").hidden = false;
     el("note-action").hidden = false;
-    el("note-action").textContent = item.again + " →";
+    el("note-action").textContent = item.again;
     el("note-action").onclick = () => { highlight(item.id); discover(item, item[scene]); };
     renderCollection();
   }
@@ -145,10 +145,10 @@
     if (isNew && found.size === items.length) {
       showHint(null);
       window.PicnicFX.chime(sound);
-      speak("六枚印章集齐啦！可以翻开手记回顾这场野餐。");
+      speak("You found all six stamps! Open your journal to see them again.");
     } else {
       showDiscovery(item);
-      speak((isNew ? "收集到" + item.name + "印章。" : "") + message);
+      speak((isNew ? "You earned the " + item.name.toLowerCase() + " stamp. " : "") + message);
     }
   }
   function renderSpots() {
@@ -161,7 +161,7 @@
         button.className = "spot" + (found.has(item.id) ? " found" : "");
         button.dataset.item = item.id;
         button.style.cssText = "left:"+x+"%;top:"+y+"%;width:"+w+"%;height:"+h+"%";
-        button.setAttribute("aria-label", "探索" + item.name);
+        button.setAttribute("aria-label", "Find the " + item.name.toLowerCase());
         if (index === 0) button.innerHTML = '<span class="pin" aria-hidden="true"></span>';
         else { button.tabIndex = -1; button.setAttribute("aria-hidden","true"); }
         button.addEventListener("click", () => discover(item,bounds));
@@ -170,7 +170,7 @@
     }
   }
   function updateTip() {
-    el("canvas-tip").textContent = small() && scene === "world" ? "左右滑动画面，点一点探索" : "点击画中事物，收集印章";
+    el("canvas-tip").textContent = small() && scene === "world" ? "Swipe to explore. Tap to collect." : "Tap the picture to collect stamps.";
   }
   function showView(next) {
     view = ["world","painting","book"].includes(next) ? next : "world";
@@ -180,8 +180,8 @@
     el("explorer").hidden = view === "book";
     el("journal").hidden = view !== "book";
     const isOriginal = view === "painting";
-    el("heading").innerHTML = view === "book" ? '我的<span class="underline">发现手记</span>' : isOriginal ? '画里的<span class="underline">野餐</span>' : '树下的<span class="underline">野餐</span>';
-    el("subheading").textContent = view === "book" ? "每枚印章，都记着你在苹果树下遇见的一位朋友。" : isOriginal ? "这是 Lucas 亲手画的野餐世界。点点原画，也能找到同一组印章。" : "走进 Lucas 的画里，点点树下的小伙伴，把新发现盖进手记。";
+    el("heading").innerHTML = view === "book" ? 'My <span class="underline">Field Journal</span>' : isOriginal ? 'The Original <span class="underline">Painting</span>' : 'Picnic Under the <span class="underline">Apple Tree</span>';
+    el("subheading").textContent = view === "book" ? "Each stamp holds a little memory from under the apple tree." : isOriginal ? "Here’s the picnic as Lucas drew it. Can you find the same six stamps in his painting?" : "Who’s come to Lucas’s picnic? Tap the picture to meet the guests and collect six stamps.";
     if (view === "book") { renderCollection(); return; }
     const changed = scene !== view;
     scene = view;
@@ -193,8 +193,8 @@
       img.height = isOriginal ? 1108 : 887;
       img.src = file;
     }
-    img.alt = isOriginal ? "Lucas 的野餐原画。小猫、蜜蜂、水果和点心围着一块黄白格纹野餐布。" : "苹果树下有一只戴黄领巾的小猫，两只蜜蜂在格纹野餐布上方飞舞。";
-    el("mode-label").textContent = isOriginal ? "画家原作" : "绘本场景";
+    img.alt = isOriginal ? "Lucas’s original painting of a kitten, bees, fruit and treats beside a yellow-and-white checkered blanket." : "A kitten in a yellow neckerchief sits under an apple tree. Two bees hover over the checkered picnic blanket.";
+    el("mode-label").textContent = isOriginal ? "Original art" : "Storybook scene";
     if (changed) { el("bubble").hidden = true; el("effects").replaceChildren(); pan.scrollLeft = 0; }
     updateTip();
     renderSpots();
@@ -202,8 +202,8 @@
   }
   function renderSound() {
     el("sound").setAttribute("aria-pressed",sound);
-    el("sound").setAttribute("aria-label",sound ? "关闭声音" : "开启声音");
-    el("sound").querySelector("span").textContent = sound ? "声音开" : "声音关";
+    el("sound").setAttribute("aria-label",sound ? "Turn sound off" : "Turn sound on");
+    el("sound").querySelector("span").textContent = sound ? "Sound on" : "Sound off";
     setIcon(el("sound").querySelector("i"),sound ? "volume" : "mute");
   }
   el("sound").addEventListener("click", () => {
@@ -213,12 +213,12 @@
   el("markers").addEventListener("click",() => {
     const enabled = frame.classList.toggle("markers-off") === false;
     el("markers").setAttribute("aria-pressed",enabled);
-    speak(enabled ? "标记已显示" : "标记已隐藏，仍可点击画中事物。");
+    speak(enabled ? "Markers are visible." : "Markers are hidden. You can still tap the picture.");
   });
   el("next-hint").addEventListener("click",nextHint);
   function zoomLabel(isOpen) {
     setIcon(el("expand").querySelector("i"),isOpen ? "shrink" : "expand");
-    el("expand").title = isOpen ? "退出放大" : "放大画面";
+    el("expand").title = isOpen ? "Close enlarged picture" : "Enlarge picture";
     el("expand").setAttribute("aria-label",el("expand").title);
   }
   el("expand").addEventListener("click",() => {
