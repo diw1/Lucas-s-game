@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f1e5">
+  <meta name="description" content="Fly a red post plane through Lucas’s paintings, collect rings and deliver a letter at the end of each route.">
+  <title>Cloudpost Express · Lucas’s World</title>
+  <meta property="og:title" content="Cloudpost Express · Lucas’s World">
+  <meta property="og:description" content="Become a flying mail cat. Thread the golden rings and deliver letters across five of Lucas’s painted worlds.">
+  <meta property="og:image" content="https://diw1.github.io/Lucas-s-game/cloudpost-express/assets/airmail-hero.webp">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23b84332'/%3E%3Cpath d='m5 14 22-8-7 21-6-9zM14 18 26 7' fill='none' stroke='%23fff4d5' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='1' y='1' width='46' height='46' rx='7' fill='%23b84332'/%3E%3Cpath d='M9 20l29-10-9 29-7-12-13-7zm13 7 16-17' fill='none' stroke='%23fff5d6' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preload" as="image" href="assets/airmail-hero.webp">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="assets/display.woff2">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <svg class="icon-bank" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="i-plane" viewBox="0 0 24 24"><path d="m21.1 3.5-5.2 16.8-4.3-6.9-7.9-3.2Z"/><path d="m11.6 13.4 9.5-9.9"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3.5 6 8.5 7 8.5-7m-17 12 5.7-5m11.3 5-5.7-5"/></symbol>
+      <symbol id="i-postcard" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="M13 8v8M5 15l3-4 3 4m5-6h3m-3 3h3"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2.5 6-2V19l-6 2-6-2.5L3 21Zm6-2v15.5m6-13V21"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3zM15.2 8.6a5 5 0 0 1 0 6.8m3.3-10a9 9 0 0 1 0 13.2"/></symbol>
+      <symbol id="i-muted" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3zM16 9l5 6m0-6-5 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 3.6 2.1c-.9.5-1.3 1-1.3 2m0 3v.1"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5.5v13m8-13v13" stroke-width="3.5"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m5.5 5.5 13 13m0-13-13 13"/></symbol>
+      <symbol id="i-ring" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="7" ry="9" transform="rotate(22 12 12)"/><path d="M7.8 10.3a7.6 7.6 0 0 1 3-4.2"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5L20 6.8"/></symbol>
+      <symbol id="i-wing" viewBox="0 0 32 24"><path d="M2 4h28c-2 6-6 8-11 8H9m-4-4h16m-10 8h8c4 0 6-1 8-4M14 20h3c3 0 5-1 7-3"/></symbol>
+    </defs>
+  </svg>
+  <a class="skip" href="#desk">Skip to flight desk</a>
+  <header class="mast">
+    <div class="mast-inner">
+      <a class="brand" href="#desk" aria-label="Cloudpost Express flight desk">
+        <span class="brand-stamp"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg></span>
+        <strong>Cloudpost Express</strong>
+      </a>
+      <nav class="desk-nav" aria-label="Game navigation">
+        <a id="desk-nav" href="#desk" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg><span>Flight desk</span></a>
+        <button type="button" id="postcards-nav"><svg class="icon" aria-hidden="true"><use href="#i-postcard"/></svg><span>Postcards</span><span id="postcard-count" class="count-badge">0</span></button>
+      </nav>
+      <div class="header-tools">
+        <button class="sound-button" id="sound" type="button" aria-label="Turn sound on" aria-pressed="false" title="Sound">
+          <svg class="icon sound-off" aria-hidden="true"><use href="#i-muted"/></svg><svg class="icon sound-on" aria-hidden="true"><use href="#i-sound"/></svg><span>Sound</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main id="desk" class="wrap desk" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero-art" src="assets/airmail-hero.webp" alt="A red post plane with a blue-eyed cat pilot flying through Lucas’s painted world." fetchpriority="high">
+      <div class="hero-copy">
+        <p class="hero-kicker"><svg class="icon" aria-hidden="true"><use href="#i-wing"/></svg> Lucas’s World <span aria-hidden="true">/</span> Air Mail</p>
+        <h1 id="hero-title">Cloudpost<br><em>Express</em></h1>
+        <p class="hero-intro">Take the red post plane through Lucas’s paintings. Fly the rings, then drop a letter at the end of the route.</p>
+        <div class="hero-actions">
+          <button type="button" id="start-flight" class="btn primary"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg>Start flight</button>
+          <button type="button" id="help-open" class="hero-help"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>How to fly</button>
+        </div>
+      </div>
+      <div class="hero-seal" aria-hidden="true"><span>BY AIR MAIL</span><svg class="icon"><use href="#i-wing"/></svg><span>CLOUDPOST</span></div>
+    </section>
+    <section class="routes" aria-labelledby="routes-title">
+      <header class="routes-head">
+        <div><p class="eyebrow"><span class="rule"></span> Flight desk</p><h2 id="routes-title">Choose your route</h2></div>
+      </header>
+      <div id="route-grid" class="route-grid" role="group" aria-label="Available flight routes"></div>
+      <div class="dispatch"><div class="selection"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><div><strong id="active-route">Ready for dispatch</strong><p id="route-brief">Pick a route, then start your flight.</p></div></div><button type="button" id="dispatch-flight" class="btn primary">Fly this route <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+    </section>
+  </main>
+  <main id="flight" class="wrap flight" hidden aria-labelledby="flight-title">
+    <header class="flight-head">
+      <div><p class="eyebrow"><span class="rule"></span><span id="flight-route-no">Air mail route</span></p><h1 id="flight-title" tabindex="-1">Mail flight</h1></div>
+      <button type="button" id="pause" class="btn secondary"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>Pause</button>
+    </header>
+    <div class="flight-panel">
+      <div class="hud">
+        <div class="ring-count"><svg class="icon" aria-hidden="true"><use href="#i-ring"/></svg><span>Rings</span><strong id="hud-score">0 / 0</strong></div>
+        <label class="progress-label" for="flight-progress">Flight progress</label><progress id="flight-progress" value="0" max="100">0%</progress>
+      </div>
+      <div class="sky-frame">
+        <canvas id="flight-canvas" tabindex="0" width="1200" height="560" aria-label="Flight area. Steer with arrow keys, W A S D, or by dragging. Use Deliver mail at the drop zone.">Use a browser with canvas support to fly this route.</canvas>
+      </div>
+      <div class="flight-tools"><p id="flight-hint">Drag to steer or use the arrow keys.</p><button id="deliver" type="button" class="btn primary"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>Deliver mail</button></div>
+    </div>
+  </main>
+  <footer class="footer wrap"><a href="../lucas-world/"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Explore Lucas’s World</a><span>Original paintings by Lucas</span></footer>
+  <template id="route-template">
+    <button type="button" class="route-card" aria-pressed="false">
+      <span class="route-picture"><img class="route-image" alt="" loading="lazy"><span class="route-no"></span><span class="selection-mark" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></span></span>
+      <span class="route-copy"><strong class="route-name"></strong><span class="route-detail"></span><span class="route-status"></span></span>
+    </button>
+  </template>
+  <dialog id="postcards-dialog" class="paper-dialog collection" aria-labelledby="collection-title">
+    <div class="dialog-inner">
+      <button type="button" class="modal-close" data-close aria-label="Close postcards"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      <p class="eyebrow"><span class="rule"></span> Air mail collection</p>
+      <div class="collection-head"><h2 id="collection-title">Your postcards</h2><span class="book-count" id="collection-count">0 / 5</span></div>
+      <p class="dialog-intro">Deliver a letter to bring a postcard home.</p>
+      <div id="postcard-grid" class="postcard-grid"></div>
+    </div>
+  </dialog>
+  <template id="postcard-template">
+    <button type="button" class="postcard-card">
+      <span class="postcard-picture"><img class="postcard-image" alt=""><span class="postcard-stamp" aria-hidden="true"><svg class="icon"><use href="#i-mail"/></svg></span></span>
+      <span class="postcard-copy"><small class="postcard-no"></small><strong class="postcard-name"></strong><span class="postcard-caption"></span></span>
+    </button>
+  </template>
+  <dialog id="help-dialog" class="paper-dialog" aria-labelledby="help-title">
+    <div class="dialog-inner">
+      <button type="button" class="modal-close" data-close aria-label="Close flight instructions"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+      <p class="eyebrow"><span class="rule"></span> Pilot’s notes</p><h2 id="help-title">How to fly</h2>
+      <ol class="help-list"><li><strong>Steer the plane</strong><span>Drag on the sky, or use the arrow keys or W A S D.</span></li><li><strong>Fly through rings</strong><span>Guide your plane through the hoops along the route.</span></li><li><strong>Deliver your letter</strong><span>At the drop zone, press Space or tap Deliver mail.</span></li></ol>
+      <button type="button" class="btn primary" data-close>Got it <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></button>
+    </div>
+  </dialog>
+  <dialog id="pause-dialog" class="paper-dialog" aria-labelledby="pause-title">
+    <div class="dialog-inner">
+      <p class="eyebrow"><span class="rule"></span> Flight on hold</p><h2 id="pause-title">Flight paused</h2>
+      <div class="pause-actions"><button type="button" class="btn primary" id="resume"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg>Resume flight</button><button type="button" id="restart" class="btn secondary">Fly again</button><button type="button" id="pause-sound" class="btn secondary" aria-pressed="true">Mute sound</button><button type="button" id="quit" class="btn text-btn">Flight desk</button></div>
+    </div>
+  </dialog>
+  <dialog id="result-dialog" class="paper-dialog result" aria-labelledby="result-title">
+    <div class="result-picture"><img id="result-image" alt=""><span id="result-stamp" class="result-stamp">Air mail</span></div>
+    <div class="dialog-inner">
+      <p class="eyebrow"><span class="rule"></span> Flight report</p><h2 id="result-title">Mail delivered!</h2><p id="result-summary" class="dialog-intro"></p>
+      <div class="result-scoreline"><span>Delivery <strong id="result-delivered"></strong></span><span>Rings <strong id="result-score"></strong></span><span id="result-stars" aria-label="Flight rating"></span></div>
+      <div class="result-letter"><strong id="result-recipient"></strong><p id="result-letter"></p></div>
+      <div class="result-actions"><button class="btn primary" id="result-next" type="button">Next route <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="btn secondary" id="result-replay" type="button">Fly again</button><button class="btn text-btn" id="result-home" type="button">Flight desk</button></div>
+    </div>
+  </dialog>
+  <p id="announce" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript><p class="wrap">Turn on JavaScript in your browser to play Cloudpost Express.</p></noscript>
+</body>
+</html>

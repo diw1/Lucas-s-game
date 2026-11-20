@@ -1,0 +1,72 @@
+export const routes = [
+  {
+    id: "orchard",
+    name: "Treehouse Post",
+    theme: "orchard",
+    landmark: "The yellow treehouse",
+    rings: 6,
+    level: 1,
+    recipient: "Pip the koala",
+    brief: "A letter for Pip! Look for the red roof in the orchard and deliver it to the little wooden door.",
+    letter: "I heard your plane from my bunk upstairs and slid down the ladder in my socks! A parade, you say? Please ask the picnic baker to save us some buns. Love, Pip",
+    stamp: "Treehouse Key",
+    color: "#a9d584",
+    tagline: "First post for the treehouse."
+  },
+  {
+    id: "picnic",
+    name: "The Picnic Run",
+    theme: "picnic",
+    landmark: "The apple tree picnic",
+    rings: 7,
+    level: 2,
+    recipient: "Miso the picnic cat",
+    brief: "Take Pip’s bun order to Miso. The bunny baker left a basket on the yellow picnic blanket.",
+    letter: "Six warm buns, all wrapped up. I’ve tied a ribbon on the basket so I won’t eat one by mistake. Could you tell the little red crab there’s a place for her, too? Miso",
+    stamp: "Picnic Basket",
+    color: "#f1bc63",
+    tagline: "A bun order for the baker."
+  },
+  {
+    id: "coral",
+    name: "Coral Crossing",
+    theme: "coral",
+    landmark: "Coral Cove",
+    rings: 8,
+    level: 3,
+    recipient: "Ruby the red crab",
+    brief: "Carry Miso’s invitation across the cove. Watch for Ruby waving both claws beside the coral.",
+    letter: "I can march sideways and clap at the same time! I drew a little map to the parade for the bat at Pumpkin Castle. Fold it twice so it fits under your wing. Ruby",
+    stamp: "Coral Claw",
+    color: "#75d2ca",
+    tagline: "An invitation across the water."
+  },
+  {
+    id: "castle",
+    name: "Pumpkin Castle",
+    theme: "castle",
+    landmark: "The pumpkin towers",
+    rings: 9,
+    level: 4,
+    recipient: "Pipkin the castle bat",
+    brief: "Fly Ruby’s map between the towers. Pipkin is keeping watch above the castle gate.",
+    letter: "I read the map upside down first. Now I see where the parade starts! Here’s my note for the band: when they hear three flaps, it’s time to play. Pipkin",
+    stamp: "Pumpkin Moon",
+    color: "#ec9a70",
+    tagline: "A folded map for the castle bat."
+  },
+  {
+    id: "festival",
+    name: "Ribbon Parade",
+    theme: "festival",
+    landmark: "Ribbon Square",
+    rings: 10,
+    level: 5,
+    recipient: "The parade marshal",
+    brief: "One last delivery! Follow the ribbons to the big pink float. The band needs Pipkin’s signal.",
+    letter: "Flap, flap, flap! The band began, Ruby marched sideways, and Pip passed around the buns. We saved the seat at the front of the float for our pilot. That means you!",
+    stamp: "Parade Rosette",
+    color: "#eaa1b6",
+    tagline: "The band is waiting for your letter."
+  }
+];
