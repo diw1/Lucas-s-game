@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101e2c"><meta name="description" content="Turn the tracks, carry a spark through nine of Lucas's paintings, and light up the island. A puzzle game for mouse, touch and keyboard.">
+<title>Lantern Night · Lucas's World</title>
+<link rel="icon" type="image/svg+xml" href="assets/lantern.svg"><link rel="preload" as="image" href="assets/nightfall.webp">
+<link rel="preload" as="font" href="assets/display.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="board.css"><link rel="stylesheet" href="island3d.css">
+<script defer src="engine.js"></script><script defer src="scenes.js"></script><script defer src="board.js"></script><script defer src="island3d.js"></script><script defer src="game.js"></script>
+</head>
+<body>
+<header class="topbar"><div class="top-inner">
+  <a class="brand" href="#home" aria-label="Lantern Night home"><img src="assets/lantern.svg" alt="" width="42" height="48"><span>Lucas's World</span></a>
+  <nav class="nav" aria-label="Game navigation"><a href="#home" data-nav="home"><i data-icon="home"></i><span>Game room</span></a><a href="#island" data-nav="island"><i data-icon="island"></i><span>3D island</span></a><a href="#album" data-nav="album"><i data-icon="book"></i><span>Art album</span></a></nav>
+  <div class="header-tools"><button id="help" class="icon-button" aria-label="How to play" title="How to play"><i data-icon="help"></i></button><button id="sound" class="icon-button" aria-pressed="false" aria-label="Turn sound on" title="Turn sound on"><i data-icon="mute"></i></button></div>
+</div></header>
+<main id="main">
+<section id="home" class="screen" aria-labelledby="game-title">
+  <article class="night-cover">
+    <div class="stars" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+    <div class="cover-story"><div class="eyeline"><span></span>A 3D island adventure</div>
+      <h1 id="game-title">Lantern <em>Night</em></h1>
+      <p>Night has fallen on Lucas's island. Wander through his paintings, turn the light tracks, and bring the lanterns to life.</p>
+      <div class="cover-actions"><a class="gold-button" id="begin" href="#island"><i data-icon="play"></i><span>Enter the 3D island</span></a><button id="hero-help" class="glass-button"><i data-icon="bulb"></i>How to play</button></div>
+    </div>
+    <span class="artist-credit"><i data-icon="brush"></i>Inspired by Lucas's paintings</span>
+  </article>
+  <section class="chapters" aria-labelledby="journey-title"><div class="section-head"><div><p class="eyeline"><span></span>Chapter select</p><h2 id="journey-title">The lantern trail</h2></div><span class="collection-pill" id="journey-count"></span></div><div class="chapter-shelf">
+    <div class="chapter-rail" id="chapters"></div><div class="rail-controls"><button aria-label="Previous chapters" id="prev-rail"><i data-icon="prev"></i></button><button aria-label="Next chapters" id="next-rail"><i data-icon="next"></i></button></div></div></section>
+</section>
+<section id="island" class="screen island-page" hidden aria-labelledby="island-title"><header class="game-heading"><div><p class="eyeline"><span></span>Explore in 3D</p><h1 id="island-title">Lantern Island</h1></div><a href="#home" class="sub-link"><i data-icon="home"></i>Game room</a></header><div id="island-host"></div></section>
+<section id="play" class="screen play-page" aria-label="Light trail puzzle" hidden>
+  <div class="game-heading"><div><p class="eyeline" id="chapter-no"></p><h1 id="chapter-title"></h1></div><a class="sub-link" id="back-island" href="#island"><i data-icon="island"></i>Back to island</a></div>
+  <div class="play-layout">
+    <article class="workbench">
+      <div class="bench-head"><h2><i data-icon="circuit"></i>Light tracks</h2><span id="lamp-counter" class="lamp-counter"></span></div>
+      <div id="board-host"></div>
+      <p class="hint-line" id="hint-line" aria-live="polite"></p>
+      <div class="work-tools"><button id="undo" class="tool"><i data-icon="undo"></i>Undo</button><button id="hint" class="tool"><i data-icon="bulb"></i>Hint</button><button id="reset" class="tool"><i data-icon="reset"></i>Restart</button><span class="moves"><b id="move-count">0</b> <span id="move-unit">turns</span></span></div>
+    </article>
+    <aside class="scene-note">
+      <div class="note-top"><span class="little-label">From Lucas's sketchbook</span><i data-icon="brush"></i></div>
+      <button id="inspect" class="art-frame" aria-label="Open the original painting"><span class="art-stage"><img id="scene-art" alt=""><span class="glow-layer" id="glows"></span></span><i data-icon="zoom"></i></button>
+      <h2 id="art-place"></h2><p id="story-line"></p>
+      <div class="note-divider"></div><div class="note-target"><span><i data-icon="star"></i>Perfect route</span><b id="par-count"></b></div>
+      <div class="note-target"><span><i data-icon="award"></i>Your best</span><b id="best-count"></b></div>
+      <button id="play-next" class="gold-button small" hidden></button>
+    </aside>
+  </div>
+</section>
+<section id="album" class="screen album-page" hidden><header class="game-heading"><div><p class="eyeline"><span></span>Lucas's paintings</p><h1>Art album</h1></div><span class="collection-pill" id="album-count"></span></header><p class="album-intro">Open any painting for a closer look. Finish its puzzle to earn a lantern seal.</p><div id="album-grid" class="album-grid"></div></section>
+<footer><span><img src="assets/lantern.svg" width="21" height="24" alt="">Lantern Night</span><a href="../lucas-world/">Explore Lucas's World <i data-icon="map"></i></a></footer>
+</main>
+<dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><button id="close-dialog" class="close-dialog icon-button" aria-label="Close"><i data-icon="close"></i></button><div id="dialog-body"></div></div></dialog>
+<div id="announcement" role="status" aria-live="polite" class="sr-only"></div>
+<noscript>This game needs JavaScript to turn the light tracks.</noscript>
+</body></html>

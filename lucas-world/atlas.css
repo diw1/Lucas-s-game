@@ -37,3 +37,6 @@
   .atlas-scale b{display:none}
   #map-title{font-size:3.05rem}
 }
+
+.island-game-link{display:block;padding:13px 15px;border:1px solid #49665c;border-radius:8px;color:#fff5d9;background:linear-gradient(90deg,#132c36 15%,#123038a3 65%,#132c3640),url(../lantern-night/assets/nightfall.webp) 71% 42%/cover;box-shadow:1px 2px 0 #cdcbb7}.island-game-link>span{display:flex;align-items:center;gap:6px;color:#f2cd81;font-size:.84rem;font-weight:bold}.island-game-link i[data-glyph] svg{width:15px;height:15px}.island-game-link strong{display:block;font:1.55rem var(--serif);margin:4px 0 1px}.island-game-link small{font-size:.84rem}.island-game-link:hover strong{text-decoration:underline;text-underline-offset:3px}
+@media(min-width:581px) and (max-width:830px){.sidebar .postcard{grid-row:span 2}.sidebar .originals-preview{grid-row:auto;grid-column:auto}.island-game-link{grid-column:2}}
