@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111d30">
-  <meta name="description" content="Step into the treehouse observatory with Lucas’s blue-eyed kitten. Search six painted rooms, solve their locks and bring back the moonlight.">
+  <meta name="description" content="Explore two books of hands-on puzzles in Lucas’s paintings. Find the Moonkeeper’s Key, then ring the Dawn Bell.">
   <title>The Moonkeeper’s Key · Lucas’s World</title>
   <meta property="og:title" content="The Moonkeeper’s Key · A Lantern Night mystery">
-  <meta property="og:description" content="Solve six hands-on puzzles, keep a star journal and decode the Moonkeeper’s last lock.">
+  <meta property="og:description" content="Solve twelve hands-on mysteries in Lucas’s paintings, from the Moonkeeper’s observatory to the Dawn Bell tower.">
   <meta property="og:image" content="https://diw1.github.io/Lucas-s-game/moonkeepers-key/assets/moonroom.webp">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%23192437'/%3E%3Cg fill='none' stroke='%23efd191' stroke-width='3.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='17' cy='17' r='6.5'/%3E%3Cpath d='M22 22l14 14m-8-8 4-4m0 8 4-4'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../lantern-night/assets/display.woff2">
-  <link rel="preload" as="image" href="assets/moonroom.webp">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=dawn">
   <link rel="stylesheet" href="early.css">
   <link rel="stylesheet" href="late.css">
   <link rel="stylesheet" href="final.css">
-  <script type="module" src="app.js"></script>
+  <link rel="stylesheet" href="dawn-garden.css">
+  <link rel="stylesheet" href="dawn-fair.css">
+  <link rel="stylesheet" href="dawn-tower.css">
+  <script type="module" src="app.js?v=dawn"></script>
 </head>
 <body>
   <svg class="mk-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -45,7 +47,7 @@
       </a>
       <nav class="mk-nav" aria-label="Observatory navigation">
         <button type="button" id="nav-desk" aria-current="page"><svg class="mk-icon" aria-hidden="true"><use href="#mk-scope"/></svg>Observatory</button>
-        <button type="button" id="nav-journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg><span>Seal journal</span></button>
+        <button type="button" id="nav-journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg><span>Journal</span></button>
       </nav>
       <button type="button" id="sound" class="mk-sound" aria-pressed="false" aria-label="Turn sound on" title="Sound">
         <svg class="mk-icon mk-off" aria-hidden="true"><use href="#mk-mute"/></svg><svg class="mk-icon mk-on" aria-hidden="true"><use href="#mk-sound"/></svg><span>Sound</span>
@@ -53,12 +55,16 @@
     </div>
   </header>
   <main id="desk" class="mk-container mk-desk" tabindex="-1">
+    <nav class="mk-books" aria-label="Choose a puzzle book">
+      <a href="#book/night" data-book="night"><small>Book I</small><span>The Moonkeeper’s Key</span></a>
+      <a href="#book/dawn" data-book="dawn"><small>Book II</small><span>The Dawn Bell</span></a>
+    </nav>
     <section class="mk-hero" aria-labelledby="desk-title">
-      <img class="mk-hero-art" src="assets/moonroom.webp" alt="A silver kitten keeps watch beside the telescope and a glowing brass lock in the treehouse observatory." fetchpriority="high">
+      <img class="mk-hero-art" id="book-cover" alt="" fetchpriority="high">
       <div class="mk-hero-copy">
-        <p class="mk-kicker"><svg class="mk-icon" aria-hidden="true"><use href="#mk-star"/></svg> A Lantern Night mystery</p>
+        <p class="mk-kicker"><svg class="mk-icon" aria-hidden="true"><use href="#mk-star"/></svg><span id="book-kicker">A Lantern Night mystery</span></p>
         <h1 id="desk-title">The Moonkeeper’s<br><em>Key</em></h1>
-        <p class="mk-hero-intro">The moon is up, but the island’s lanterns are dark. Follow the silver kitten through Lucas’s paintings to find the missing key.</p>
+        <p class="mk-hero-intro" id="book-intro">The moon is up, but the island’s lanterns are dark. Follow the silver kitten through Lucas’s paintings to find the missing key.</p>
         <div class="mk-hero-actions">
           <button type="button" id="enter-room" class="mk-btn mk-primary"><svg class="mk-icon" aria-hidden="true"><use href="#mk-key"/></svg>Enter the observatory</button>
           <button type="button" id="help" class="mk-btn mk-quiet"><svg class="mk-icon" aria-hidden="true"><use href="#mk-help"/></svg>How to play</button>
@@ -67,7 +73,7 @@
     </section>
     <section class="mk-chapters" aria-labelledby="chapter-title">
       <header class="mk-chapters-head">
-        <div><p class="mk-kicker"><span class="mk-gold-line"></span> Chapter select</p><h2 id="chapter-title">The six rooms</h2></div>
+        <div><p class="mk-kicker"><span class="mk-gold-line"></span><span id="chapter-range">Rooms 01–06</span></p><h2 id="chapter-title">The moonlight trail</h2></div>
         <div class="mk-progress"><div><svg class="mk-icon" aria-hidden="true"><use href="#mk-key"/></svg><span id="desk-count">0 / 6 rooms</span></div><progress id="desk-track" value="0" max="6" aria-label="Rooms opened"></progress></div>
       </header>
       <div id="room-grid" class="mk-room-grid" role="group" aria-label="Rooms in the moonlight mystery"></div>
@@ -95,7 +101,7 @@
       <aside class="mk-evidence" aria-labelledby="clue-title">
         <figure class="mk-original"><button type="button" id="inspect-art" class="mk-original-mat" aria-label="Enlarge Lucas’s original painting"><img id="game-art" alt=""><span class="mk-zoom" aria-hidden="true">⤢</span></button><figcaption><svg class="mk-icon" aria-hidden="true"><use href="#mk-image"/></svg><span id="art-caption">Original painting by Lucas</span></figcaption></figure>
         <div class="mk-clue"><p class="mk-kicker"><svg class="mk-icon" aria-hidden="true"><use href="#mk-star"/></svg> Field notes</p><h2 id="clue-title">The painting’s clue</h2><p id="clue-text"></p></div>
-        <button type="button" id="game-journal" class="mk-evidence-journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg>Open seal journal <svg class="mk-icon" aria-hidden="true"><use href="#mk-arrow"/></svg></button>
+        <button type="button" id="game-journal" class="mk-evidence-journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg><span class="mk-action-label">Open seal journal</span><svg class="mk-icon" aria-hidden="true"><use href="#mk-arrow"/></svg></button>
       </aside>
     </div>
   </main>
@@ -113,15 +119,16 @@
     <ol class="mk-instructions">
       <li><strong>Look at Lucas’s painting.</strong><span>Read the field notes and look for details that might fit the lock.</span></li>
       <li><strong>Work the mechanism.</strong><span>Choose your answer on the workbench, then try the lock. Ask for a hint if you need one.</span></li>
-      <li><strong>Find the Moonkeeper’s Key.</strong><span>Collect five seals. In the last room, use their star engravings to match the symbols around the wheel.</span></li>
+      <li><strong>Use your journal.</strong><span>Book I records five engraved seals. Book II records five chimes and their flashes. Each book ends with a puzzle that uses its five entries.</span></li>
     </ol>
     <button type="button" class="mk-btn mk-primary" data-close>Got it <svg class="mk-icon" aria-hidden="true"><use href="#mk-check"/></svg></button>
   </div></dialog>
   <dialog id="journal-dialog" class="mk-dialog mk-journal" aria-labelledby="journal-title"><div class="mk-dialog-inner">
-    <button class="mk-close" type="button" data-close aria-label="Close seal journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-close"/></svg></button>
+    <button class="mk-close" type="button" data-close aria-label="Close journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-close"/></svg></button>
     <p class="mk-kicker"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg> Observatory collection</p>
     <div class="mk-journal-heading"><h2 id="journal-title">Seal journal</h2><span id="journal-count">0 / 5 seals</span></div>
-    <p class="mk-dialog-lede">Each seal has a symbol and a star engraving. In the sixth room, match the engravings around the wheel to find which symbol belongs in each place.</p>
+    <div class="mk-journal-books" role="group" aria-label="Journal volumes"><button type="button" data-volume="night">Book I · Seals</button><button type="button" data-volume="dawn">Book II · Chimes</button></div>
+    <p class="mk-dialog-lede" id="journal-lede"></p>
     <div id="journal-grid" class="mk-journal-grid"></div>
   </div></dialog>
   <template id="journal-template">

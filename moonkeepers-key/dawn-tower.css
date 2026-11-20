@@ -1,0 +1,77 @@
+.dt-box{--dt-cream:#f8edd2;--dt-gold:#e3be78;--dt-ink:#254951;--dt-water:#183d48;min-width:0;max-width:100%;container:dt-board / inline-size}
+.dt-box *{box-sizing:border-box}
+.dt-box button{font-family:inherit;touch-action:manipulation}
+.dt-box button:focus-visible{position:relative;z-index:2;outline:3px solid #ffdf75;outline-offset:-3px}
+.dt-box h3,.dt-box p,.dt-box ul{margin:0}
+.dt-accessible{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dt-machine-title,.dt-note-head{font:normal clamp(1.1rem,2.1vw,1.55rem)/1.15 var(--mk-serif,Georgia,serif);letter-spacing:-.025em}
+.dt-tide-note{padding:clamp(12px,3%,20px);background:#efe2be;background-image:repeating-linear-gradient(0deg,transparent 0 21px,#b2a16a38 22px,transparent 23px);color:#394a43;border:1px solid #bca677;border-radius:5px 11px 7px 5px;box-shadow:inset 0 0 0 3px #f2e8ce,0 2px 0 #23343d}
+.dt-tide-note .dt-note-head{color:#365148;font-size:1.12rem}
+.dt-notes{display:grid;gap:3px;padding-left:1.2rem;margin-top:7px!important;font-size:.88rem;line-height:1.5}
+.dt-note::marker{color:#97754b}
+.dt-manifest,.dt-blueprint,.dt-puncher{position:relative;overflow:hidden;border:1px solid #888363;border-radius:8px}
+.dt-manifest{margin-top:11px;background:linear-gradient(115deg,#1b464c,#173741 78%);padding:clamp(10px,2.4%,18px);box-shadow:inset 0 0 0 3px #18343c,inset 0 0 0 4px #8fa18b40}
+.dt-manifest-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#f2e4be;margin-bottom:7px}
+.dt-paper-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:#c8d6c7;font-weight:700;white-space:nowrap}
+.dt-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:2px;text-align:center}
+.dt-table th{font-weight:670}
+.dt-table th,.dt-table td{padding:0;position:relative}
+.dt-manifest th:first-child{width:30%;text-align:left}
+.dt-manifest thead th{padding:4px 0;color:#d6e3d5;font-size:.75rem}
+.dt-manifest thead th svg{display:inline-block;vertical-align:middle;width:19px;height:17px;color:#e7c693}
+.dt-parcel-size{display:inline-block;margin-left:2px;vertical-align:middle}
+.dt-manifest tbody th{font-size:.84rem;color:#fff2d6}
+.dt-animal{display:inline-block;width:clamp(27px,4.4vw,40px);aspect-ratio:1;vertical-align:middle;border-radius:50%;border:2px solid #b6b698;background:#899e91 url("../lantern-night/assets/art/reef.webp") no-repeat;background-size:440% auto;box-shadow:0 1px 3px #0c242994}
+.dt-animal[data-animal=whale]{background-position:14% 0%}
+.dt-animal[data-animal=turtle]{background-position:47% 0%}
+.dt-animal[data-animal=crab]{background-position:72% 81%}
+.dt-animal[data-animal=fish]{background-position:95% 0%}
+.dt-animal-name{display:inline-block;vertical-align:middle;margin-inline-start:5px}
+.dt-seal-pad{display:grid;place-items:center;width:100%;min-height:42px;border:1px solid #68867f;border-radius:5px;background:#214b50;color:#9fbbb0}
+.dt-seal-pad:hover{background:#305d59}
+.dt-ink{display:grid;place-items:center;width:23px;height:23px;border:1px dashed #88a29680;border-radius:50%;font:700 1.05rem/1 system-ui}
+.dt-seal-pad[aria-pressed=true]{border-color:#efd79b;background:#d8c992;color:#294c47;box-shadow:inset 0 0 0 2px #c3ac76}
+.dt-seal-pad[aria-pressed=true] .dt-ink{border:1px solid #647953;transform:rotate(-8deg)}
+.dt-guide,.dt-machine-status{font-size:.82rem;line-height:1.5}
+.dt-box .dt-guide{margin-top:8px;color:#d5ddd4}
+.dt-box .dt-machine-status:not(:empty){margin-top:6px;color:#f4d997}
+.dt-blueprint{padding:clamp(10px,2.4%,19px);color:#deeee6;background:#254e5b;background-image:linear-gradient(90deg,#a5c7bd0e 1px,transparent 1px),linear-gradient(#a5c7bd0e 1px,transparent 1px);background-size:12px 12px;border-color:#748d88;box-shadow:inset 0 0 0 3px #234653}
+.dt-blueprint .dt-machine-title{color:#e4e9d7}
+.dt-roll-legend{display:flex;gap:4px 12px;flex-wrap:wrap;font-size:.72rem;line-height:1.4;padding:4px 0 6px}
+.dt-legend-item{display:inline-flex;align-items:center;gap:4px}
+.dt-legend-mark,.dt-imprint{font-family:ui-monospace,monospace}
+.dt-legend-mark[data-mark=flash],.dt-imprint[data-mark=flash]{color:#f6d796}
+.dt-legend-mark[data-mark=rest],.dt-imprint[data-mark=rest]{color:#d5e6df}
+.dt-legend-mark[data-mark=worn],.dt-imprint[data-mark=worn]{color:#a7c3bf}
+.dt-blueprint .dt-table th,.dt-puncher .dt-table th{font-size:.72rem;line-height:1.36;padding:3px 0}
+.dt-tower .dt-table th:first-child{width:16%;text-align:start}
+.dt-blueprint .dt-table tbody td{border:1px solid #a9c7b83a;background:#143b4680;border-radius:3px}
+.dt-imprint{display:block;font-size:1.02rem;line-height:1.3}
+.dt-imprint[data-mark=worn]{font-size:.82rem}
+.dt-puncher{padding:clamp(11px,2.5%,19px);margin-top:12px;color:#5c442b;background:linear-gradient(117deg,#f5e3b8,#e4c799 80%,#cfac75);border:1px solid #ac8c59;box-shadow:inset 0 0 0 3px #ac8c5b,inset 0 0 0 4px #f7e6c2}
+.dt-puncher .dt-machine-title{margin-bottom:6px;color:#4d3a30}
+.dt-puncher td{background:#b79865;border-radius:3px}
+.dt-puncher tfoot td{background:transparent;padding-top:4px}
+.dt-peg{display:grid;place-items:center;width:100%;min-height:42px;padding:2px;border:1px solid #b49664;border-radius:3px;background:repeating-linear-gradient(85deg,#ffffff07 0 2px,transparent 2px 5px),#ebd7aa;color:#463a28}
+.dt-peg:hover{background-color:#f9e7bf}
+.dt-peg:focus-visible{outline-color:#25536a!important}
+.dt-peg-head{display:grid;place-items:center;width:15px;height:15px;background:radial-gradient(circle at 65% 75%,#6f5e40,#3d392d 69%);border-radius:50%;box-shadow:0 1px 0 1px #fff1cb,inset 1px 1px 2px #3d3828;transition:width .1s,height .1s}
+.dt-peg[aria-pressed=true]{background-color:#e5c586}
+.dt-peg[aria-pressed=true] .dt-peg-head{width:23px;height:23px;background:radial-gradient(circle at 33% 25%,#fff1bf 0,#e9bc60 30%,#b78644 55%,#836239 72%,#b6935a 90%);border:1px solid #8b6533;box-shadow:1px 2px 2px #6552367a,0 0 0 1px #c2a064}
+.dt-matched{display:block;font-size:.75rem;line-height:1.4;font-weight:760;color:#493622;overflow-wrap:anywhere}
+@container dt-board (max-width:410px){
+  .dt-manifest th:first-child{width:25%}
+  .dt-animal{display:none}
+  .dt-animal-name{margin-left:0;font-size:.76rem}
+  .dt-seal-pad,.dt-peg{min-height:41px}
+  .dt-manifest thead th svg{width:13px}
+  .dt-blueprint .dt-table th,.dt-puncher .dt-table th,.dt-matched{font-size:.68rem}
+  .dt-notes{font-size:.8rem;gap:2px}
+}
+@media(pointer:coarse){.dt-seal-pad,.dt-peg{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.dt-peg-head{transition:none}}
+@media(forced-colors:active){
+  .dt-peg[aria-pressed=true],.dt-seal-pad[aria-pressed=true]{outline:2px solid Highlight}
+  .dt-peg-head{border:1px solid ButtonText;background:Canvas}
+  .dt-peg[aria-pressed=true] .dt-peg-head{background:Highlight}
+}
