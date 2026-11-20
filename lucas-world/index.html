@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f6eb">
+  <meta name="description" content="九幅 Lucas 的原画连成八个地点，树屋的外景和内景共用一扇门。去树屋做客，和蓝鲸游泳，沿着小路把一封信送给下一位朋友。">
+  <title>Lucas's World</title>
+  <link rel="icon" href="assets/atlas-mark.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/atlas.webp" as="image">
+  <link rel="stylesheet" href="atlas.css">
+  <link rel="stylesheet" href="visit.css">
+  <script src="assets/stamps.js" defer></script>
+  <script src="effects.js" defer></script>
+  <script src="places.js" defer></script>
+  <script src="visit.js" defer></script>
+  <script src="atlas.js" defer></script>
+</head>
+<body>
+  <header class="mast">
+    <div class="mast-inner">
+      <a class="wordmark" href="#map" aria-label="Lucas's World 首页"><img src="assets/atlas-mark.svg" alt="" width="42" height="42"><span>画里游</span></a>
+      <nav aria-label="主导航">
+        <a href="#map" data-section="map"><i data-glyph="map"></i>世界地图</a>
+        <a href="#gallery" data-section="gallery"><i data-glyph="frame"></i>原画集</a>
+        <a href="#passport" data-section="passport"><i data-glyph="book"></i>旅行护照</a>
+      </nav>
+      <button type="button" id="sound" class="audio-btn" aria-pressed="false"><i data-glyph="mute"></i><span>声音关</span></button>
+    </div>
+  </header>
+  <main class="container" id="main">
+    <section id="map-page" class="atlas-page" aria-labelledby="map-title">
+      <header class="hero-heading">
+        <div><p class="overline"><span></span>手绘探险岛</p>
+          <h1 id="map-title" lang="en">Lucas's <em>World</em></h1>
+          <p class="lede">九幅原画，八个地点。点开一个地名，就能走进 Lucas 的画里。</p>
+        </div>
+        <div class="creator"><span class="creator-line"></span><span><i data-glyph="pencil"></i> 原画作者</span><b>Lucas</b></div>
+      </header>
+      <div class="map-layout">
+        <div id="map-home">
+          <article id="map-card" class="map-card" aria-label="小岛互动地图">
+            <div class="map-toolbar"><h2><i data-glyph="compass"></i>小岛地图</h2>
+              <div class="map-tools"><button id="labels" type="button" aria-pressed="true"><i data-glyph="pin"></i><span>地名</span></button><button id="zoom" type="button" aria-label="放大地图" title="放大地图"><i data-glyph="expand"></i></button></div>
+            </div>
+            <div class="map-scroll" id="map-scroll">
+              <div class="island" id="island">
+                <img src="assets/atlas.webp" alt="九幅画连成的小岛。上方是一座能走进去的树屋和南瓜古堡，中间有野餐地、兔子面包房和舞台，往海边走能到花园、广场和珊瑚海湾。" width="1536" height="1024" fetchpriority="high">
+                <div id="map-pins" class="map-pins"></div>
+              </div>
+            </div>
+            <div class="map-caption"><span><i data-glyph="hand"></i>点地名进入原画</span><span class="atlas-scale" aria-hidden="true"><b></b> LUCAS'S ATLAS</span></div>
+          </article>
+        </div>
+        <aside class="sidebar" aria-label="旅行活动">
+          <section class="postcard">
+            <div class="airmail" aria-hidden="true"></div>
+            <div class="post-content">
+              <div class="post-heading"><div><p class="edition">ISLAND POST</p><h2>岛上邮局</h2></div>
+                <span class="postage" aria-hidden="true"><span id="post-sun"></span></span>
+              </div>
+              <div class="post-divider"></div>
+              <p class="post-addressee" id="mail-title"></p>
+              <p class="mail-body" id="mail-body"></p>
+              <button class="post-button" id="mail-button" type="button"></button>
+            </div>
+          </section>
+          <a href="#passport" class="passport-cover">
+            <div class="cover-heading"><i data-glyph="book"></i><span>旅行护照</span></div>
+            <div class="cover-bottom"><span><strong id="stamp-total">0</strong><small> / 9 枚原画印章</small></span><div class="cover-seal" aria-hidden="true"><i data-glyph="compass"></i></div></div>
+            <div id="cover-progress" class="cover-progress" aria-hidden="true"></div>
+          </a>
+          <a href="#gallery" class="originals-preview">
+            <div class="original-stack" aria-hidden="true"><img src="assets/places/canopy.webp" alt=""><img src="assets/places/cat.webp" alt=""><img src="assets/places/reef.webp" alt=""></div>
+            <span><strong>翻开原画集</strong><small>Lucas 画的 9 幅原作</small></span>
+          </a>
+        </aside>
+      </div>
+    </section>
+    <section id="gallery-page" class="atlas-page" hidden aria-labelledby="gallery-title">
+      <header class="secondary-heading"><p class="overline"><span></span>ORIGINAL ARTWORK</p><h1 id="gallery-title">Lucas 的原画集</h1><p class="lede">翻开一幅原画，点点里面的人物和物件。</p></header>
+      <div id="gallery-grid" class="gallery-grid"></div>
+    </section>
+    <section id="passport-page" class="atlas-page" hidden aria-labelledby="passport-title">
+      <header class="secondary-heading"><p class="overline"><span></span>ISLAND PASSPORT</p><h1 id="passport-title">旅行护照</h1><p id="passport-summary" class="lede"></p></header>
+      <div class="passport-grid" id="passport-grid"></div>
+    </section>
+    <section id="visit-page" class="atlas-page" hidden aria-label="原画探索">
+      <div id="delivery-belt" class="delivery-belt" hidden></div>
+      <div id="visit-mount"></div>
+    </section>
+    <footer class="endpaper"><span><i data-glyph="pencil"></i>Lucas 的手绘小岛</span><a href="#map" lang="en">Lucas's World</a></footer>
+  </main>
+  <dialog id="map-dialog" aria-label="放大的小岛地图"><div id="map-enlarged"></div></dialog>
+  <div class="notice" id="notice" role="status" aria-live="polite"></div>
+  <noscript>请在浏览器开启 JavaScript，即可点击地图。<a href="assets/atlas.webp">查看完整小岛地图</a></noscript>
+</body>
+</html>

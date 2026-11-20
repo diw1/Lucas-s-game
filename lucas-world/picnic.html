@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f5e9">
+  <meta name="description" content="走进 Lucas 画的苹果树下，和小猫、蜜蜂一起野餐，收集六枚发现印章。">
+  <title>树下的野餐 · Lucas's World</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/orchard.webp" as="image">
+  <link rel="preload" href="assets/brush.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="assets/stamps.js"></script>
+  <script defer src="effects.js"></script>
+  <script defer src="world.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topinner">
+      <a class="brand" href="./#map" aria-label="回到 Lucas's World 世界地图"><span class="brand-art" data-stamp="basket"></span><span>世界地图</span></a>
+      <nav aria-label="主导航">
+        <a href="#world" data-nav="world"><i data-icon="compass"></i>探索世界</a>
+        <a href="#book" data-nav="book"><i data-icon="book"></i>发现手记</a>
+        <a href="#painting" data-nav="painting"><i data-icon="picture"></i>画家原作</a>
+      </nav>
+      <button id="sound" class="sound" type="button" aria-pressed="false"><i data-icon="mute"></i><span>声音关</span></button>
+    </div>
+  </header>
+  <main class="page">
+    <header class="intro">
+      <div>
+        <div class="eyebrow"><span></span>LUCAS’ PICTUREBOOK</div>
+        <h1 id="heading">树下的<span class="underline">野餐</span></h1>
+        <p id="subheading">走进 Lucas 的画里，点点树下的小伙伴，把新发现盖进手记。</p>
+      </div>
+      <div class="sun-flight" aria-hidden="true">
+        <svg viewBox="0 0 200 72" fill="none"><path d="M3 49C26 62 45 60 61 39S64 18 58 26c-8 14 15 25 35 17s36-25 58-20" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-dasharray="4 6"/></svg>
+        <span data-stamp="bee" class="flying-friend"></span><span data-stamp="sun" class="sun"></span>
+      </div>
+    </header>
+    <section id="explorer" class="world-layout" aria-label="互动绘本">
+      <div id="frame-home">
+        <article class="picture-frame" id="frame">
+          <span class="tape" aria-hidden="true"></span>
+          <div class="scene-wrap">
+            <div class="mode-label"><span></span><b id="mode-label">绘本场景</b></div>
+            <div class="scene-pan" id="scene-pan">
+              <div class="stage" id="stage">
+                <img id="scene-image" src="assets/orchard.webp" width="1774" height="887" alt="苹果树下的小猫、花丛中的蜜蜂，以及铺在方格布上的丰盛野餐。">
+                <div id="hotspots" class="hotspots" aria-label="画里的发现点"></div>
+                <div id="effects" class="effects" aria-hidden="true"></div>
+                <div id="bubble" class="bubble" hidden></div>
+              </div>
+            </div>
+          </div>
+          <div class="frame-tools">
+            <span class="how"><i data-icon="hand"></i><span id="canvas-tip">点击画中事物，收集印章</span></span>
+            <div class="toolbuttons">
+              <button id="markers" aria-pressed="true" title="显示或隐藏画中的标记"><i data-icon="map-pin"></i><span>标记</span></button>
+              <span class="divider"></span>
+              <button id="expand" title="放大画面" aria-label="放大画面"><i data-icon="expand"></i></button>
+            </div>
+          </div>
+        </article>
+        <div class="credit"><span class="credit-line"></span><i data-icon="pencil"></i><span>原画作者 <b>Lucas</b></span></div>
+      </div>
+      <aside class="notebook" aria-label="发现进度">
+        <div class="rings" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+        <div class="note-head">
+          <div class="mini-english">FIELD NOTES</div>
+          <div class="note-title"><h2>发现手记</h2><span class="count"><b id="count">0</b><span>/</span>6</span></div>
+          <div class="progress-track" role="progressbar" aria-label="已发现的印章" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><span></span></div>
+        </div>
+        <div class="stamp-grid" id="stamp-grid"></div>
+        <div class="note-hint" id="note-hint">
+          <div class="hint-top"><span><i data-icon="bulb"></i><b id="hint-label">探索小提示</b></span><button id="next-hint" aria-label="换一个提示" title="换一个提示"><i data-icon="refresh"></i></button></div>
+          <p id="hint-text">谁系着黄色的小领巾，坐在树下等你？</p>
+          <button id="note-action" class="text-action" hidden></button>
+        </div>
+      </aside>
+    </section>
+    <section id="journal" class="journal-panel" aria-label="发现手记" hidden>
+      <div class="journal-top"><div><div class="mini-english">STAMP COLLECTION</div><h2>我的印章</h2></div><span class="count"><b id="journal-count">0</b><span>/</span>6</span></div>
+      <div id="journal-grid" class="journal-grid"></div>
+      <a href="#world" class="return-link"><i data-icon="compass"></i>回到画里探索<i data-icon="arrow"></i></a>
+    </section>
+    <footer><span><i data-icon="sprout"></i>画里游<span class="footer-dot">·</span>互动绘本</span><span class="footer-en">LUCAS’ ART WORLD</span></footer>
+  </main>
+  <dialog id="lightbox" aria-label="放大探索画作"><div id="zoom-home"></div></dialog>
+  <div role="status" aria-live="polite" id="announce" class="sr-only"></div>
+</body>
+</html>
