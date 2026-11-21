@@ -1,29 +1,55 @@
 import {earlyRooms} from "./early.js";
 import {lateRooms} from "./late.js";
 import {finalRoom} from "./final.js";
-import {engraving, sealIcon, seals} from "./seals.js?v=dawn";
+import {engraving, sealIcon, seals} from "./seals.js?v=tide";
 import {gardenRooms} from "./dawn-garden.js";
 import {fairRooms} from "./dawn-fair.js";
 import {towerRooms,chimeMarks} from "./dawn-tower.js";
+import {shoreRooms} from "./tide-shore.js";
+import {lightRooms} from "./tide-lights.js";
+import {voyageRooms,bearingMarks} from "./tide-voyage.js";
 
 const nightRooms=[...earlyRooms,...lateRooms,finalRoom];
 const dawnRooms=[...gardenRooms,...fairRooms,...towerRooms];
 const books={
   night:{
+    id:"night", numeral:"I", item:"Seal", marks:seals, keepsake:"key",
+    closing:"Five seals collected · The Moonkeeper’s Key found",
     rooms:nightRooms, first:0, heading:"The Moonkeeper’s", emphasis:"Key", trail:"The moonlight trail",
     intro:"The moon is up, but the island’s lanterns are dark. Follow the silver kitten through Lucas’s paintings to find the missing key.",
     cover:"assets/moonroom.webp",alt:"A silver kitten keeps watch beside the telescope and brass lock in the treehouse observatory.",
     start:"Enter the observatory", ending:"Moonlight returns", endingArt:"assets/moonrise.webp",
+    endingAlt:"The illuminated Moonkeeper’s Observatory",
     collection:"seals", guide:"Each seal has a star engraving. Match the engravings around the wheel in room six."
   },
   dawn:{
+    id:"dawn", numeral:"II", item:"Chime", marks:chimeMarks, keepsake:"bell",
+    closing:"Five chimes reunited · The Dawn Bell restored",
     rooms:dawnRooms, first:nightRooms.length, heading:"The Dawn", emphasis:"Bell", trail:"The morning bell trail",
     intro:"The first light reaches the treehouse, but the morning bell is silent. Gather its five chimes and help the kitten ring in the day.",
     cover:"assets/dawnbell.webp",alt:"The silver kitten and squirrel beside a great brass bell above Lucas’s orchard at sunrise.",
     start:"Follow the first chime", ending:"The island wakes!", endingArt:"assets/dawnbell.webp",
     collection:"chimes", guide:"Read each chime’s three beats from left to right. A bright lamp flashes; a dark lamp rests. Use these patterns at the bell tower."
+  },
+  tide:{
+    id:"tide", numeral:"III", item:"Bearing", marks:bearingMarks, keepsake:"atlas",
+    rooms:[...shoreRooms,...lightRooms,...voyageRooms], first:nightRooms.length+dawnRooms.length,
+    heading:"The Tideglass", emphasis:"Atlas", trail:"The whale’s way home",
+    intro:"A little blue whale has lost its pod. Join the silver kitten at the chart table and piece together a safe passage through Lucas’s painted island.",
+    cover:"assets/tideglass.webp", alt:"A silver kitten studies a glowing sea chart on a wooden pier beside a little blue whale.",
+    start:"Unroll the sea chart", ending:"Home waters!", endingArt:"assets/homewaters.webp",
+    endingAlt:"At sunrise the little whale swims beside its parent while the silver kitten waves from the pier.",
+    collection:"bearings", guide:"Each bearing gives a compass direction and a distance in squares. At the last chart table, sail them in the order you found them.",
+    closing:"Five bearings plotted · The whale is home"
   }
 };
+const editions=Object.values(books);
+const nextBook=selected=>editions[editions.indexOf(selected)+1];
+const journalTitle=selected=>selected.item+" journal";
+function completionAction(selected) {
+  const next=nextBook(selected);
+  return next?"Explore Book "+next.numeral:"View "+journalTitle(selected).toLowerCase();
+}
 const $=id=>document.getElementById(id);
 const by=(node,selector)=>node.querySelector(selector);
 const clone=id=>$(id).content.firstElementChild.cloneNode(true);
@@ -95,7 +121,7 @@ function paintProgress() {
   $("desk-count").textContent=count;$("game-progress").textContent=count;
   $("desk-track").max=rooms.length;$("desk-track").value=n;
   $("desk-track").setAttribute("aria-label","Mysteries solved");
-  setCaption($("enter-room"),n===rooms.length?(book===books.night?"Explore Book II":"Open your completed journal"):n?"Continue the mystery":book.start);
+  setCaption($("enter-room"),n===rooms.length?completionAction(book):n?"Continue the mystery":book.start);
   $("room-grid").replaceChildren(...rooms.map((room,i)=>{
     const card=clone("room-template"),locked=i>n,done=i<n;
     card.dataset.room=room.id;card.disabled=locked;
@@ -111,32 +137,39 @@ function paintProgress() {
   }));
 }
 function markFor(selected,i) {
-  return (selected===books.night?seals:chimeMarks)[i];
+  return selected.marks[i];
 }
 function drawMark(mark) {
+  if(mark.direction) {
+    const angle=["N","NE","E","SE","S","SW","W","NW"].indexOf(mark.direction)*45;
+    return '<svg class="mk-bearing" aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor"><circle cx="16" cy="16" r="13"/><path transform="rotate('+angle+' 16 16)" d="m16 5 4 12-4-2-4 2z" fill="currentColor"/></svg>';
+  }
   if(!mark.beats)return engraving(mark);
   const lights=[1,2,3].map(i=>mark.beats.includes(i));
   const pattern=lights.map(lit=>lit?"flash":"rest").join(", ");
   return '<span class="mk-pulses" role="img" aria-label="'+pattern+'">'+lights.map(lit=>'<i aria-hidden="true"'+(lit?' class="on"':'')+'></i>').join("")+'</span>';
 }
-function markTitle(mark){return mark.mark+(mark.beats?" rhythm":" engraving");}
+function markTitle(mark){
+  if(mark.direction)return mark.direction+" · "+mark.steps+(mark.steps===1?" square":" squares");
+  return mark.mark+(mark.beats?" rhythm":" engraving");
+}
 function renderJournal() {
-  const n=progress(volume),night=volume===books.night;
-  $("journal-count").textContent=Math.min(5,n)+" / 5 "+volume.collection+(n===6?(night?" + key":" + bell"):"");
+  const n=progress(volume),count=volume.marks.length;
+  $("journal-count").textContent=Math.min(count,n)+" / "+count+" "+volume.collection+(n===volume.rooms.length?" + "+volume.keepsake:"");
   $("journal-lede").textContent=volume.guide;
-  $("journal-title").textContent=night?"Seal journal":"Chime journal";
+  $("journal-title").textContent=journalTitle(volume);
   for(const tab of document.querySelectorAll("[data-volume]"))tab.setAttribute("aria-pressed",String(volume===books[tab.dataset.volume]));
   $("journal-grid").replaceChildren(...volume.rooms.map((room,i)=>{
     const card=clone("journal-template"),found=i<n,seal=markFor(volume,i);
     card.classList.toggle("is-locked",!found);card.dataset.room=room.id;
-    by(card,".journal-art").src=art(room);by(card,".journal-number").textContent=seal?(night?"Seal ":"Chime ")+tickName(i):"Room "+tickName(volume.first+i);
+    by(card,".journal-art").src=art(room);by(card,".journal-number").textContent=seal?volume.item+" "+tickName(i):"Room "+tickName(volume.first+i);
     by(card,".journal-seal").innerHTML=found?sealIcon(room.reward.symbol):icon("lock");
     by(card,".journal-name").textContent=found?room.reward.name:room.place;
     const note=by(card,".journal-note");
     if(found&&seal) {
       note.classList.add("mk-code");note.innerHTML=drawMark(seal);
       const text=document.createElement("span");text.textContent=markTitle(seal);note.append(text);
-    }else note.textContent=found?(night?"The observatory is alight.":room.journalNote):"Open this room to reveal its entry.";
+    }else note.textContent=found?(room.journalNote||"The observatory is alight."):"Open this room to reveal its entry.";
     if(found&&seal&&room.journalNote) {
       const memory=document.createElement("p");memory.className="mk-journal-memory";
       memory.textContent=room.journalNote;note.after(memory);
@@ -178,16 +211,18 @@ function renderGame(room) {
   $("clue-title").textContent=room===finalRoom?"Read the engravings":"Keeper’s clue";
   $("clue-text").textContent=room.clue;
   $("board-head").textContent=room.boardTitle||["The porch rail","The star chart","The baker’s scales","The tideglass frame","The moon clock","The cipher wheel"][i];
-  setCaption($("game-journal"),book===books.night?"Open seal journal":"Open chime journal");
+  setCaption($("game-journal"),"Open "+journalTitle(book).toLowerCase());
   $("room-next").hidden=!earned(room);
-  setCaption($("room-next"),i===rooms.length-1?(book===books.night?"Explore Book II":"Chime journal"):"Next room");
+  setCaption($("room-next"),i===rooms.length-1?completionAction(book):"Next room");
   resetFeedback();paintHints();setBoard(load("board."+room.id));
   paintProgress();window.scrollTo(0,0);focus($("game-title"));
 }
 function useBook(selected) {
   book=selected;
-  $("desk").dataset.edition=book===books.night?"night":"dawn";
-  $("book-kicker").textContent=book===books.night?"Book I · A Lantern Night mystery":"Book II · A Lantern Night mystery";
+  document.title=book.heading+" "+book.emphasis+" · Lucas’s World";
+  $("desk").dataset.edition=book.id;
+  $("book-kicker").textContent="Book "+book.numeral+" · A Lantern Night mystery";
+  $("room-grid").setAttribute("aria-label",book.trail+" rooms");
   $("desk-title").replaceChildren(document.createTextNode(book.heading),document.createElement("br"),Object.assign(document.createElement("em"),{textContent:book.emphasis}));
   $("book-intro").textContent=book.intro;
   if($("book-cover").getAttribute("src")!==book.cover)$("book-cover").src=book.cover;
@@ -197,24 +232,30 @@ function useBook(selected) {
     if(book===books[tab.dataset.book])tab.setAttribute("aria-current","page");else tab.removeAttribute("aria-current");
   }
 }
+function resumeBook() {
+  const saved=load("book");
+  let last=Object.hasOwn(books,saved)?books[saved]:editions.filter(edition=>progress(edition)>0).at(-1)||books.night;
+  while(progress(last)===last.rooms.length&&nextBook(last))last=nextBook(last);
+  return last;
+}
 function renderLocation() {
   closeDialogs();
   const roomId=location.hash.startsWith("#room/")?location.hash.slice(6):"";
-  const roomBook=Object.values(books).find(b=>b.rooms.some(r=>r.id===roomId));
-  const bookId=location.hash.startsWith("#book/")?location.hash.slice(6):"";
+  const roomBook=editions.find(b=>b.rooms.some(r=>r.id===roomId));
+  const bookId=location.hash.startsWith("#book/")?location.hash.slice(6):
+    !location.hash?new URLSearchParams(location.search).get("edition"):null;
   const explicit=Object.hasOwn(books,bookId)?books[bookId]:roomBook;
-  const preferred=progress(books.night)===nightRooms.length||load("book")==="dawn"?books.dawn:books.night;
-  useBook(explicit||preferred);
-  if(explicit)store("book",book===books.night?"night":"dawn");
+  useBook(explicit||resumeBook());
+  if(explicit)store("book",book.id);
   const i=book.rooms.findIndex(r=>r.id===roomId);
   if(i>=0&&i<=progress()){renderGame(book.rooms[i]);return;}
-  if(roomId||(!explicit&&location.hash&&location.hash!=="#desk"))history.replaceState(null,"",book===books.night?"#book/night":"#book/dawn");
+  if(roomId||(!explicit&&location.hash&&location.hash!=="#desk"))history.replaceState(null,"","#book/"+book.id);
   current=null;board=null;$("board-mount").replaceChildren();
   $("desk").hidden=false;$("game").hidden=true;$("nav-desk").setAttribute("aria-current","page");
   paintProgress();window.scrollTo(0,0);
 }
 function navigate(room) {
-  const target=room?"#room/"+room.id:(book===books.night?"#book/night":"#book/dawn");
+  const target=room?"#room/"+room.id:"#book/"+book.id;
   if(location.hash!==target)history.pushState(null,"",target);
   renderLocation();
   if(!room)focus($("enter-room"));
@@ -222,10 +263,13 @@ function navigate(room) {
 function nextRoom() {
   const next=book.rooms[book.rooms.indexOf(current)+1];
   if(next)navigate(next);
-  else if(book===books.night)visitDawn();
+  else finishBook();
+}
+function finishBook(){
+  const next=nextBook(book);
+  if(next){useBook(next);navigate(null);}
   else{navigate(null);openJournal();}
 }
-function visitDawn(){useBook(books.dawn);navigate(null);}
 function showReward() {
   const i=book.rooms.indexOf(current),final=i===book.rooms.length-1,seal=markFor(book,i),night=book===books.night;
   $("reward-dialog").classList.toggle("mk-ending",final);
@@ -234,13 +278,13 @@ function showReward() {
   $("reward-text").textContent=current.reply;
   $("reward-icon").innerHTML=sealIcon(current.reward.symbol);
   $("reward-art").src=final?book.endingArt:art(current);
-  $("reward-art").alt=final?(night?"The illuminated Moonkeeper’s Observatory":book.alt):current.place;
+  $("reward-art").alt=final?(book.endingAlt||book.alt):current.place;
   const mark=$("reward-seal");
   if(seal) {
     mark.innerHTML=drawMark(seal);
     const label=document.createElement("span");label.textContent="In your journal · "+markTitle(seal);mark.append(label);
-  }else mark.textContent=night?"Five seals collected · The Moonkeeper’s Key found":"Five chimes reunited · The Dawn Bell restored";
-  setCaption($("reward-next"),final?(night?"Explore Book II":"View chime journal"):"Next room");
+  }else mark.textContent=book.closing;
+  setCaption($("reward-next"),final?completionAction(book):"Next room");
   showDialog($("reward-dialog"));focus($("reward-next"));
 }
 const missMessages=[
@@ -278,7 +322,7 @@ $("sound").addEventListener("click",()=>{
   sound=!sound;store("sound",sound);updateSound();ring("click");
 });
 $("enter-room").addEventListener("click",()=>{
-  const n=progress();if(n<book.rooms.length)navigate(book.rooms[n]);else if(book===books.night)visitDawn();else openJournal();
+  const n=progress();if(n<book.rooms.length)navigate(book.rooms[n]);else finishBook();
 });
 for(const id of ["back-desk","nav-desk","home-brand","reward-desk"])
   $(id).addEventListener("click",e=>{e.preventDefault();navigate(null);});

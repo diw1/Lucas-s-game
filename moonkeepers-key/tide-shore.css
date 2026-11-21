@@ -1,0 +1,100 @@
+.ts-board { --ts-paper:#f2e5c4; --ts-gold:#dfbf82; --ts-muted:#c6cdc2; width:100%; min-width:0; display:grid; gap:10px; color:var(--ts-paper) }
+.ts-board *, .ts-board *::before,.ts-board *::after { box-sizing:border-box }
+.ts-board p { margin:0 }
+.ts-board button { appearance:none; min-width:0; cursor:pointer; font:inherit; color:inherit; touch-action:manipulation; -webkit-tap-highlight-color:transparent }
+.ts-board button:disabled { cursor:default }
+.ts-board button:focus-visible { outline:3px solid #ffe29b; outline-offset:2px; z-index:3 }
+.ts-board svg { display:block; pointer-events:none }
+.ts-definitions { position:absolute; width:0; height:0; overflow:hidden }
+.ts-map-case,.ts-river-case { position:relative; isolation:isolate; padding:7px 12px 8px; border:1px solid #9a845e; border-radius:8px;
+  box-shadow:inset 0 0 0 2px #4c5749,inset 0 0 0 3px #a8a07870,0 3px 7px #10192466;
+  background:repeating-linear-gradient(95deg,#d5c89406 0 2px,transparent 3px 9px),repeating-linear-gradient(90deg,#283d3438 0 2px,transparent 3px 25%),
+    radial-gradient(ellipse at 40% 32%,#6c78634c,transparent 68%),linear-gradient(138deg,#526454,#43584b 74%,#3a5048) }
+.ts-map-case::before,.ts-map-case::after,.ts-river-case::before,.ts-river-case::after { content:""; position:absolute; top:9px; width:9px; height:9px; border-radius:50%;
+  border:1px solid #69684c; background:linear-gradient(136deg,#bca77a 40%,#625e43 42% 52%,#b49d71 54%); box-shadow:0 1px 2px #27372b }
+.ts-map-case::before,.ts-river-case::before { left:9px }
+.ts-map-case::after,.ts-river-case::after { right:9px }
+.ts-map,.ts-frame-label { width:min(100%,352px); margin-inline:auto }
+.ts-map { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px; aspect-ratio:1; padding:4px;
+  border:1px solid #756b4c; border-radius:6px; background:#857958; box-shadow:inset 0 0 0 2px #c9ba8a,0 2px 6px #26392b99 }
+.ts-quarter { position:relative; display:block; overflow:hidden; border:0; padding:0; border-radius:2px; background:#91b7a9; isolation:isolate }
+.ts-quarter:after { content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 7px #80744854,inset 0 0 0 1px #a49365a1;
+  background:repeating-linear-gradient(173deg,#f5e2ad05 0 1px,transparent 1px 5px) }
+.ts-quarter-picture { display:block; width:100%; height:100%; aspect-ratio:1; transform-origin:50% 50%; transition:transform .27s cubic-bezier(.22,.72,.25,1); }
+.ts-quarter:focus-visible { outline-offset:-4px!important }
+.ts-quarter:where(:hover,:focus-visible) .ts-turn { background:#f1dc9f; color:#4d5546; opacity:1 }
+.ts-quarter-tag,.ts-turn { position:absolute; pointer-events:none; z-index:1; border:1px solid #8d8865; color:#354a42; background:#e7d6a5e8; box-shadow:0 1px 2px #495a464d }
+.ts-quarter-tag { left:4px; top:4px; border-radius:2px; padding:1px 3px; font:700 9px/1.1 ui-monospace,Consolas,monospace; letter-spacing:.05em }
+.ts-turn { right:4px; bottom:4px; display:grid; place-items:center; border-radius:50%; width:21px; height:21px; opacity:.8 }
+.ts-turn svg { width:19px; height:19px }
+.ts-frame-label { position:relative; display:flex; align-items:center; color:#eee0b4; min-height:24px; font:600 10px/1 ui-monospace,Consolas,monospace; text-transform:uppercase; letter-spacing:.055em }
+.ts-frame-label svg { position:absolute; transform:translateX(-50%); width:23px; height:23px; border-radius:50%; padding:2px; border:1px solid #988a65; background:#dacb9b }
+.ts-north { margin-bottom:4px }
+.ts-south { margin-top:4px }
+.ts-north svg { left:27.5% }
+.ts-south svg { left:75% }
+.ts-north span { margin-left:calc(27.5% + 15px) }
+.ts-south span { position:absolute; right:calc(25% + 15px) }
+.ts-readout,.ts-boat-label { display:flex; justify-content:space-between; align-items:center; gap:7px; color:#dfd4b0; font:600 11px/1.35 ui-monospace,Consolas,monospace; letter-spacing:.02em }
+.ts-readout span { display:inline-flex; align-items:center; gap:6px }
+.ts-readout span::before { content:""; width:6px; height:6px; border:1px solid #a99360; background:#958565; border-radius:50% }
+.ts-restored .ts-readout span::before { background:#e9cc79; box-shadow:0 0 5px #f7de8e66 }
+.ts-status { color:var(--ts-muted); min-height:1.4em; font-size:13px; line-height:1.4 }
+.ts-ferry-rules { padding:8px 13px; border:1px solid #a99770; border-radius:6px; color:#374438; background:repeating-linear-gradient(2deg,#9e79330a 0 1px,transparent 2px 7px),linear-gradient(110deg,#f2e7c8,#e3d3af);
+  box-shadow:inset 0 0 0 3px #e8d8b6,inset 0 0 0 4px #b3a17c }
+.ts-ferry-rules p { font:600 15px/1.3 Georgia,serif; color:#3f4a3c }
+.ts-pairs { display:flex; flex-wrap:wrap; align-items:center; gap:3px 13px; margin-top:1px }
+.ts-pairs>span { display:inline-flex; align-items:center; gap:3px; color:#706044; font:600 13px/1.1 Georgia,serif }
+.ts-pairs em { color:#48503f; font:500 13px/1.2 Georgia,serif }
+.ts-pairs svg { width:29px; height:29px; flex:none }
+.ts-river-case { padding:9px 10px 7px }
+.ts-banks { width:min(100%,540px); margin:0 auto 5px; display:flex; align-items:center; justify-content:space-between; color:#e3d2a4; font:700 10px/1.2 ui-monospace,Consolas,monospace; text-transform:uppercase; letter-spacing:.06em; padding-inline:8% }
+.ts-river { position:relative; isolation:isolate; width:min(100%,540px); margin-inline:auto; height:clamp(196px,22vw,253px); overflow:hidden; border:2px solid #a99d76; border-radius:6px;
+  background:radial-gradient(ellipse at 25% 38%,#7fa89191,transparent 60%),linear-gradient(146deg,#548d85,#619d95 50%,#3f7b79);
+  box-shadow:0 2px 4px #243d3580,inset 0 0 8px #305651aa }
+.ts-river-art { position:absolute; inset:0; width:100%; height:100%; z-index:-1 }
+.ts-deck { position:absolute; inset:4px 0; display:grid; grid-template-columns:32% 36% 32%; grid-template-rows:repeat(3,1fr); align-items:center; justify-items:center }
+.ts-passenger { position:relative; display:flex; align-items:center; justify-content:center; gap:3px; width:90%; max-width:126px; min-height:44px;
+  padding:1px 3px; border:1px solid #748664; border-radius:6px; background:linear-gradient(135deg,#d5d5aadc,#b1be90ed);
+  box-shadow:inset 0 0 0 2px #cfcea53b,0 2px 3px #506e5540 }
+.ts-passenger svg { flex:0 1 43%; width:43%; height:36px; max-width:39px; filter:drop-shadow(0 1px 1px #667c584d) }
+.ts-passenger strong { flex:0 1 auto; min-width:0; color:#374539; font:700 14px/1.13 Georgia,serif }
+.ts-passenger:not(.ts-away):where(:hover,:focus-visible),.ts-passenger[aria-pressed=true] { background:#e3d6a4; border-color:#7d6b41 }
+.ts-passenger[aria-pressed=true] { border-style:dashed; box-shadow:inset 0 0 0 1px #c5a963 }
+.ts-passenger.ts-away { border-color:#8f9c77; background:#c0c9a185; box-shadow:none }
+.ts-ferry-boat { pointer-events:none; grid-area:2 / 2; width:97%; max-width:125px; position:relative; justify-self:center;
+  transform:translateX(-15%) rotate(-5deg); transition:transform .35s ease; filter:drop-shadow(1px 3px 1px #3c686388) }
+.ts-ferry-boat:before { content:""; position:absolute; inset:53% 2% 4%; border-radius:50%; border:1px solid #c0dcc1a6; transform:rotate(-5deg) }
+.ts-ferry-boat svg { position:relative; width:100%; height:auto }
+.ts-ferry[data-bank="1"] .ts-ferry-boat { transform:translateX(15%) rotate(4deg) }
+.ts-boat-label { margin:5px auto 0; width:min(100%,540px); font-size:10px }
+.ts-ferry-controls { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 12px }
+.ts-seat-caption { font:500 15px/1.2 Georgia,serif; color:#e9dfc2 }
+.ts-sail-controls { display:flex; gap:6px; align-items:center }
+.ts-sail-controls button { display:inline-flex; flex:none; align-items:center; gap:3px; justify-content:center; min-height:40px; padding:5px 10px; border:1px solid #988862; font-size:13px; line-height:1.2; border-radius:5px }
+.ts-sail-controls .ts-row { color:#334139; background:linear-gradient(145deg,#e1c889,#c9af73); border-color:#a58f59; font-weight:700 }
+.ts-sail-controls .ts-row:not(:disabled):hover { background:#ead39e }
+.ts-sail-controls .ts-undo { background:#30433d; color:#e7d8b1 }
+.ts-undo svg { height:18px; width:18px }
+.ts-sail-controls button:disabled { opacity:.48 }
+@media(max-width:600px) {
+  .ts-board { gap:8px }
+  .ts-pairs { gap:0 9px }
+  .ts-pairs svg { width:24px; height:24px }
+  .ts-banks { padding-inline:5% }
+  .ts-passenger { flex-direction:column; width:87%; gap:0; padding:1px; min-height:48px }
+  .ts-passenger svg { flex:none; width:30px; height:28px }
+  .ts-passenger strong { font-size:12px }
+  .ts-sail-controls button { min-height:44px }
+}
+@media(max-width:370px) {
+  .ts-map-case,.ts-river-case { padding-inline:6px }
+  .ts-banks { font-size:9px }
+  .ts-ferry-rules { padding:8px 9px }
+  .ts-ferry-controls { align-items:start }
+  .ts-sail-controls { margin-left:auto }
+  .ts-frame-label { font-size:9px }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ts-board *, .ts-board *::before,.ts-board *::after { transition:none!important; animation:none!important }
+}

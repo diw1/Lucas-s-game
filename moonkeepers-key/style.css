@@ -45,7 +45,10 @@ h1,h2,h3,p,figure,ol{margin:0}
 .mk-books span{font:normal 1.08rem/1.15 var(--mk-serif)}
 .mk-books a[aria-current=page],.mk-journal-books button[aria-pressed=true]{border-color:#ac915e;color:#ffe6af;background:linear-gradient(120deg,#343b3b,#263342)}
 .mk-books a:hover,.mk-journal-books button:hover{border-color:#c2ac7e}
-.mk-journal-books{display:flex;gap:8px;margin-top:13px}.mk-journal-books button{min-height:38px;padding:6px 10px}
+.mk-journal-books{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.mk-journal-books button{min-height:38px;padding:6px 10px}
+.mk-books a{min-width:0}
+.mk-code .mk-bearing,.mk-reward-seal .mk-bearing{width:28px;height:28px;vertical-align:middle;flex:none}
+.mk-desk[data-edition="tide"] .mk-kicker{color:#c3eadb}
 .mk-pulses{display:inline-flex;gap:3px;vertical-align:middle;margin-right:7px}.mk-pulses i{width:13px;height:13px;border-radius:50%;border:1px solid #aab7bd;background:#1d2c39}.mk-pulses i.on{background:#ffde8d;border-color:#ffedc7;box-shadow:0 0 6px #ecbd642f}
 .mk-journal-memory{margin-top:6px;font-size:.78rem;line-height:1.4;color:var(--mk-muted)}
 .mk-reward-seal .mk-pulses{margin:0}.mk-room-grid .room-card:disabled{opacity:.92}
