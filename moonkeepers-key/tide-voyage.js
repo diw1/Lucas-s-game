@@ -49,12 +49,12 @@ function captionedGem(id) {
 
 function clueBook() {
   const log=node("section","log");
-  log.append(node("h3","heading","The kitten’s test strips"));
+  log.append(node("h3","heading","The kitten’s three tries"));
   const table=node("table","strips");
   const caption=table.createCaption(); caption.className="tv-sr";
-  caption.textContent="Previous test strips with their exact and elsewhere counts";
+  caption.textContent="Each try shows how many stones have the right spot or need a new spot.";
   const head=table.createTHead().insertRow();
-  for(const label of ["Stones, left to right","Exact","Elsewhere"]) {
+  for(const label of ["Stones the kitten tried","Right spot","New spot"]) {
     const th=document.createElement("th"); th.scope="col"; th.textContent=label; head.append(th);
   }
   const body=table.createTBody();
@@ -69,14 +69,14 @@ function clueBook() {
       tr.insertCell().append(tally);
     }
   }
-  const expl=node("details","example"), summary=node("summary","example-title","How the kitten scored a strip");
+  const expl=node("details","example"), summary=node("summary","example-title","See a pretend lock");
   const pair=node("div","example-pair");
-  for(const [label,ids] of [["Pretend lock",["fan","pearl","star"]],["Test strip",["fan","star","drop"]]]) {
+  for(const [label,ids] of [["Lock",["fan","pearl","star"]],["Kitten’s try",["fan","star","drop"]]]) {
     const row=node("div","example-row");
     row.append(node("strong","example-label",label),...ids.map(captionedGem)); pair.append(row);
   }
-  expl.append(summary,pair,node("p","example-text","Here Fan is exact. Star belongs in a different place. Drop is absent. The strip earns 1 exact and 1 elsewhere."));
-  log.append(table,node("p","strip-key","Exact = right stone in its place. Elsewhere = right stone in a different place."),expl);
+  expl.append(summary,pair,node("p","example-text","Fan fits here. Star needs a new spot. Drop is not in this lock. That gives 1 right spot and 1 new spot."));
+  log.append(table,node("p","strip-key","“Right spot” means the stone fits there. “New spot” means the stone fits somewhere else."),expl);
   return log;
 }
 
@@ -91,11 +91,11 @@ function makeVault(host,saved,onChange) {
   const read=()=>({slots:[...slots]});
   const root=node("div","board"), layout=node("div","vault"), cabinet=node("section","cabinet");
   const seats=node("div","sockets"), rack=node("div","rack"), message=node("p","status");
-  seats.setAttribute("role","group"); seats.setAttribute("aria-label","Lock sockets");
-  rack.setAttribute("role","group"); rack.setAttribute("aria-label","Choose a stone for the selected socket");
+  seats.setAttribute("role","group"); seats.setAttribute("aria-label","Spots on the lock");
+  rack.setAttribute("role","group"); rack.setAttribute("aria-label","Tap a stone for your spot");
   message.setAttribute("role","status");
   const keys=slots.map((_,i)=>{
-    const key=button("socket","",()=>{selected=i; paint(); message.textContent="Choose a stone for socket "+(i+1)+".";});
+    const key=button("socket","",()=>{selected=i; paint(); message.textContent="Tap a stone for spot "+(i+1)+".";});
     key.dataset.socket=String(i+1); seats.append(key); return key;
   });
   for(const id of Object.keys(gems)) {
@@ -106,7 +106,7 @@ function makeVault(host,saved,onChange) {
       const free=slots.indexOf(null);
       if(free!==-1) selected=free;
       paint();
-      message.textContent=gems[id].name+" in socket "+(i+1)+". "+(free===-1?"All three sockets are filled.":"Choose a stone for socket "+(selected+1)+".");
+      message.textContent=gems[id].name+" is in spot "+(i+1)+". "+(free===-1?"The lock is full.":"Tap a stone for spot "+(selected+1)+".");
       onChange?.(read());
     });
     item.dataset.gem=id; item.append(gem(id),node("span","choice-title",gems[id].name)); rack.append(item);
@@ -116,13 +116,20 @@ function makeVault(host,saved,onChange) {
       const id=slots[i], contents=node("span","socket-inlay");
       if(id) contents.append(gem(id));
       key.setAttribute("aria-pressed",String(i===selected));
-      key.setAttribute("aria-label","Socket "+(i+1)+", "+(id?gems[id].name:"empty"));
-      key.replaceChildren(node("span","socket-no","Socket "+(i+1)),contents,node("span","socket-word",id?gems[id].name:"Empty"));
+      key.setAttribute("aria-label","Spot "+(i+1)+", "+(id?gems[id].name:"empty"));
+      key.replaceChildren(node("span","socket-no","Spot "+(i+1)),contents,node("span","socket-word",id?gems[id].name:"Empty"));
     });
   }
-  cabinet.append(node("h3","heading","The vault lock"),node("p","tray-guide","Choose a socket, then a stone. Use three different stones."),seats,rack,message);
+  cabinet.append(node("h3","heading","Your lock"),node("p","tray-guide","Tap three stones to fill the spots. To change one, tap its spot, then a stone."),seats,rack,message);
   layout.append(clueBook(),cabinet); root.append(layout); host.replaceChildren(root); paint();
-  return {read,check:()=>slots.every(Boolean) && readings.every(row=>{
+  const answer=["star","fan","pearl"];
+  function guide() {
+    const i=slots.findIndex((id,i)=>id!==answer[i]);
+    if(i<0)return null;
+    if(i!==selected)return {target:keys[i],text:"Tap spot "+(i+1)+" on your lock."};
+    return {target:rack.querySelector('[data-gem="'+answer[i]+'"]'),text:"Tap "+gems[answer[i]].name+" for spot "+(i+1)+"."};
+  }
+  return {read,guide,check:()=>slots.every(Boolean) && readings.every(row=>{
     const exact=row.gems.filter((id,i)=>slots[i]===id).length;
     const matches=row.gems.filter(id=>slots.includes(id)).length;
     return exact===row.exact && matches-exact===row.elsewhere;
@@ -160,18 +167,23 @@ function makeVoyage(host,saved,onChange) {
   }
   const read=()=>({stops:[...stops]});
   const root=node("section","board"), layout=node("div","voyage");
-  const help=node("div","sailing-notes"), heading=node("h3","heading","Pilot’s orders");
-  const rules=node("p","rules","Sail each journal bearing from your last stop. If you start on a current, slide one extra square east after sailing. Currents you pass or land on wait until the next leg.");
-  help.append(heading,rules);
+  const help=node("div","sailing-notes"), heading=node("h3","heading","How to swim");
+  const rules=node("p","rules","Start on ⇉? Follow your arrow first. Then let the water push you one square right. Tap just the last square.");
+  const demo=node("div","swim-demo");
+  demo.setAttribute("role","img");demo.setAttribute("aria-label","Example. Start at B4 on moving water. Swim up to B2. Slide right to C2. Tap C2.");
+  for(const [label,mark] of [["Start","B4 ⇉"],["Up 2","↑ B2"],["Right 1","→ C2"]]) {
+    const step=node("span","swim-step");step.append(node("small","swim-label",label),node("b","swim-mark",mark));demo.append(step);
+  }
+  help.append(heading,rules,demo);
   const panel=node("div","chart-panel"), top=node("div","chart-cap");
-  top.append(node("h3","chart-title","Calf Passage"),node("span","north","↑ North"));
+  top.append(node("h3","chart-title","The whale’s map"),node("span","north","↑ Up"));
   const map=node("div","sea");
   map.innerHTML=chartArt+'<svg class="tv-course" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polyline class="tv-course-shadow"/><polyline class="tv-course-ink"/></svg>';
   const strokes=map.querySelectorAll("polyline");
   const grid=node("div","grid");
-  grid.setAttribute("role","group"); grid.setAttribute("aria-label","Chart squares. North is up. Use arrow keys to move and Enter to plot.");
+  grid.setAttribute("role","group"); grid.setAttribute("aria-label","Sea map. Use the arrow keys. Press Enter to pick a square.");
   const legend=node("div","chart-key");
-  legend.append(node("span","legend-start","⚑  A5 · Start"),node("span","legend-current","⇉  East current"),node("span","legend-scale","1 step = 1 square"));
+  legend.append(node("span","legend-start","⚑  Start at A5"),node("span","legend-current","⇉  Push right"),node("span","legend-scale","1 step = 1 square"));
   const dock=node("div","logbook"), steps=node("ol","legs"), status=node("p","leg-status");
   status.setAttribute("role","status");
   const fields=bearingMarks.map(mark=>{
@@ -229,7 +241,7 @@ function makeVoyage(host,saved,onChange) {
       const pin=el.querySelector(".tv-pin"); pin.textContent=latest||""; pin.hidden=!latest;
       el.classList.toggle("tv-plotted",!!latest);
       el.classList.toggle("tv-last",path.at(-1)===cell);
-      el.setAttribute("aria-label",[cell,cell===start?"starting flag":"",currents.has(cell)?"east current":"calm water",legs.length?"charted stops "+legs.join(" and "):""].filter(Boolean).join(", "));
+      el.setAttribute("aria-label",[cell,cell===start?"start":"",currents.has(cell)?"water pushes right":"still water",legs.length?"stop "+legs.join(" and "):""].filter(Boolean).join(", "));
     }
     fields.forEach(({leg,value},i)=>{
       value.textContent=stops[i]||"—";
@@ -237,42 +249,49 @@ function makeVoyage(host,saved,onChange) {
       if(i===stops.length)leg.setAttribute("aria-current","step"); else leg.removeAttribute("aria-current");
     });
     const index=stops.length, from=path.at(-1);
-    status.textContent=index===bearingMarks.length?"Five stops plotted. Check your course.":"From "+from+", plot the "+bearingMarks[index].name+" bearing.";
+    status.textContent=index===bearingMarks.length?"Five stops! Check your path.":"At "+from+". Follow "+bearingMarks[index].name+" "+bearingMarks[index].mark.split(" ")[0]+" "+bearingMarks[index].steps+".";
     undo.disabled=!stops.length;
   }
   moveTab(stops.at(-1)||start,false);
   map.append(grid); panel.append(top,map,legend); dock.append(steps,footer); layout.append(help,panel,dock); root.append(layout);
   host.replaceChildren(root); draw();
-  return {read,check:()=>stops.length===bearingMarks.length && stops.every((cell,i)=>cell===endpoint(i===0?start:stops[i-1],bearingMarks[i]))};
+  function guide() {
+    const bad=stops.findIndex((cell,i)=>cell!==endpoint(i===0?start:stops[i-1],bearingMarks[i]));
+    if(bad!==-1)return {target:undo,text:"Tap Undo stop to go back one stop."};
+    if(stops.length===bearingMarks.length)return null;
+    const next=endpoint(stops.at(-1)||start,bearingMarks[stops.length]);
+    return {target:cells.get(next),text:"Tap "+next+" on the map."};
+  }
+  return {read,guide,check:()=>stops.length===bearingMarks.length && stops.every((cell,i)=>cell===endpoint(i===0?start:stops[i-1],bearingMarks[i]))};
 }
 
 export const voyageRooms=[
   {
     id:"pearlvault",title:"The Pearl Vault",place:"The Kitten’s Garden",art:"cat",boardTitle:"The three-stone lock",
-    brief:"Under the garden stones, the kitten finds a little vault lined with oyster silk. Its lid holds three sockets and a notebook of tries from the last navigator.",
-    clue:"Read the three test strips together. The marks count how many stones fit exactly and how many belong elsewhere. Each count describes the whole strip.",
+    brief:"The kitten finds a box in the garden. Three stones will open it. Look at the stones the kitten has tried.",
+    clue:"Each row is one try. The numbers tell you how many stones fit. Find three stones that fit all the clues.",
     hints:[
-      "Look at the first and third strips. They use the same stones. Only the first two swap places. Pearl stays at the right both times.",
-      "Pearl must be on the right. If Pearl were absent, Drop and Fan would both fit on strip one, and swapping them would leave strip three with no exact match.",
-      "If Drop were first, Star would have to be in the middle. That would give strip two an exact match, but it has none. Set Star, Fan, Pearl."
+      "Look at tries 1 and 3. Fan and Drop swap spots. Which stone stays put?",
+      "Pearl is the stone that stays put. Try Pearl in spot 3. Now look at try 2. Star needs a new spot.",
+      "Tap spot 1, then Star. Tap spot 2, then Fan. Tap spot 3, then Pearl."
     ],
     reward:{symbol:"pearl",name:"Pearl Bearing"},
-    reply:"The oyster silk unfolds. The kitten lifts a milky compass bead. Under its glass, a needle points out to the open sea.",
-    miss:"Check each strip against your lock, from left to right. An exact match counts only once. It cannot also count as elsewhere.",
-    journalNote:"The Pearl Bearing points southeast for one square.",create:makeVault
+    reply:"Pop! The lid lifts. Inside is a pearl with a tiny arrow. It points out to sea.",
+    miss:"Look at the first try. Two stones must be in those same spots. Tap a spot to change its stone.",
+    journalNote:"Pearl says ↘. Swim one square down and right.",create:makeVault
   },
   {
     id:"whaleroute",title:"Where the Whales Sing",place:"Calf Passage",art:"reef",boardTitle:"The whale chart",
-    brief:"A small whale waits by the harbor flag. From beyond the coral, a deep call crosses the water. The kitten lays five bearings on the deck to plot the calf’s way home.",
-    clue:"Start at A5. Plot one stop for each bearing in journal order. Count diagonal steps corner to corner. Water marked ⇉ adds one square east when you leave it.",
+    brief:"A little whale hears its family call. Can you help it swim home? Your five arrows show the way.",
+    clue:"Start at the flag on A5. Follow the five arrows in order. Tap where each swim ends. An arrow like ↗ means up and right in one step.",
     hints:[
-      "The Shell Bearing points northeast one. From A5 that is B4. B4 has a current, so the next leg will slide east after you count its steps.",
-      "From B4 sail two north to B2, then drift east to C2. Prism sends you two east to E2. An arrow you pass does nothing.",
-      "From E2 go two southwest to C4. Leave its current by sailing one southeast to D5, then sliding east to E5. Your five stops are B4, C2, E2, C4, E5."
+      "Shell says ↗ 1. Start at A5. Go up one square and right one square. Tap B4.",
+      "At B4, swim up two. Then the water pushes right. Tap C2. Next swim right two and tap E2.",
+      "Tap the five stops in order: B4, C2, E2, C4, E5. Undo stop takes off your last tap."
     ],
     reward:{symbol:"atlas",name:"The Tideglass Atlas"},
-    reply:"A broad gray back breaks the water beside the calf. Two tails rise together, then slip into the blue. The kitten closes the atlas with a drop of sea still shining on its cover.",
-    miss:"Trace each leg from the stop before it. Apply the one-square east drift only when you leave a current. Undo a stop to retrace your course.",
-    journalNote:"The calf found its family in the eastern water. All five bearings are bound into the Tideglass Atlas.",create:makeVoyage
+    reply:"A big whale rises beside the little one. Two tails wave at the kitten, then slip under the sea.",
+    miss:"Check where you started each swim. If you started on ⇉, add one step right. Tap Undo stop to try again.",
+    journalNote:"Five arrows led the little whale home.",create:makeVoyage
   }
 ];

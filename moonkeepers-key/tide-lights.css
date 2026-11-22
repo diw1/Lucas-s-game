@@ -61,6 +61,8 @@
 .tl-sample-ships {display:flex;align-items:center;gap:1px;flex:0 0 auto}
 .tl-look {width:22px;margin-right:2px;color:#58726f}
 .tl-look svg {display:block;width:100%}
+.tl-mirror-example {flex:0 0 65px;display:block}
+.tl-mirror-example svg {display:block;width:100%;height:auto}
 .tl-sample {display:flex;width:25px;align-items:center;flex-direction:column;line-height:1}
 .tl-sample svg {width:100%;height:30px}
 .tl-sample-number {font:700 .6rem/1.1 ui-monospace,monospace}

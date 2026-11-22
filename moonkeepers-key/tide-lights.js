@@ -61,7 +61,7 @@ function optics(host,saved,onChange) {
     Array.from(saved.mirrors).every(v=>v===0||v===1);
   const angles=valid?[...saved.mirrors]:[...startMirrors];
   const root=node("section","optics");
-  root.setAttribute("aria-label","Prism lighthouse ray puzzle");
+  root.setAttribute("aria-label","Turn the lighthouse mirrors");
   const panel=node("div","optical-case"), board=node("div","water");
   const lines=[1,2,3,4].map(n=>'M'+50*n+' 0v250M0 '+50*n+'h250').join("");
   const coast=obstacles.map(([x,y])=>sprite(x,y,rock)).join("");
@@ -86,7 +86,7 @@ function optics(host,saved,onChange) {
     b.append(node("span","map-label",name));board.append(b);return b;
   });
   const legend=node("div","legend");
-  legend.append(node("span","amber-key","Lamp light"),node("span","blue-key","Prism light"));
+  legend.append(node("span","amber-key","Yellow from the lamp"),node("span","blue-key","Blue from the crystal"));
   const path=(p,cls)=>{
     if(p.length<2)return "";
     const d=p.map(([x,y],i)=>(i?"L":"M")+(x*50+25)+" "+(y*50+25)).join(" ");
@@ -100,14 +100,23 @@ function optics(host,saved,onChange) {
     switches.forEach((b,i)=>{
       const name=address(...mirrors[i]),falls=angles[i]===1;
       b.classList.toggle("tl-falls",falls);
-      b.setAttribute("aria-label","Turn mirror "+name+". Glass currently runs from "+(falls?"top left to bottom right.":"bottom left to top right."));
+      b.setAttribute("aria-label","Mirror "+name+". It slopes "+(falls?"down":"up")+" to the right. Tap to turn.");
     });
-    const outcome=ray.result==="lit"?"The blue beam lights the beacon.":ray.result==="rock"?"The beam stops at "+ray.events.at(-1)+".":ray.result==="sea"?"The beam escapes out to sea.":ray.result==="loop"?"The beam circles back on itself.":"The beacon needs blue prism light.";
+    const outcome=ray.result==="lit"?"The blue beam lights the beacon.":ray.result==="rock"?"A rock stops the light at "+ray.events.at(-1).split(" ")[1]+".":ray.result==="sea"?"The light goes out to sea.":ray.result==="loop"?"The light goes round in a loop.":"The lighthouse needs blue light.";
     status.textContent=outcome;
     const route=node("span","sr"," Beam path: lamp A4, "+ray.events.join(", ")+".");status.append(route);
   }
-  panel.append(board,legend);root.append(panel,status);host.replaceChildren(root);render();
-  return {read,check};
+  const demo=node("div","example"),copy=node("div","example-copy");
+  const drawing=node("span","mirror-example");
+  drawing.innerHTML='<svg viewBox="0 0 96 42" aria-hidden="true"><path d="M5 32h50V6" fill="none" stroke="#b47624" stroke-width="3"/><path d="m49 12 6-8 6 8" fill="none" stroke="#b47624" stroke-width="3"/><path d="m43 40 24-24" stroke="#365764" stroke-width="5"/><path d="m43 38 23-23" stroke="#84bfc2" stroke-width="2"/></svg>';
+  copy.append(node("b","example-head","How a mirror works"),node("span","explanation","Light comes from the left. This mirror sends it up."));
+  demo.append(drawing,copy);
+  function guide() {
+    const answer=[0,0,1,1],i=angles.findIndex((v,j)=>v!==answer[j]);
+    return i<0?null:{target:switches[i],text:"Tap mirror "+address(...mirrors[i])+" to send the light "+["up","right","down","right"][i]+"."};
+  }
+  panel.append(board,legend);root.append(demo,panel,status);host.replaceChildren(root);render();
+  return {read,check,guide};
 }
 
 const shores=[
@@ -147,7 +156,7 @@ function shoreDiagram() {
     strip.append(sample);
   }
   const copy=node("div","example-copy");
-  copy.append(node("b","example-head","A view from shore"),node("span","explanation","Look from the left. You see masts 1 and 3. Mast 2 hides behind 3."));
+  copy.append(node("b","example-head","How many can you see?"),node("span","explanation","Look from the left. The 3 hides the 2. You see two masts."));
   d.append(strip,copy);return d;
 }
 function skyline(host,saved,onChange) {
@@ -156,9 +165,9 @@ function skyline(host,saved,onChange) {
   const heights=valid?[...saved.heights]:Array(9).fill(0);
   let active=Number.isInteger(saved?.active)&&saved.active>=0&&saved.active<9?saved.active:0;
   const root=node("section","skyline");
-  root.setAttribute("aria-label","Three by three mast height puzzle");
+  root.setAttribute("aria-label","Give each boat a mast");
   const board=node("div","harbour"), frame=node("div","sky-case");
-  board.setAttribute("role","group");board.setAttribute("aria-label","Harbour berths and three numbered shore views");
+  board.setAttribute("role","group");board.setAttribute("aria-label","Nine boats. Look from the three arrows.");
   function place(n,row,col) {n.style.gridRow=String(row+1);n.style.gridColumn=String(col+1);board.append(n);}
   const shoreSigns=shores.map(shore=>{
     const sign=node("div","shore");
@@ -185,7 +194,7 @@ function skyline(host,saved,onChange) {
       }
     }
     if(old===value&&active===previous)return;
-    render();live.textContent=here(i)+(value?" set to "+value+".":" cleared.")+(i!==active?" Next berth: "+here(active)+".":"");onChange?.(read());
+    render();live.textContent=here(i)+(value?" is "+value+" high.":" is empty.")+(i!==active?" Next boat: "+here(active)+".":"");onChange?.(read());
   }
   const berths=heights.map((_,i)=>{
     const b=button("berth",()=>choose(i));
@@ -207,48 +216,54 @@ function skyline(host,saved,onChange) {
   function render(){
     berths.forEach((b,i)=>{
       const h=heights[i];
-      b.setAttribute("aria-pressed",String(active===i));b.setAttribute("aria-label","Berth "+here(i)+", "+(h?"mast height "+h:"empty")+". Select to edit.");
+      b.setAttribute("aria-pressed",String(active===i));b.setAttribute("aria-label","Boat "+here(i)+". "+(h?"Mast height "+h:"No mast yet")+". Tap to choose.");
       b.innerHTML='<span class="tl-coordinate">'+here(i)+'</span>'+miniature(h)+'<b class="tl-height-value">'+(h||"·")+'</b>';
     });
     shoreSigns.forEach((sign,i)=>{
       const s=shores[i],filled=s.line.every(j=>heights[j]),actual=seen(s.line,heights);
       sign.classList.toggle("tl-matched",filled&&actual===s.count);
-      sign.setAttribute("aria-label",s.label+". Look inward to see "+s.count+(s.count===1?" mast.":" masts.")+(filled?" Currently visible: "+actual+".":""));
+      sign.setAttribute("aria-label",s.label+". The arrow wants "+s.count+(s.count===1?" mast.":" masts.")+(filled?" You can see "+actual+".":""));
     });
-    label.textContent="Mast height at "+here(active);
+    label.textContent="Choose a height for "+here(active);
     keys.forEach((b,i)=>b.setAttribute("aria-pressed",String(heights[active]===i+1)));
   }
   controls.append(label,palette);frame.append(board,controls);root.append(shoreDiagram(),frame,live);host.replaceChildren(root);render();
-  return {read,check};
+  function guide() {
+    const answer=[2,1,3,3,2,1,1,3,2];
+    const i=heights[active]!==answer[active]?active:heights.findIndex((v,j)=>v!==answer[j]);
+    if(i<0)return null;
+    return i===active?{target:keys[answer[i]-1],text:"Tap "+answer[i]+" for boat "+here(i)+"."}:{target:berths[i],text:"Tap boat "+here(i)+"."};
+  }
+  return {read,check,guide};
 }
 
 export const lightRooms=[
   {
     id:"prismwatch",title:"The Prism Watch",place:"Pumpkin Castle Lighthouse",art:"castle",boardTitle:"The lighthouse mirrors",
-    brief:"The whale calf can follow a blue beacon through the fog. From the castle wall, Ruby finds a lamp, four swivel mirrors and a sea-glass prism.",
-    clue:"Tap a mirror to change its tilt. Guide the lamp light through the crystal at C2, then send its blue beam into the striped beacon at E5. Rocks stop the light.",
+    brief:"The little whale is lost in the fog. Help Ruby light the striped lighthouse so the whale can see it.",
+    clue:"Tap a mirror to turn it. Send the light through the crystal at C2. Then aim the blue light at the lighthouse at E5.",
     hints:[
-      "Follow the amber line from the lamp on the left. At each mirror, notice where the light turns. The crystal changes its colour, but keeps it moving straight.",
-      "The light needs to turn up at B4 and right at B2 to reach the crystal. Follow the blue line to the next mirror.",
-      "From Reset, turn B4, then D2, then D5 once each. Leave B2 as it is."
+      "Start at the lamp on the left. Follow the yellow line to the first mirror.",
+      "B4 should send light up. B2 should send it right, through the crystal.",
+      "From Reset, tap B4 once. Tap D2 once. Tap D5 once."
     ],
-    miss:"The beacon is waiting for prism light. Trace the beam from the lamp to see where it stops.",
+    miss:"The lighthouse is still dark. Follow the light to see where it stops.",
     reward:{symbol:"prism",name:"Prism Bearing"},
-    reply:"A blue stripe cuts through the castle fog. Beyond the rocks, the calf blows a little fountain into the light. Ruby marks the sighting in the atlas.",
-    journalNote:"The castle prism lit a blue passage through the fog.",create:optics
+    reply:"The blue light shines through the fog. The little whale sends up a spout. Ruby marks the spot on her map.",
+    journalNote:"The blue light helped the whale see through the fog.",create:optics
   },
   {
     id:"skyline",title:"The Harbour Skyline",place:"Treehouse Harbour",art:"canopy",boardTitle:"The harbour berths",
-    brief:"From the treehouse lookout, Ruby can see nine boats. The old harbour chart gives their mast heights as seen from three places on shore.",
-    clue:"Use heights 1, 2 and 3 once in each row and column. Each shore number tells how many masts you see looking along its arrow. A taller mast hides shorter ones behind it. Select a berth, then choose its height.",
+    brief:"Ruby spots nine boats from the treehouse. Help her put the right mast on each boat.",
+    clue:"Tap a boat. Pick a height. Use 1, 2 and 3 once across each row and down each column. Each arrow tells how many masts you should see from that side.",
     hints:[
-      "Start on the right of the top row. If the lookout sees only one mast, the nearest mast must be height 3.",
-      "The left lookout sees two in the top row. With 3 at the far end, the first two must be 2 then 1. Now look up column A from below. The nearest mast cannot be 3.",
-      "From top to bottom, set the rows to 2, 1, 3 / 3, 2, 1 / 1, 3, 2."
+      "Look at the 1 on the right. A tall mast at C1 can hide the whole row.",
+      "Put 3 at C1. Try 2, then 1 in front of it. How many can you see from the left?",
+      "From Reset, fill the top row with 2, 1, 3. Use 3, 2, 1 in the middle. Use 1, 3, 2 at the bottom."
     ],
-    miss:"Check that each row and column has three different heights, then count the masts from each shore marker.",
+    miss:"Look along one row. Can you find a 1, a 2 and a 3? Then try one arrow.",
     reward:{symbol:"mast",name:"Mast Bearing"},
-    reply:"The harbourmaster sights along the tallest mast. Beyond its little red flag, the calf is heading out of the shallows. Ruby draws the safe channel on the chart.",
-    journalNote:"Three shore sightings fixed the safe channel beyond Treehouse Harbour.",create:skyline
+    reply:"Ruby looks past the tallest mast. There’s the little whale! She draws a safe path out of the harbour.",
+    journalNote:"Ruby found a safe path past the boats.",create:skyline
   }
 ];

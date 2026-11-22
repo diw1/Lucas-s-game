@@ -38,6 +38,8 @@
 .ts-readout,.ts-boat-label { display:flex; justify-content:space-between; align-items:center; gap:7px; color:#dfd4b0; font:600 11px/1.35 ui-monospace,Consolas,monospace; letter-spacing:.02em }
 .ts-readout span { display:inline-flex; align-items:center; gap:6px }
 .ts-readout span::before { content:""; width:6px; height:6px; border:1px solid #a99360; background:#958565; border-radius:50% }
+.ts-example { display:flex; align-items:center; gap:8px; color:#ebdcba; font:500 14px/1.25 Georgia,serif }
+.ts-example svg { width:34px; height:29px; flex:none }
 .ts-restored .ts-readout span::before { background:#e9cc79; box-shadow:0 0 5px #f7de8e66 }
 .ts-status { color:var(--ts-muted); min-height:1.4em; font-size:13px; line-height:1.4 }
 .ts-ferry-rules { padding:8px 13px; border:1px solid #a99770; border-radius:6px; color:#374438; background:repeating-linear-gradient(2deg,#9e79330a 0 1px,transparent 2px 7px),linear-gradient(110deg,#f2e7c8,#e3d3af);

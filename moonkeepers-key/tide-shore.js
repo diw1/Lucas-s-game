@@ -3,7 +3,7 @@ const rotateIcon=svg('<path d="M11 23a13 13 0 1 1 5 12m-5-20v9h10" stroke="curre
 const undoIcon=svg('<path d="m18 11-10 10 10 9M9 21h16q12 0 13 12" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');
 const lighthouse='<g stroke="#705f4c" stroke-linejoin="round" stroke-width="1.4"><path d="M8 40q10-5 28-2l6 5H5Z" fill="#a39973"/><path d="m16 38 3-23h11l3 23Z" fill="#f8dfaf"/><path d="m18 24 13-3 .7 5-14.3 4Z" fill="#b96854" stroke="none"/><path d="M17 15h15v4H17Z" fill="#725f52"/><path d="M19 8h11v7H19Z" fill="#f1c87b"/><path d="m16 8 8-6 9 6Z" fill="#b66853"/><path d="M23 38v-5q2-4 4 0v5" fill="#685e50"/></g>';
 const anchor='<g fill="none" stroke-linejoin="round" stroke-linecap="round"><path d="M24 13v24m-9-17h18M6 29q3 13 18 13 15 0 18-13m-35 0 1 8m0-8 8 3m26-3-2 8m1-8-7 3" stroke="#806e50" stroke-width="5"/><path d="M24 13v24m-9-17h18M7 29q3 12 17 12 15 0 17-12m-34 0 2 7m-2-7 8 3m26-3-2 7m2-7-7 3" stroke="#d8b66e" stroke-width="2.8"/><circle cx="24" cy="9" r="5" fill="#63908b" stroke="#806e50" stroke-width="4"/><circle cx="24" cy="9" r="5" stroke="#e1bd7d" stroke-width="1.8"/></g>';
-const quadrantNames=["Northwest","Northeast","Southwest","Southeast"],codes=["nw","ne","sw","se"];
+const quadrantNames=["Top left","Top right","Bottom left","Bottom right"],codes=["nw","ne","sw","se"];
 const initialTurns=[1,3,2,1], directions=["north","east","south","west"];
 const coastlines=[
   [[-20,-20],[153,-20],[143,0],[158,24],[143,39],[127,47],[139,57],[128,66],[111,60],[96,68],[84,76],[91,83],[113,86],[128,99],[121,111],[108,120],[91,125],[75,114],[70,102],[61,94],[45,90],[32,93],[23,104],[21,120],[-4,136],[-20,138]],
@@ -65,14 +65,15 @@ function chart(host,saved,onChange) {
   const turns=Array.isArray(saved?.turns)&&saved.turns.length===4&&saved.turns.every(v=>Number.isInteger(v)&&v>=0&&v<4)?[...saved.turns]:[...initialTurns];
   const angles=[...turns],id="ts-coast-"+(++chartInstance),read=()=>({turns:[...turns]});
   const check=()=>turns[0]===0&&turns[3]===0&&shoreJoins(turns).every(Boolean);
-  host.innerHTML='<section class="ts-board ts-chart" aria-label="Four rotating quarters of a coastal chart">'+
+  host.innerHTML='<section class="ts-board ts-chart" aria-label="Four pieces of a sea map">'+
     '<svg class="ts-definitions" aria-hidden="true" focusable="false"><defs><g id="'+id+'">'+paintMap()+'</g></defs></svg>'+
-    '<div class="ts-map-case"><div class="ts-frame-label ts-north">'+svg(lighthouse)+'<span>North light</span></div>'+
-    '<div class="ts-map" role="group" aria-label="Rotate each map quarter clockwise">'+codes.map((code,i)=>
+    '<div class="ts-map-case"><div class="ts-frame-label ts-north">'+svg(lighthouse)+'<span>Lighthouse</span></div>'+
+    '<div class="ts-map" role="group" aria-label="Tap a piece to turn it">'+codes.map((code,i)=>
       '<button type="button" data-chart="'+code+'" class="ts-quarter">'+
         '<svg class="ts-quarter-picture" viewBox="'+(i%2*100)+' '+(Math.floor(i/2)*100)+' 100 100" aria-hidden="true" focusable="false"><use href="#'+id+'"/></svg>'+
-        '<span class="ts-quarter-tag">'+code.toUpperCase()+'</span><span class="ts-turn">'+rotateIcon+'</span></button>').join('')+'</div>'+
-    '<div class="ts-frame-label ts-south">'+svg(anchor)+'<span>South mooring</span></div></div>'+
+        '<span class="ts-quarter-tag">'+quadrantNames[i]+'</span><span class="ts-turn">'+rotateIcon+'</span></button>').join('')+'</div>'+
+    '<div class="ts-frame-label ts-south">'+svg(anchor)+'<span>Anchor</span></div></div>'+
+    '<div class="ts-example">'+svg('<path d="M3 7h42v34H3Z" fill="#7cafaa" stroke="#8d7c53"/><path d="M3 7h42v8Q32 13 23 26 14 35 3 29Z" fill="#b8bf8c" stroke="#f1dbae" stroke-width="2"/><path d="M24 7v34" stroke="#766d55" stroke-width="1.5"/>')+'<span>Join sand to sand like this.</span></div>'+
     '<div class="ts-readout" aria-label="Chart progress"><span data-shores></span><span data-marks></span></div>'+
     '<p class="ts-status" role="status" aria-live="polite"></p></section>';
   const root=host.firstElementChild,tiles=[...root.querySelectorAll("[data-chart]")],live=root.querySelector(".ts-status");
@@ -81,19 +82,23 @@ function chart(host,saved,onChange) {
     tiles.forEach((b,i)=>{
       const turn=turns[i],dist=i===0?directions[turn]:i===3?directions[(2+turn)%4]:null;
       b.querySelector(".ts-quarter-picture").style.transform="rotate("+(angles[i]*90)+"deg)";
-      const details=seams.flatMap(([a,s,b,t],n)=>a===i||b===i?[directions[a===i?s:t]+" seam "+(joined[n]?"joined":"separated")]:[]);
-      b.setAttribute("aria-label",quadrantNames[i]+" chart quarter. Rotate clockwise. "+details.join(", ")+". "+(dist?"The "+(i===0?"lighthouse":"anchor")+" is at its "+dist+" edge.":""));
+      const details=seams.flatMap(([a,s,b,t],n)=>a===i||b===i?[directions[a===i?s:t]+" edge "+(joined[n]?"joined":"apart")]:[]);
+      b.setAttribute("aria-label",quadrantNames[i]+" map piece. Tap to turn. "+details.join(", ")+". "+(dist?"The "+(i===0?"lighthouse":"anchor")+" is at its "+dist+" edge.":""));
     });
     const joints=joined.filter(Boolean).length,marks=Number(turns[0]===0)+Number(turns[3]===0);
-    root.querySelector("[data-shores]").textContent=joints+" / 4 shores joined";root.querySelector("[data-marks]").textContent=marks+" / 2 rim marks";
-    root.classList.toggle("ts-restored",check());return joints+" of four shores join. "+marks+" of two rim marks align.";
+    root.querySelector("[data-shores]").textContent=joints+" / 4 shores joined";root.querySelector("[data-marks]").textContent=marks+" / 2 pictures match";
+    root.classList.toggle("ts-restored",check());return joints+" of four shores join. "+marks+" of two pictures match.";
   }
   tiles.forEach((b,i)=>b.addEventListener("click",()=>{
     turns[i]=(turns[i]+1)%4;angles[i]++;const status=render();
-    live.textContent=check()?"The coast is whole. Try the lock.":quadrantNames[i]+" turned. "+status;onChange?.(read());
+    live.textContent=check()?"The map fits! Try the lock.":quadrantNames[i]+" turned. "+status;onChange?.(read());
   }));
-  render();live.textContent=check()?"The coast is whole. Try the lock.":"Tap a quarter to turn it clockwise. Match the sandy shores and the two marks on the rim.";
-  return {read,check};
+  render();live.textContent=check()?"The map fits! Try the lock.":"Tap a piece. It turns one step to the right.";
+  function guide(){
+    const i=turns.findIndex(v=>v!==0);
+    return i<0?null:{target:tiles[i],text:"Tap the "+quadrantNames[i].toLowerCase()+" piece once."};
+  }
+  return {read,check,guide};
 }
 
 const friends={
@@ -126,13 +131,30 @@ function riverBackdrop() {
 }
 const seatIsKnown=id=>id===null||(typeof id==="string"&&Object.hasOwn(friends,id));
 function crossing(state,passenger) {
-  if(!seatIsKnown(passenger))return {reason:"Choose a passenger from this bank."};
+  if(!seatIsKnown(passenger))return {reason:"Pick someone on this side."};
   const bit=passenger===null?0:friends[passenger].bit;
-  if(bit&&Number(Boolean(state.mask&bit))!==state.bank)return {reason:"That passenger is on the other bank."};
+  if(bit&&Number(Boolean(state.mask&bit))!==state.bank)return {reason:"That one is across the river."};
   const mask=state.mask^bit, unattended=state.bank===0?7^mask:mask;
-  if((unattended&3)===3)return {reason:"Pup would chase Duckling on the bank without the kitten. Choose a different passenger."};
-  if((unattended&6)===6)return {reason:"Duckling would nibble the sweet peas on the bank without the kitten. Choose a different passenger."};
+  if((unattended&3)===3)return {reason:"Pup would chase Duckling here. Pick someone else."};
+  if((unattended&6)===6)return {reason:"Duckling would eat the peas here. Pick someone else."};
   return {mask,bank:1-state.bank};
+}
+function nextPassenger(state) {
+  // At most sixteen combinations of river bank and cargo positions exist.
+  const queue=[{state}],visited=new Set([state.mask*2+state.bank]);
+  for(let i=0;i<queue.length;i++) {
+    const step=queue[i];
+    for(const passenger of [...friendIds,null]) {
+      const next=crossing(step.state,passenger);
+      if(next.reason)continue;
+      const first=i===0?passenger:step.first;
+      if(next.mask===7&&next.bank===1)return first;
+      const key=next.mask*2+next.bank;
+      if(visited.has(key))continue;
+      visited.add(key);queue.push({state:next,first});
+    }
+  }
+  return undefined;
 }
 function ferry(host,saved,onChange) {
   let state={mask:0,bank:0},history=[],seat=null;
@@ -147,9 +169,9 @@ function ferry(host,saved,onChange) {
   if(saved?.seat&&seatIsKnown(saved.seat)&&Number(Boolean(state.mask&friends[saved.seat].bit))===state.bank&&state.mask!==7)seat=saved.seat;
   const read=()=>({voyages:[...history],seat}),check=()=>state.mask===7&&state.bank===1;
   host.innerHTML='<section class="ts-board ts-ferry" aria-label="The picnic rowboat">'+
-    '<div class="ts-ferry-rules"><p><b>The kitten must watch these pairs</b></p>'+
-    '<div class="ts-pairs"><span>'+svg(friends.pup.art)+' + '+svg(friends.duck.art)+'<em>Pup chases Duckling.</em></span><span>'+svg(friends.duck.art)+' + '+svg(friends.peas.art)+'<em>Duckling nibbles peas.</em></span></div></div>'+
-    '<div class="ts-river-case"><div class="ts-banks"><span>Picnic bank</span><span>Ferry house</span></div>'+
+    '<div class="ts-ferry-rules"><p><b>Keep the kitten with these pairs</b></p>'+
+    '<div class="ts-pairs"><span>'+svg(friends.pup.art)+' + '+svg(friends.duck.art)+'<em>Pup chases Duckling.</em></span><span>'+svg(friends.duck.art)+' + '+svg(friends.peas.art)+'<em>Duckling eats peas.</em></span></div></div>'+
+    '<div class="ts-river-case"><div class="ts-banks"><span>Picnic side</span><span>Ferry house</span></div>'+
     '<div class="ts-river">'+riverBackdrop()+'<div class="ts-deck">'+friendIds.map((id,n)=>
       '<button type="button" class="ts-passenger" data-passenger="'+id+'" style="grid-row:'+(n+1)+'">'+svg(friends[id].art)+'<strong>'+friends[id].name+'</strong></button>').join('')+
     '<div class="ts-ferry-boat" aria-hidden="true"><svg viewBox="0 0 79 48" focusable="false">'+boatShape+
@@ -160,26 +182,26 @@ function ferry(host,saved,onChange) {
     '<p class="ts-status" role="status" aria-live="polite"></p></section>';
   const root=host.firstElementChild,live=root.querySelector(".ts-status"),passengers=[...root.querySelectorAll("[data-passenger]")];
   const art=root.querySelector(".ts-cargo-art"),back=root.querySelector("[data-undo-voyage]"),row=root.querySelector("[data-sail]");
-  const bankNames=["picnic bank","ferry house"];
+  const bankNames=["picnic side","ferry house"];
   function render() {
     root.dataset.bank=String(state.bank);
     passengers.forEach(b=>{
       const id=b.dataset.passenger,side=Number(Boolean(state.mask&friends[id].bit)),near=side===state.bank&&!check();
       b.style.gridColumn=side?"3":"1";b.classList.toggle("ts-away",!near);b.setAttribute("aria-disabled",String(!near));b.setAttribute("aria-pressed",String(id===seat));
-      b.setAttribute("aria-label",friends[id].name+", "+bankNames[side]+(id===seat?", selected for this voyage":near?", choose as passenger":", across the water"));
+      b.setAttribute("aria-label",friends[id].name+", "+bankNames[side]+(id===seat?", in the boat":near?", tap to take along":", across the water"));
     });
     art.innerHTML=seat?friends[seat].art:"";back.disabled=!history.length;row.disabled=check();
     root.querySelector("[data-bank-label]").textContent="Boat at "+bankNames[state.bank];
-    root.querySelector("[data-voyages]").textContent=history.length+(history.length===1?" voyage":" voyages");
-    root.querySelector(".ts-seat-caption").textContent=check()?"Everyone is ashore.":seat?"Passenger: "+friends[seat].name:"Passenger seat empty";
+    root.querySelector("[data-voyages]").textContent=history.length+(history.length===1?" trip":" trips");
+    root.querySelector(".ts-seat-caption").textContent=check()?"All across!":seat?friends[seat].name+" is in the boat.":"One empty seat";
     row.textContent=check()?"Arrived":seat?"Row with "+friends[seat].name:"Row alone";
     row.setAttribute("aria-label",row.textContent+(check()?"":" to the "+bankNames[1-state.bank]));
   }
   passengers.forEach(b=>b.addEventListener("click",()=>{
     const id=b.dataset.passenger;
-    if(check()){live.textContent="Everyone reached the ferry house. Try the lock.";return;}
-    if(Number(Boolean(state.mask&friends[id].bit))!==state.bank){live.textContent=friends[id].name+" is across the river. Choose a passenger from the kitten’s bank.";return;}
-    seat=seat===id?null:id;render();live.textContent=seat?friends[id].name+" is aboard. Tap the passenger again to empty the seat.":"The passenger seat is empty.";onChange?.(read());
+    if(check()){live.textContent="All three are across! Try the lock.";return;}
+    if(Number(Boolean(state.mask&friends[id].bit))!==state.bank){live.textContent=friends[id].name+" is across the river. Pick someone by the boat.";return;}
+    seat=seat===id?null:id;render();live.textContent=seat?friends[id].name+" is in the boat. Tap again to take them out.":"The seat is empty.";onChange?.(read());
   }));
   row.addEventListener("click",()=>{
     if(check())return;
@@ -187,27 +209,35 @@ function ferry(host,saved,onChange) {
     if(next.reason){live.textContent=next.reason;return;}
     const traveler=seat?friends[seat].name+" and the kitten":"The kitten";
     history.push(seat);state=next;snapshots.push(state);seat=null;render();onChange?.(read());
-    live.textContent=check()?"Everyone reached the ferry house. Try the lock.":traveler+" reached the "+bankNames[state.bank]+".";
+    live.textContent=check()?"All three are across! Try the lock.":traveler+" reached the "+bankNames[state.bank]+".";
   });
   back.addEventListener("click",()=>{
     if(!history.length)return;
-    history.pop();snapshots.pop();state=snapshots.at(-1);seat=null;render();live.textContent="Voyage undone. The boat is at the "+bankNames[state.bank]+".";onChange?.(read());
+    history.pop();snapshots.pop();state=snapshots.at(-1);seat=null;render();live.textContent="Back one trip. The boat is at the "+bankNames[state.bank]+".";onChange?.(read());
   });
-  render();live.textContent=check()?"Everyone reached the ferry house. Try the lock.":seat?friends[seat].name+" is aboard. Row when you are ready.":"Choose one passenger on your bank, or row alone. Get everyone to the ferry house.";
-  return {read,check};
+  render();live.textContent=check()?"All three are across! Try the lock.":seat?friends[seat].name+" is in the boat. Tap Row.":"Tap someone by the boat. Then tap Row. You can also row alone.";
+  function guide() {
+    if(check())return null;
+    const next=nextPassenger(state);
+    if(next===undefined)return null;
+    if(next===seat)return {target:row,text:seat?"Tap Row with "+friends[seat].name+".":"Tap Row alone."};
+    const id=next===null?seat:next;
+    return {target:passengers.find(b=>b.dataset.passenger===id),text:next===null?"Tap "+friends[seat].name+" to empty the seat.":"Tap "+friends[next].name+" to put them in the boat."};
+  }
+  return {read,check,guide};
 }
 
 export const shoreRooms=[
-  {id:"chartroom",title:"The Torn Sea Chart",place:"Treehouse Chartroom",art:"hollow",boardTitle:"The coastal chart",
-    brief:"A whale calf is waiting for a safe way home. In the treehouse, four quarters of a chart have slipped in their frame. Its coast will reveal the first of five bearings.",
-    clue:"Turn the map pieces until sandy shores meet across every seam. The painted lighthouse belongs under the north light stamp, and the painted anchor belongs above the south mooring stamp.",
-    hints:["Find the little striped lighthouse on the northwest piece and the gold anchor on the southeast piece. The frame shows which edges they belong on.","Fix the lighthouse against the top rim and the anchor against the bottom rim first. Leave those corners still and compare the two shores touching each other in the middle.","From Reset, turn northwest three times, northeast once, southwest twice, and southeast three times."],
-    miss:"The chart is still torn. Match both rim stamps and join the coast along all four seams.",reward:{symbol:"shell",name:"Shell Bearing"},
-    reply:"The headlands meet around a quiet channel. At its mouth, a shell-shaped brass bearing slides from the chart frame.",journalNote:"Found at the mouth of the channel on the restored treehouse chart.",create:chart},
-  {id:"ferrycross",title:"The Picnic Rowboat",place:"Orchard Ferry",art:"picnic",boardTitle:"The estuary ferry",
-    brief:"The ferryman has a Reed Bearing for the calf. First, the kitten must bring Pup, Duckling, and the picnic peas to the ferry house.",
-    clue:"The kitten rows every voyage and has space for one passenger. On a bank without the kitten, Pup chases Duckling and Duckling eats sweet peas. Either bank is safe while the kitten is there.",
-    hints:["For your first trip, ask which two can safely wait together. Pup and the peas make a quiet pair.","Take Duckling across, then row back alone. Take Pup next. Duckling has to ride back with you before you can leave Pup there.","From the start, row with Duckling, alone, with Pup, with Duckling back, with sweet peas, alone, then with Duckling."],
-    miss:"The ferry house is still waiting. Bring all three across, using a return trip whenever the kitten is on the far bank.",reward:{symbol:"reed",name:"Reed Bearing"},
-    reply:"Pup trots up the jetty beside Duckling. The ferryman parts the reeds and takes the second bearing from a loop of river grass.",journalNote:"Given by the orchard ferryman after the picnic party crossed safely.",create:ferry}
+  {id:"chartroom",title:"The Torn Sea Chart",place:"Treehouse Chartroom",art:"hollow",boardTitle:"Turn the map",
+    brief:"Help the little whale get home. Fix its sea map to find the first bearing.",
+    clue:"Match the lighthouse to the top picture. Match the anchor to the bottom picture. Join the sandy lines.",
+    hints:["Look at the top left piece. Its little lighthouse goes at the top.","The anchor goes at the bottom. The sandy lines should meet at each edge.","From Reset, tap top left 3 times, top right once, bottom left twice, then bottom right 3 times."],
+    miss:"Find a break in a sandy line. Turn a piece beside it. Check both pictures too.",reward:{symbol:"shell",name:"Shell Bearing"},
+    reply:"The coast fits! A shell pops out of the frame. It is the whale’s first bearing.",journalNote:"Found in the treehouse map.",create:chart},
+  {id:"ferrycross",title:"The Picnic Rowboat",place:"Orchard Ferry",art:"picnic",boardTitle:"Cross the river",
+    brief:"Pup, Duckling, and the peas need a ride. Take all three to the ferry house.",
+    clue:"The kitten can take one friend or the peas. It can also row alone. Pup and the peas can wait together.",
+    hints:["Pup and the peas can wait together. Duckling needs the kitten beside Pup or the peas.","From Reset, take Duckling across. Row back alone. Take Pup across. Bring Duckling back.","From Reset, row seven times. Take Duckling, nobody, Pup, Duckling, peas, nobody, Duckling."],
+    miss:"Get all three to the ferry house on the right. The kitten can row back.",reward:{symbol:"reed",name:"Reed Bearing"},
+    reply:"Pup runs up the dock. Duckling follows. The ferryman gives you the Reed Bearing.",journalNote:"A gift for bringing the picnic across.",create:ferry}
 ];

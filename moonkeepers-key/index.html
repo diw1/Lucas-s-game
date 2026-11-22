@@ -4,24 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111d30">
-  <meta name="description" content="Explore eighteen puzzle rooms in Lucas’s paintings. Find the Moonkeeper’s Key, ring the Dawn Bell and chart a little whale’s way home.">
+  <meta name="description" content="Play 24 puzzle rooms in Lucas’s paintings. Find a key, ring a bell, help a whale and light the treehouse bridge for the Firefly Festival.">
   <title>The Moonkeeper’s Key · Lucas’s World</title>
   <meta property="og:title" content="The Moonkeeper’s Key · A Lantern Night mystery">
-  <meta property="og:description" content="Three books of hands-on mysteries in Lucas’s paintings. Open the observatory, wake the island and sail the Tideglass Atlas.">
+  <meta property="og:description" content="Four books of hands-on mysteries in Lucas’s paintings, from the moonlit observatory to the Firefly Festival.">
   <meta property="og:image" content="https://diw1.github.io/Lucas-s-game/moonkeepers-key/assets/moonroom.webp">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='11' fill='%23192437'/%3E%3Cg fill='none' stroke='%23efd191' stroke-width='3.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='17' cy='17' r='6.5'/%3E%3Cpath d='M22 22l14 14m-8-8 4-4m0 8 4-4'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../lantern-night/assets/display.woff2">
-  <link rel="stylesheet" href="style.css?v=tide">
+  <link rel="stylesheet" href="style.css?v=firefly">
   <link rel="stylesheet" href="early.css">
   <link rel="stylesheet" href="late.css">
   <link rel="stylesheet" href="final.css">
   <link rel="stylesheet" href="dawn-garden.css">
   <link rel="stylesheet" href="dawn-fair.css">
   <link rel="stylesheet" href="dawn-tower.css">
-  <link rel="stylesheet" href="tide-shore.css">
-  <link rel="stylesheet" href="tide-lights.css">
-  <link rel="stylesheet" href="tide-voyage.css">
-  <script type="module" src="app.js?v=tide"></script>
+  <link rel="stylesheet" href="tide-shore.css?v=firefly">
+  <link rel="stylesheet" href="tide-lights.css?v=firefly">
+  <link rel="stylesheet" href="tide-voyage.css?v=firefly">
+  <link rel="stylesheet" href="firefly-garden.css">
+  <link rel="stylesheet" href="firefly-workshop.css">
+  <link rel="stylesheet" href="firefly-parade.css">
+  <script type="module" src="app.js?v=firefly"></script>
 </head>
 <body>
   <svg class="mk-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -62,6 +65,7 @@
       <a href="#book/night" data-book="night"><small>Book I</small><span>The Moonkeeper’s Key</span></a>
       <a href="#book/dawn" data-book="dawn"><small>Book II</small><span>The Dawn Bell</span></a>
       <a href="#book/tide" data-book="tide"><small>Book III</small><span>The Tideglass Atlas</span></a>
+      <a href="#book/firefly" data-book="firefly"><small>Book IV</small><span>The Firefly Festival</span></a>
     </nav>
     <section class="mk-hero" aria-labelledby="desk-title">
       <img class="mk-hero-art" id="book-cover" alt="" fetchpriority="high">
@@ -92,7 +96,7 @@
     </header>
     <div class="mk-workbench">
       <section class="mk-board" aria-labelledby="board-head">
-        <header class="mk-panel-head"><svg class="mk-icon" aria-hidden="true"><use href="#mk-key"/></svg><h2 id="board-head">The lock</h2></header>
+        <header class="mk-panel-head"><svg class="mk-icon" aria-hidden="true"><use href="#mk-key"/></svg><h2 id="board-head">The lock</h2><button type="button" id="show-guide" class="mk-guide-button" hidden><svg class="mk-icon" aria-hidden="true"><use href="#mk-lamp"/></svg>Show me</button></header>
         <div id="board-mount"></div>
         <div class="mk-board-tools">
           <button type="button" id="check" class="mk-btn mk-primary"><svg class="mk-icon" aria-hidden="true"><use href="#mk-key"/></svg>Try the lock</button>
@@ -100,7 +104,7 @@
           <button type="button" id="hint" class="mk-btn mk-outline"><svg class="mk-icon" aria-hidden="true"><use href="#mk-lamp"/></svg>Hint</button>
           <button type="button" id="room-next" class="mk-btn mk-primary" hidden>Next room <svg class="mk-icon" aria-hidden="true"><use href="#mk-arrow"/></svg></button>
         </div>
-        <div class="mk-feedback"><p id="board-status" role="status" aria-live="polite"></p><p id="board-hint" role="status" aria-live="polite"></p></div>
+        <div class="mk-feedback"><p id="board-status" role="status" aria-live="polite"></p><p id="board-hint" role="status" aria-live="polite"></p><button type="button" id="previous-hint" class="mk-previous-hint" hidden>‹ Previous hint</button></div>
       </section>
       <aside class="mk-evidence" aria-labelledby="clue-title">
         <figure class="mk-original"><button type="button" id="inspect-art" class="mk-original-mat" aria-label="Enlarge Lucas’s original painting"><img id="game-art" alt=""><span class="mk-zoom" aria-hidden="true">⤢</span></button><figcaption><svg class="mk-icon" aria-hidden="true"><use href="#mk-image"/></svg><span id="art-caption">Original painting by Lucas</span></figcaption></figure>
@@ -123,7 +127,8 @@
     <ol class="mk-instructions">
       <li><strong>Look at Lucas’s painting.</strong><span>Read the field notes and look for details that might fit the lock.</span></li>
       <li><strong>Work the mechanism.</strong><span>Choose your answer on the workbench, then try the lock. Ask for a hint if you need one.</span></li>
-      <li><strong>Use your journal.</strong><span>Collect engraved seals in Book I, chime patterns in Book II and compass bearings in Book III. You’ll need all five entries to solve each book’s final puzzle.</span></li>
+      <li><strong>Need a hand?</strong><span>In the whale and firefly books, tap Show me. Look for the gold ring. You still get to make the move.</span></li>
+      <li><strong>Use your journal.</strong><span>Your five finds go in your journal. Look at them again in the last room.</span></li>
     </ol>
     <button type="button" class="mk-btn mk-primary" data-close>Got it <svg class="mk-icon" aria-hidden="true"><use href="#mk-check"/></svg></button>
   </div></dialog>
@@ -131,7 +136,7 @@
     <button class="mk-close" type="button" data-close aria-label="Close journal"><svg class="mk-icon" aria-hidden="true"><use href="#mk-close"/></svg></button>
     <p class="mk-kicker"><svg class="mk-icon" aria-hidden="true"><use href="#mk-book"/></svg> Observatory collection</p>
     <div class="mk-journal-heading"><h2 id="journal-title">Seal journal</h2><span id="journal-count">0 / 5 seals</span></div>
-    <div class="mk-journal-books" role="group" aria-label="Journal volumes"><button type="button" data-volume="night">Book I · Seals</button><button type="button" data-volume="dawn">Book II · Chimes</button><button type="button" data-volume="tide">Book III · Bearings</button></div>
+    <div class="mk-journal-books" role="group" aria-label="Journal volumes"><button type="button" data-volume="night">Book I · Seals</button><button type="button" data-volume="dawn">Book II · Chimes</button><button type="button" data-volume="tide">Book III · Bearings</button><button type="button" data-volume="firefly">Book IV · Lanterns</button></div>
     <p class="mk-dialog-lede" id="journal-lede"></p>
     <div id="journal-grid" class="mk-journal-grid"></div>
   </div></dialog>
@@ -153,6 +158,8 @@
     <h2 id="art-title">Lucas’s painting</h2><img id="art-full" alt="">
   </div></dialog>
   <p id="announce" class="mk-sr" role="status" aria-live="polite"></p>
+  <p id="guide-bubble" class="mk-guide-bubble" aria-hidden="true" hidden></p>
+  <p id="guide-announcement" class="mk-sr" role="status" aria-live="polite"></p>
   <noscript><p class="mk-container">Turn on JavaScript in your browser to play The Moonkeeper’s Key.</p></noscript>
 </body>
 </html>

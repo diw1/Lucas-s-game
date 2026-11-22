@@ -1,16 +1,20 @@
 import {earlyRooms} from "./early.js";
 import {lateRooms} from "./late.js";
 import {finalRoom} from "./final.js";
-import {engraving, sealIcon, seals} from "./seals.js?v=tide";
+import {engraving, sealIcon, seals} from "./seals.js?v=firefly";
 import {gardenRooms} from "./dawn-garden.js";
 import {fairRooms} from "./dawn-fair.js";
 import {towerRooms,chimeMarks} from "./dawn-tower.js";
-import {shoreRooms} from "./tide-shore.js";
-import {lightRooms} from "./tide-lights.js";
-import {voyageRooms,bearingMarks} from "./tide-voyage.js";
+import {shoreRooms} from "./tide-shore.js?v=firefly";
+import {lightRooms} from "./tide-lights.js?v=firefly";
+import {voyageRooms,bearingMarks} from "./tide-voyage.js?v=firefly";
+import {gardenFireflyRooms} from "./firefly-garden.js";
+import {workshopFireflyRooms} from "./firefly-workshop.js";
+import {paradeFireflyRooms,lanternCards,lanternPair} from "./firefly-parade.js";
 
 const nightRooms=[...earlyRooms,...lateRooms,finalRoom];
 const dawnRooms=[...gardenRooms,...fairRooms,...towerRooms];
+const tideRooms=[...shoreRooms,...lightRooms,...voyageRooms];
 const books={
   night:{
     id:"night", numeral:"I", item:"Seal", marks:seals, keepsake:"key",
@@ -33,14 +37,26 @@ const books={
   },
   tide:{
     id:"tide", numeral:"III", item:"Bearing", marks:bearingMarks, keepsake:"atlas",
-    rooms:[...shoreRooms,...lightRooms,...voyageRooms], first:nightRooms.length+dawnRooms.length,
+    rooms:tideRooms, first:nightRooms.length+dawnRooms.length, guided:true,
     heading:"The Tideglass", emphasis:"Atlas", trail:"The whale’s way home",
-    intro:"A little blue whale has lost its pod. Join the silver kitten at the chart table and piece together a safe passage through Lucas’s painted island.",
+    intro:"A little blue whale can’t find its family. Help the kitten fix the map and show the whale the way home.",
     cover:"assets/tideglass.webp", alt:"A silver kitten studies a glowing sea chart on a wooden pier beside a little blue whale.",
-    start:"Unroll the sea chart", ending:"Home waters!", endingArt:"assets/homewaters.webp",
+    start:"Open the map", ending:"Home waters!", endingArt:"assets/homewaters.webp",
     endingAlt:"At sunrise the little whale swims beside its parent while the silver kitten waves from the pier.",
-    collection:"bearings", guide:"Each bearing gives a compass direction and a distance in squares. At the last chart table, sail them in the order you found them.",
-    closing:"Five bearings plotted · The whale is home"
+    collection:"bearings", guide:"Each arrow tells you which way to go. The number tells you how many squares to move. On the last map, start with arrow 1.",
+    closing:"Five arrows on the map · The whale is home"
+  },
+  firefly:{
+    id:"firefly", numeral:"IV", item:"Lantern", marks:lanternCards, keepsake:"festival", guided:true,
+    rooms:[...gardenFireflyRooms,...workshopFireflyRooms,...paradeFireflyRooms],
+    first:nightRooms.length+dawnRooms.length+tideRooms.length,
+    heading:"The Firefly", emphasis:"Festival", trail:"Lights for the treehouse bridge",
+    intro:"One firefly blinks. Then another! Help the kitten and its friends make five lanterns for the bridge between their treehouses.",
+    cover:"assets/firefly-dusk.webp", alt:"A firefly lands on the silver kitten’s nose as it makes a paper lantern beside the squirrel.",
+    start:"Make the first lantern", ending:"The bridge lights up!", endingArt:"assets/firefly-bridge.webp",
+    endingAlt:"The kitten, koala, pig and squirrel gather under five glowing lanterns between Lucas’s two treehouses.",
+    collection:"lanterns", guide:"Look at the two pictures on each lantern. On the bridge, the pictures that touch must match.",
+    closing:"All five lanterns are glowing."
   }
 };
 const editions=Object.values(books);
@@ -77,10 +93,43 @@ function storedHints(room) {
   const n=load("hints."+room.id);
   return Number.isInteger(n) ? Math.max(0,Math.min(room.hints.length,n)) : 0;
 }
-function showDialog(node) {if(!node.open) node.showModal();}
+function showDialog(node) {clearGuide();if(!node.open) node.showModal();}
 function closeDialogs() {document.querySelectorAll("dialog[open]").forEach(d=>d.close());}
 const focus=node=>node?.focus({preventScroll:true});
 let current=null,board=null,sound=load("sound")!==false,context;
+let guidedTarget=null,hintPage=0;
+
+function clearGuide() {
+  guidedTarget?.classList.remove("mk-pointed");
+  guidedTarget=null;
+  $("guide-bubble").hidden=true;
+  $("guide-announcement").textContent="";
+}
+function placeGuideBubble() {
+  if(!guidedTarget)return;
+  const box=guidedTarget.getBoundingClientRect(),bubble=$("guide-bubble");
+  const width=document.documentElement.clientWidth,height=document.documentElement.clientHeight;
+  if(box.bottom<=0||box.top>=height){bubble.hidden=true;return;}
+  bubble.hidden=false;
+  const space=8,tip=bubble.getBoundingClientRect();
+  const x=Math.max(space,Math.min(box.left+(box.width-tip.width)/2,width-tip.width-space));
+  const y=box.top>tip.height+space*2?box.top-tip.height-space:box.bottom+space;
+  bubble.style.left=x+"px";bubble.style.top=Math.max(space,Math.min(y,height-tip.height-space))+"px";
+}
+function showGuide() {
+  if(!board?.guide)return;
+  const step=board.check()?{target:$("check"),text:"Ready! Tap Try the lock."}:board.guide();
+  if(!step?.target)return;
+  clearGuide();
+  guidedTarget=step.target;
+  guidedTarget.classList.add("mk-pointed");
+  focus(guidedTarget);
+  const box=guidedTarget.getBoundingClientRect(),height=document.documentElement.clientHeight;
+  if(box.top<65||box.bottom>height-85)guidedTarget.scrollIntoView({block:"center",inline:"nearest",behavior:"instant"});
+  $("guide-announcement").textContent=step.text;
+  $("guide-bubble").textContent=step.text;
+  placeGuideBubble();
+}
 
 function ring(kind) {
   if(!sound)return;
@@ -140,6 +189,7 @@ function markFor(selected,i) {
   return selected.marks[i];
 }
 function drawMark(mark) {
+  if(mark.left&&mark.right)return lanternPair(mark);
   if(mark.direction) {
     const angle=["N","NE","E","SE","S","SW","W","NW"].indexOf(mark.direction)*45;
     return '<svg class="mk-bearing" aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor"><circle cx="16" cy="16" r="13"/><path transform="rotate('+angle+' 16 16)" d="m16 5 4 12-4-2-4 2z" fill="currentColor"/></svg>';
@@ -150,7 +200,11 @@ function drawMark(mark) {
   return '<span class="mk-pulses" role="img" aria-label="'+pattern+'">'+lights.map(lit=>'<i aria-hidden="true"'+(lit?' class="on"':'')+'></i>').join("")+'</span>';
 }
 function markTitle(mark){
-  if(mark.direction)return mark.direction+" · "+mark.steps+(mark.steps===1?" square":" squares");
+  if(mark.left&&mark.right)return "";
+  if(mark.direction) {
+    const words={N:"Up",NE:"Up and right",E:"Right",SE:"Down and right",S:"Down",SW:"Down and left",W:"Left",NW:"Up and left"};
+    return words[mark.direction]+" · "+mark.steps+(mark.steps===1?" square":" squares");
+  }
   return mark.mark+(mark.beats?" rhythm":" engraving");
 }
 function renderJournal() {
@@ -168,7 +222,7 @@ function renderJournal() {
     const note=by(card,".journal-note");
     if(found&&seal) {
       note.classList.add("mk-code");note.innerHTML=drawMark(seal);
-      const text=document.createElement("span");text.textContent=markTitle(seal);note.append(text);
+      if(markTitle(seal))note.append(Object.assign(document.createElement("span"),{textContent:markTitle(seal)}));
     }else note.textContent=found?(room.journalNote||"The observatory is alight."):"Open this room to reveal its entry.";
     if(found&&seal&&room.journalNote) {
       const memory=document.createElement("p");memory.className="mk-journal-memory";
@@ -184,20 +238,26 @@ function resetFeedback() {
 function paintHints() {
   const n=storedHints(current);
   const region=$("board-hint");
-  region.replaceChildren(...current.hints.slice(0,n).map((hint,i)=>{
+  const start=book.guided?Math.max(0,hintPage-1):0;
+  region.replaceChildren(...current.hints.slice(start,book.guided?hintPage:n).map((hint,i)=>{
     const line=document.createElement("span");line.className="mk-hint-line";
-    line.textContent="Hint "+(i+1)+" of "+current.hints.length+" · "+hint;
+    line.textContent="Hint "+(start+i+1)+" of "+current.hints.length+" · "+hint;
     return line;
   }));
-  $("hint").disabled=n===current.hints.length;
-  setCaption($("hint"),n===0?"Hint":n===current.hints.length?"All hints shown":"Next hint");
+  const last=(book.guided?hintPage:n)===current.hints.length;
+  $("hint").disabled=last;
+  $("previous-hint").hidden=!book.guided||hintPage<2;
+  setCaption($("hint"),n===0?"Hint":last?"All hints shown":"Next hint");
 }
 function setBoard(saved) {
+  clearGuide();
   const room=current;
   board=room.create($("board-mount"),saved,state=>{
+    clearGuide();
     store("board."+room.id,state);
     resetFeedback();
   });
+  $("show-guide").hidden=typeof board.guide!=="function";
 }
 function renderGame(room) {
   current=room;
@@ -208,13 +268,13 @@ function renderGame(room) {
   $("game-title").textContent=room.title;$("game-brief").textContent=room.brief;
   $("game-art").src=art(room);$("game-art").alt=room.place+", from Lucas’s original painting";
   $("art-caption").textContent=room.place+" · Painted by Lucas";
-  $("clue-title").textContent=room===finalRoom?"Read the engravings":"Keeper’s clue";
+  $("clue-title").textContent=book.guided?"How to play":room===finalRoom?"Read the engravings":"Keeper’s clue";
   $("clue-text").textContent=room.clue;
   $("board-head").textContent=room.boardTitle||["The porch rail","The star chart","The baker’s scales","The tideglass frame","The moon clock","The cipher wheel"][i];
-  setCaption($("game-journal"),"Open "+journalTitle(book).toLowerCase());
+  setCaption($("game-journal"),book===books.tide?"My map arrows":"Open "+journalTitle(book).toLowerCase());
   $("room-next").hidden=!earned(room);
   setCaption($("room-next"),i===rooms.length-1?completionAction(book):"Next room");
-  resetFeedback();paintHints();setBoard(load("board."+room.id));
+  hintPage=storedHints(room);resetFeedback();paintHints();setBoard(load("board."+room.id));
   paintProgress();window.scrollTo(0,0);focus($("game-title"));
 }
 function useBook(selected) {
@@ -239,6 +299,7 @@ function resumeBook() {
   return last;
 }
 function renderLocation() {
+  clearGuide();
   closeDialogs();
   const roomId=location.hash.startsWith("#room/")?location.hash.slice(6):"";
   const roomBook=editions.find(b=>b.rooms.some(r=>r.id===roomId));
@@ -282,7 +343,7 @@ function showReward() {
   const mark=$("reward-seal");
   if(seal) {
     mark.innerHTML=drawMark(seal);
-    const label=document.createElement("span");label.textContent="In your journal · "+markTitle(seal);mark.append(label);
+    const title=markTitle(seal),label=document.createElement("span");label.textContent=title?"In your journal · "+title:"Saved in your lantern journal";mark.append(label);
   }else mark.textContent=book.closing;
   setCaption($("reward-next"),final?completionAction(book):"Next room");
   showDialog($("reward-dialog"));focus($("reward-next"));
@@ -297,6 +358,7 @@ const missMessages=[
 ];
 $("check").addEventListener("click",()=>{
   if(!current||!board)return;
+  clearGuide();
   if(!board.check()) {
     $("board-status").dataset.tone="warm";
     $("board-status").textContent=current.miss||missMessages[book.rooms.indexOf(current)];
@@ -315,9 +377,17 @@ $("reset").addEventListener("click",()=>{
 });
 $("hint").addEventListener("click",()=>{
   if(!current)return;
-  const n=Math.min(storedHints(current)+1,current.hints.length);
-  store("hints."+current.id,n);paintHints();ring("hint");
+  clearGuide();
+  const seen=storedHints(current);
+  hintPage=Math.min((book.guided?hintPage:seen)+1,current.hints.length);
+  store("hints."+current.id,Math.max(seen,hintPage));paintHints();ring("hint");
 });
+$("previous-hint").addEventListener("click",()=>{if(hintPage>1){hintPage--;paintHints();}});
+$("show-guide").addEventListener("click",showGuide);
+$("board-mount").addEventListener("click",clearGuide,true);
+window.addEventListener("scroll",placeGuideBubble,{passive:true});
+window.addEventListener("resize",placeGuideBubble);
+window.addEventListener("keydown",event=>{if(event.key==="Escape"&&guidedTarget){clearGuide();focus($("show-guide"));}});
 $("sound").addEventListener("click",()=>{
   sound=!sound;store("sound",sound);updateSound();ring("click");
 });

@@ -47,6 +47,14 @@ h1,h2,h3,p,figure,ol{margin:0}
 .mk-books a:hover,.mk-journal-books button:hover{border-color:#c2ac7e}
 .mk-journal-books{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.mk-journal-books button{min-height:38px;padding:6px 10px}
 .mk-books a{min-width:0}
+.mk-desk[data-edition="firefly"] .mk-kicker{color:#ffdeb1}
+.mk-guide-button{margin-left:auto;display:inline-flex;align-items:center;gap:6px;flex:none;padding:7px 11px;min-height:38px;color:#ffdfa2;background:#26352f;border:1px solid #a99b68;border-radius:6px;font-weight:700}
+.mk-guide-button .mk-icon{width:15px;height:15px}
+.mk-guide-button:hover{background:#334538}
+body .mk-board .mk-pointed{outline:3px solid #ffdd78!important;outline-offset:1px;box-shadow:inset 0 0 0 2px #563811,0 0 0 5px #4b3316!important;z-index:2}
+.mk-guide-bubble{position:fixed;z-index:8;pointer-events:none;width:max-content;max-width:min(270px,calc(100vw - 18px));margin:0;padding:7px 12px;border:1px solid #9f7535;border-radius:7px;background:#fff0bd;color:#2a2220;font:600 .88rem/1.32 var(--mk-sans);box-shadow:0 3px 12px #101a2c55}
+.mk-previous-hint{padding:4px 0;min-height:32px;background:transparent;border:0;color:var(--mk-gold);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:730px){.mk-books{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.mk-books a{flex-wrap:wrap;align-content:flex-start}.mk-journal-books{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
 .mk-code .mk-bearing,.mk-reward-seal .mk-bearing{width:28px;height:28px;vertical-align:middle;flex:none}
 .mk-desk[data-edition="tide"] .mk-kicker{color:#c3eadb}
 .mk-pulses{display:inline-flex;gap:3px;vertical-align:middle;margin-right:7px}.mk-pulses i{width:13px;height:13px;border-radius:50%;border:1px solid #aab7bd;background:#1d2c39}.mk-pulses i.on{background:#ffde8d;border-color:#ffedc7;box-shadow:0 0 6px #ecbd642f}
