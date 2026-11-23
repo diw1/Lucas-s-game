@@ -45,33 +45,102 @@
       special: ["暗影球", "Shadow Ball"],
       type: "ghost",
     },
+    lapras: {
+      name: ["拉普拉斯", "Lapras"],
+      move: ["水枪", "Water Gun"],
+      special: ["冲浪", "Surf"],
+      type: "water",
+    },
+    jigglypuff: {
+      name: ["胖丁", "Jigglypuff"],
+      move: ["拍击", "Pound"],
+      special: ["巨声", "Hyper Voice"],
+      type: "normal",
+    },
+    cubone: {
+      name: ["卡拉卡拉", "Cubone"],
+      move: ["骨棒", "Bone Club"],
+      special: ["骨头回力镖", "Bonemerang"],
+      type: "ground",
+    },
+    mareep: {
+      name: ["咩利羊", "Mareep"],
+      move: ["电击", "Thunder Shock"],
+      special: ["放电", "Discharge"],
+      type: "electric",
+    },
+    poliwag: {
+      name: ["蚊香蝌蚪", "Poliwag"],
+      move: ["泡沫", "Bubble"],
+      special: ["泡沫光线", "Bubble Beam"],
+      type: "water",
+    },
   };
   const starters = ["pikachu", "charmander", "squirtle", "bulbasaur"];
   const gyms = [
     {
-      id: "oars",
+      id: "rowboat", zone: 1,
+      name: ["拉普拉斯湖", "Lapras Lake"],
+      badge: ["船桨徽章", "Oar Badge"],
+      foe: "lapras",
+    },
+    {
+      id: "london", zone: 0,
+      name: ["草地音乐厅", "Meadow Concert Hall"],
+      badge: ["交响徽章", "Symphony Badge"],
+      foe: "jigglypuff",
+    },
+    {
+      id: "shepherd", zone: 0,
+      name: ["牧羊草坡", "Shepherd’s Meadow"],
+      badge: ["田园徽章", "Pastoral Badge"],
+      foe: "mareep",
+    },
+    {
+      id: "bongo", zone: 0, companion: true,
+      name: ["骨鼓山道", "Bone Drum Trail"],
+      badge: ["鼓点徽章", "Drumbeat Badge"],
+      foe: "cubone",
+    },
+    {
+      id: "bubble", zone: 1, companion: true,
+      name: ["泡泡池塘", "Bubble Pond"],
+      badge: ["涟漪徽章", "Ripple Badge"],
+      foe: "poliwag",
+    },
+    {
+      id: "oars", zone: 0,
       name: ["常青草地", "Viridian Meadow"],
       badge: ["回声徽章", "Echo Badge"],
       foe: "eevee",
     },
     {
-      id: "drums",
+      id: "drums", zone: 1,
       name: ["溪畔道馆", "Brookside Gym"],
       badge: ["静拍徽章", "Stillbeat Badge"],
       foe: "psyduck",
     },
     {
-      id: "spell",
+      id: "spell", zone: 2,
       name: ["月影道馆", "Moonshade Gym"],
       badge: ["半音徽章", "Half-step Badge"],
       foe: "gengar",
     },
-  ].map((g) => ({
-    ...g,
-    lesson: window.FireflyLessons.find((l) => l.id === g.id),
-    song: window.DuelSongs[g.id],
-  }));
+  ].map((g) => {
+    const song = window.DuelSongs[g.id];
+    const earlierLesson = window.FireflyLessons.find((lesson) => lesson.id === g.id);
+    return {
+      ...g, song, review: Boolean(earlierLesson),
+      page: song.page ?? earlierLesson.page,
+      bench: song.bench ?? [earlierLesson.bench, earlierLesson.benchEn],
+    };
+  });
   const shortcut = {
+    z: 55,
+    x: 56,
+    c: 57,
+    v: 58,
+    b: 59,
     a: 60,
     w: 61,
     s: 62,
@@ -85,8 +154,10 @@
     u: 70,
     j: 71,
     k: 72,
+    o: 73,
+    l: 74,
   };
-  const whites = [60, 62, 64, 65, 67, 69, 71, 72];
+  const whites = [55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 74];
   const sharpNames = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
   const storeKey = "lucas.pokemon-piano.v1";
   let saved = {};
@@ -99,21 +170,21 @@
   const tr = (pair) => pair[language === "en" ? 1 : 0];
   const t = (zh, en) => tr([zh, en]);
   let partner = available().includes(saved.partner) ? saved.partner : "pikachu";
-  let gymIndex = Math.max(
-    0,
-    gyms.findIndex((g) => g.id === saved.gym),
-  );
+  // Older saves open the new chapter once. Subsequent visits remember any choice, including review.
+  const libraryVersion = 2;
+  let gymIndex = saved.libraryVersion === libraryVersion
+    ? Math.max(0, gyms.findIndex((g) => g.id === saved.gym))
+    : 0;
   let bpm = [60, 80, 100].includes(saved.bpm) ? saved.bpm : 80;
   const gym = () => gyms[gymIndex];
   const ally = () => creatures[partner];
   const foe = () => creatures[gym().foe];
   const beatMs = () => 60000 / bpm;
-  const bookPage = () => gym().lesson.page;
   const song = () => gym().song;
   const maxAlly = 66,
     maxFoe = 90;
   let phase, cursor, slots, due, hp, enemyHp, chain, power, shielded;
-  let totalBars, totalNotes, notesPlayed, onBeat, lastNoteEnd, pausedTailBeats;
+  let totalBars, totalNotes, hasEighths, notesPlayed, onBeat, lastNoteEnd, pausedTailBeats;
   let lastHeard, lastHeardSlot,
     lastGrade,
     logMessage,
@@ -133,7 +204,7 @@
     try {
       localStorage.setItem(
         storeKey,
-        JSON.stringify({ language, partner, gym: gym().id, bpm, badges: [...earned] }),
+        JSON.stringify({ libraryVersion, language, partner, gym: gym().id, bpm, badges: [...earned] }),
       );
     } catch {}
   }
@@ -160,12 +231,14 @@
     slots = [];
     totalBars = 0;
     totalNotes = 0;
+    hasEighths = false;
     let start = 0;
     song().sections.forEach((section, sectionIndex) => {
       for (const bar of section.bars) {
         bar.forEach(([midi, beats, spelling], eventInBar) => {
           slots.push({ midi, beats, spelling, start, sectionIndex, barIndex: totalBars, eventInBar });
           start += beats;
+          if (beats < 1) hasEighths = true;
           if (midi !== null) totalNotes++;
         });
         totalBars++;
@@ -197,6 +270,7 @@
     lastHeard = null;
     lastGrade = "";
     loadSong();
+    buildKeys();
     log("野生的" + foe().name[0] + "出现了！", "A wild " + foe().name[1] + " appeared!");
     noteStatus(
       "把设备放在钢琴旁，也可以点屏幕琴键。",
@@ -206,7 +280,7 @@
     renderAll();
   }
   function paintArena() {
-    window.DuelArena.show({ player: partner, foe: gym().foe, zone: gymIndex });
+    window.DuelArena.show({ player: partner, foe: gym().foe, zone: gym().zone });
   }
   function createChoice(tag, cls, portrait, text, detail, selected, onClick) {
     const b = document.createElement("button");
@@ -233,7 +307,9 @@
   }
   function renderSetup() {
     $("partners").replaceChildren();
-    $("gyms").replaceChildren();
+    $("chapterSongs").replaceChildren();
+    $("reviewSongs").replaceChildren();
+    if (gym().review) $("review").open = true;
     for (const id of available()) {
       createChoice("partners", "partner", id, tr(creatures[id].name), "", partner === id, () =>
         changeSetup(id, gymIndex),
@@ -243,21 +319,20 @@
       const mark = document.createElement("span");
       mark.className = "gym-mark";
       mark.textContent = earned.has(g.id) ? "✦" : "›";
+      const pageLabel = t("第 " + g.page + " 页", "p. " + g.page);
+      const sourceLabel = g.companion ? t(" · 配套原创", " · Original practice song") : "";
       createChoice(
-        "gyms",
+        g.review ? "reviewSongs" : "chapterSongs",
         "gym",
         g.foe,
         tr(g.song.title),
-        t(
-          creatures[g.foe].name[0] + " · 第 " + g.lesson.page + " 页",
-          creatures[g.foe].name[1] + " · p. " + g.lesson.page,
-        ),
+        tr(creatures[g.foe].name) + " · " + pageLabel + sourceLabel,
         gymIndex === i,
         () => changeSetup(partner, i),
       ).append(mark);
     });
     $("tempo").value = String(bpm);
-    $("caseCount").textContent = earned.size + " / 3";
+    $("caseCount").textContent = earned.size + " / " + gyms.length;
     $("moveName").textContent = tr(ally().special);
     $("moveInfo").textContent = t(
       "踩准 4 个音就能使出" + ally().special[0] + "。弹完整首，再来一次终结技！",
@@ -316,7 +391,7 @@
     $("foeName").textContent = tr(foe().name);
     $("allyName").textContent = tr(ally().name);
     $("zoneLabel").textContent =
-      tr(gym().name) + " · " + t("第 " + bookPage() + " 页", "p. " + bookPage());
+      tr(gym().name) + " · " + t("第 " + gym().page + " 页", "p. " + gym().page);
     $("log").textContent = tr(logMessage);
     $("inputState").textContent = tr(inputMessage);
     renderSetup();
@@ -358,7 +433,7 @@
       const offset = (now - due) / beatMs();
       position += Math.min(here.midi === null && !restHeld ? here.beats : 0, offset);
     }
-    const step = 15;
+    const step = hasEighths ? 23 : 15;
     slots.forEach((s, i) => {
       const left = 16 + (s.start - position) * step;
       const visible = left >= -7 && left <= 108;
@@ -459,16 +534,24 @@
     accept(midi, now);
   }
   function buildKeys() {
+    const pitches = slots.filter((slot) => slot.midi !== null).map((slot) => slot.midi);
+    const low = Math.min(...pitches) < 60 ? 55 : 60;
+    const high = Math.max(low < 60 ? 67 : 72, ...pitches);
+    const visibleWhites = whites.filter((midi) => low <= midi && midi <= high);
+    $("keyboard").replaceChildren();
+    keyElements.clear();
+    $("keyboard").style.setProperty("--black-key-width", 58 / visibleWhites.length + "%");
     for (const [letter, m] of Object.entries(shortcut).sort((a, b) => a[1] - b[1])) {
+      if (m < low || m > high) continue;
       const white = whites.includes(m),
         b = document.createElement("button");
       b.className = "key " + (white ? "white" : "black");
       b.type = "button";
       b.dataset.note = m;
-      if (!white) b.style.left = whites.filter((n) => n < m).length * 12.5 + "%";
+      if (!white) b.style.left = (visibleWhites.filter((n) => n < m).length / visibleWhites.length) * 100 + "%";
       const name = document.createElement("span"),
         hint = document.createElement("small");
-      name.textContent = white ? sharpNames[m % 12] + (m % 12 === 0 ? Math.floor(m / 12) - 1 : "") : "";
+      name.textContent = white ? pitch(m, m === low || m === high || m % 12 === 0) : "";
       hint.textContent = letter.toUpperCase();
       b.append(name, hint);
       b.addEventListener("pointerdown", (e) => {
@@ -653,10 +736,10 @@
     restHeld = false;
     log("轮到" + ally().name[0] + "了！", "It’s " + ally().name[1] + "’s turn!");
     noteStatus(
-      kind === "mic" ? "拾音中 · 一次弹一个音，先松开延音踏板。" : "点击琴键，或用电脑 A–K 与上排黑键。",
+      kind === "mic" ? "拾音中 · 一次弹一个音，先松开延音踏板。" : "点屏幕琴键，也可以按琴键上标出的电脑字母。",
       kind === "mic"
         ? "Mic on · play one note at a time with the sustain pedal up."
-        : "Tap the keys or use A–K and the black keys above them.",
+        : "Tap a piano key or press the computer letter shown on it.",
     );
     renderControls();
     updateReadout();
@@ -868,7 +951,7 @@
       notesPlayed + " 个音符 · " + onBeat + " 次合拍 · " + foe().name[0] + "加入了可选搭档。",
       notesPlayed + " notes · " + onBeat + " on beat · " + foe().name[1] + " is now a playable partner.",
     ));
-    paragraph(t("回到书上 · ", "At the piano · ") + tr([gym().lesson.bench, gym().lesson.benchEn]));
+    paragraph(t("回到书上 · ", "At the piano · ") + tr(gym().bench));
     dialogButton(
       t("带" + foe().name[0] + "出战", "Team up with " + foe().name[1]),
       () => {
@@ -942,7 +1025,7 @@
     )
       return;
     const m = shortcut[e.key.toLowerCase()];
-    if (typeof m !== "number" || phase !== "play" || mode !== "touch") return;
+    if (!keyElements.has(m) || phase !== "play" || mode !== "touch") return;
     e.preventDefault();
     touchDown("k" + e.code, m);
   });
@@ -958,7 +1041,6 @@
     audio.stopListening();
     stopTones();
   });
-  buildKeys();
   reset();
   requestAnimationFrame(runFrame);
 })();

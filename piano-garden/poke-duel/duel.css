@@ -165,7 +165,10 @@ h1 { font-size: clamp(1.82rem,3.6vw,2.95rem); font-weight: 850; letter-spacing: 
 .partner span { font: 750 clamp(.63rem,.9vw,.78rem)/1.18 var(--body); }
 .partner:hover:enabled, .gym:hover:enabled { border-color: #568a7c; }
 .partner[aria-pressed="true"] { color: #154f46; background: #e1f0df; border: 2px solid #28725e; padding: 4px 0; }
-#gyms { display: grid; gap: 5px; margin-top: 7px; }
+.song-list { display: grid; gap: 5px; margin-top: 7px; }
+.setup .review-songs { margin-top: 9px; }
+.setup .review-songs > summary { padding: 6px 1px; border: 0; background: transparent; color: #52635a; font-size: .8rem; }
+.review-songs:not([open]) > summary > span:last-child { transform: none; }
 .gym { display: flex; align-items: center; text-align: start; gap: 7px; padding: 5px 8px; border: 1px solid #c9cabc; border-radius: 5px; background: #f9f9ef; width: 100%; }
 .gym[aria-pressed="true"] { background: #f9eddd; border-color: #b9744d; }
 .gym img { width: 44px; height: 44px; flex: none; object-fit: contain; image-rendering: pixelated; }
@@ -232,7 +235,7 @@ dialog::backdrop { background: #0b1729ad; }
 }
 #keyboard .white {
   position: relative;
-  width: 12.5%;
+  flex: 1 1 0;
   height: clamp(65px, 8.5vh, 85px);
   border-inline-end: 1px solid #8e9a97;
   background: linear-gradient(#e6e8db 0, #fffef6 32%, #f6f4ea 93%, #bcc7c3 94%);
@@ -242,7 +245,7 @@ dialog::backdrop { background: #0b1729ad; }
   position: absolute;
   top: 0;
   z-index: 2;
-  width: 7.3%;
+  width: var(--black-key-width);
   height: 58%;
   transform: translateX(-50%);
   background: linear-gradient(105deg, #3d5057, #1a2b32);

@@ -4,16 +4,7 @@
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const artRoot = new URL("art/", scriptUrl);
   const images = new Map();
-  const trainers = new Set([
-    "pikachu",
-    "charmander",
-    "squirtle",
-    "bulbasaur",
-    "eevee",
-    "psyduck",
-    "gengar",
-  ]);
-  const wild = new Set(["eevee", "psyduck", "gengar"]);
+  const wild = new Set(["eevee", "psyduck", "gengar", "lapras", "jigglypuff", "mareep", "cubone", "poliwag"]);
   const elementOf = {
     pikachu: "electric",
     charmander: "fire",
@@ -22,6 +13,17 @@
     eevee: "normal",
     psyduck: "water",
     gengar: "ghost",
+    lapras: "water",
+    jigglypuff: "normal",
+    mareep: "electric",
+    cubone: "ground",
+    poliwag: "water",
+  };
+  const trailColors = {
+    ghost: ["#684c91", "#c5a1eb"],
+    fire: ["#dd654c", "#ffc45b"],
+    water: ["#4c9db5", "#b9f3eb"],
+    ground: ["#956940", "#e4c88a"],
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const duration = { hit: 580, "ally-hit": 580, super: 850, win: 1250 };
@@ -112,20 +114,14 @@
         pixelLine(xx - 6, yy + 4, xx + 5, yy - 3, "#34764d", 3);
         pixelLine(xx - 4, yy + 2, xx + 4, yy - 2, "#b6e478", 2);
       }
-    } else if (["ghost", "fire", "water"].includes(element)) {
-      const colors =
-        element === "ghost"
-          ? ["#684c91", "#c5a1eb"]
-          : element === "fire"
-            ? ["#dd654c", "#ffc45b"]
-            : ["#4c9db5", "#b9f3eb"];
+    } else if (Object.hasOwn(trailColors, element)) {
       for (let i = 4; i >= 0; i--) {
         const u = Math.max(0, t - i * 0.045);
         orb(
           x1 + (x2 - x1) * u,
           y1 + (y2 - y1) * u + Math.sin(u * 13 + i) * 4,
           3 + (4 - i) + (powerful ? 2 : 0),
-          ...colors,
+          ...trailColors[element],
         );
       }
     } else {
@@ -233,7 +229,7 @@
       ctx.imageSmoothingEnabled = false;
     }
     const next = {
-      player: trainers.has(player) ? player : "pikachu",
+      player: Object.hasOwn(elementOf, player) ? player : "pikachu",
       foe: wild.has(foe) ? foe : "eevee",
       zone: Math.max(0, Math.min(2, Math.floor(Number(zone) || 0))),
       fainted: false,

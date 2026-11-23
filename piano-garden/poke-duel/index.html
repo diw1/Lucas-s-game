@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f2e8">
   <link rel="icon" href="art/pikachu.png">
-  <link rel="stylesheet" href="duel.css?v=full-song-1">
+  <link rel="stylesheet" href="duel.css?v=ff1078-50">
   <title>宝可梦钢琴道馆 · Pokémon Piano League</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
   <main class="wrap">
     <header class="mast"><div><h1 data-zh="宝可梦钢琴道馆" data-en="Pokémon Piano League">宝可梦钢琴道馆</h1>
       <p data-zh="挑一首曲子，用钢琴指挥搭档。弹到终曲，击败对手！" data-en="Pick a song and lead your partner at the piano. Play the finale to defeat your rival!">挑一首曲子，用钢琴指挥搭档。弹到终曲，击败对手！</p></div>
-      <button type="button" class="case-button" id="openCase"><span class="badge-mark" aria-hidden="true">✦</span><span data-zh="我的徽章" data-en="My badges">我的徽章</span> <b id="caseCount">0 / 3</b></button>
+      <button type="button" class="case-button" id="openCase"><span class="badge-mark" aria-hidden="true">✦</span><span data-zh="我的徽章" data-en="My badges">我的徽章</span> <b id="caseCount"></b></button>
     </header>
     <div class="layout">
       <section class="console" aria-label="Battle">
@@ -49,10 +49,17 @@
       <aside class="side">
         <details class="setup" id="setup" open><summary><span data-zh="训练家准备区" data-en="Trainer setup">训练家准备区</span><span aria-hidden="true">⌄</span></summary>
           <div class="setup-body"><h3 data-zh="选择搭档" data-en="Choose a partner">选择搭档</h3><div id="partners"></div>
-            <h3 data-zh="选择曲目和对手" data-en="Choose a song and rival">选择曲目和对手</h3><div id="gyms"></div>
+            <div id="gyms">
+              <h3 data-zh="第 50–60 页 · 本阶段曲目" data-en="Pages 50–60 · Current songs">第 50–60 页 · 本阶段曲目</h3>
+              <div class="song-list" id="chapterSongs"></div>
+              <details class="review-songs" id="review"><summary><span data-zh="第 35–45 页 · 复习曲目" data-en="Pages 35–45 · Review songs">第 35–45 页 · 复习曲目</span><span aria-hidden="true">⌄</span></summary>
+                <div class="song-list" id="reviewSongs"></div>
+              </details>
+            </div>
             <label class="speed" for="tempo"><span data-zh="练习速度" data-en="Practice tempo">练习速度</span><select id="tempo"><option value="60">60 BPM</option><option value="80">80 BPM</option><option value="100">100 BPM</option></select></label>
           </div></details>
         <div class="move-card"><div><h3 data-zh="搭档招式" data-en="Partner move">搭档招式</h3><b id="moveName"></b></div><p id="moveInfo"></p><div id="charge" aria-label="Power"></div></div>
+        <a class="book-link" href="https://cloud.pianoadventures.com/products/piano-adventures-level-1-lesson-book-play-along-audio/" target="_blank" rel="noopener noreferrer" data-zh="听 FF1078 课本的官方配套音频 ↗" data-en="Listen to the FF1078 book recordings ↗">听 FF1078 课本的官方配套音频 ↗</a>
         <a class="book-link" href="../firefly/index.html" data-zh="回《萤火琴谷》练书上的技巧 ↗" data-en="Practise the book skills in Firefly Vale ↗">回《萤火琴谷》练书上的技巧 ↗</a>
       </aside>
     </div>
@@ -60,6 +67,8 @@
   </main>
   <dialog id="sheet"><div class="sheet-head"><h2 id="sheetTitle"></h2><button id="dismiss" class="close" type="button" aria-label="Close">×</button></div><div id="sheetBody"></div><div id="sheetActions"></div></dialog>
   <script defer src="../firefly/audio.js"></script><script defer src="../firefly/lessons.js"></script>
-  <script defer src="arena.js?v=full-song-1"></script><script defer src="songs.js?v=full-song-1"></script><script defer src="score.js?v=full-song-1"></script><script defer src="battle.js?v=full-song-2"></script>
+  <script defer src="arena.js?v=ff1078-50"></script>
+  <script defer src="songs.js?v=full-song-1"></script><script defer src="chapter-songs.js?v=ff1078-50"></script><script defer src="shepherd.js?v=ff1078-50"></script>
+  <script defer src="score.js?v=ff1078-50"></script><script defer src="battle.js?v=ff1078-50"></script>
 </body>
 </html>
