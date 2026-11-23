@@ -75,6 +75,26 @@
       special: ["泡沫光线", "Bubble Beam"],
       type: "water",
     },
+    butterfree: {
+      name: ["巴大蝶", "Butterfree"], move: ["起风", "Gust"],
+      special: ["空气斩", "Air Slash"], type: "flying",
+    },
+    machop: {
+      name: ["腕力", "Machop"], move: ["空手劈", "Karate Chop"],
+      special: ["十字劈", "Cross Chop"], type: "fighting",
+    },
+    doduo: {
+      name: ["嘟嘟", "Doduo"], move: ["啄", "Peck"],
+      special: ["啄钻", "Drill Peck"], type: "flying",
+    },
+    hoothoot: {
+      name: ["咕咕", "Hoothoot"], move: ["啄", "Peck"],
+      special: ["空气斩", "Air Slash"], type: "flying",
+    },
+    ponyta: {
+      name: ["小火马", "Ponyta"], move: ["火花", "Ember"],
+      special: ["火焰轮", "Flame Wheel"], type: "fire",
+    },
   };
   const starters = ["pikachu", "charmander", "squirtle", "bulbasaur"];
   const gyms = [
@@ -109,6 +129,26 @@
       foe: "poliwag",
     },
     {
+      id: "scarf", zone: 0, shelf: "midway", companion: true,
+      name: ["丝带花园", "Ribbon Garden"], badge: ["丝带徽章", "Ribbon Badge"], foe: "butterfree",
+    },
+    {
+      id: "march", zone: 0, shelf: "midway", companion: true,
+      name: ["行进广场", "Parade Square"], badge: ["步伐徽章", "Parade Badge"], foe: "machop",
+    },
+    {
+      id: "bicycle", zone: 1, shelf: "midway", companion: true,
+      name: ["河畔车道", "Riverside Cycleway"], badge: ["车轮徽章", "Wheel Badge"], foe: "doduo",
+    },
+    {
+      id: "field", zone: 2, shelf: "midway", companion: true,
+      name: ["月下麦田", "Moonlit Field"], badge: ["麦穗徽章", "Harvest Badge"], foe: "hoothoot",
+    },
+    {
+      id: "pony", zone: 0, shelf: "midway",
+      name: ["草原马场", "Prairie Paddock"], badge: ["马蹄徽章", "Horseshoe Badge"], foe: "ponyta",
+    },
+    {
       id: "oars", zone: 0,
       name: ["常青草地", "Viridian Meadow"],
       badge: ["回声徽章", "Echo Badge"],
@@ -130,7 +170,7 @@
     const song = window.DuelSongs[g.id];
     const earlierLesson = window.FireflyLessons.find((lesson) => lesson.id === g.id);
     return {
-      ...g, song, review: Boolean(earlierLesson),
+      ...g, song, shelf: g.shelf ?? (earlierLesson ? "review" : "chapter"),
       page: song.page ?? earlierLesson.page,
       bench: song.bench ?? [earlierLesson.bench, earlierLesson.benchEn],
     };
@@ -175,6 +215,8 @@
   let gymIndex = saved.libraryVersion === libraryVersion
     ? Math.max(0, gyms.findIndex((g) => g.id === saved.gym))
     : 0;
+  if (new URLSearchParams(location.search).get("pages") === "45-50" && gyms[gymIndex].shelf !== "midway")
+    gymIndex = gyms.findIndex((g) => g.shelf === "midway");
   let bpm = [60, 80, 100].includes(saved.bpm) ? saved.bpm : 80;
   const gym = () => gyms[gymIndex];
   const ally = () => creatures[partner];
@@ -307,9 +349,8 @@
   }
   function renderSetup() {
     $("partners").replaceChildren();
-    $("chapterSongs").replaceChildren();
-    $("reviewSongs").replaceChildren();
-    if (gym().review) $("review").open = true;
+    for (const shelf of ["chapter", "midway", "review"]) $(shelf + "Songs").replaceChildren();
+    if (gym().shelf !== "chapter") $(gym().shelf).open = true;
     for (const id of available()) {
       createChoice("partners", "partner", id, tr(creatures[id].name), "", partner === id, () =>
         changeSetup(id, gymIndex),
@@ -322,7 +363,7 @@
       const pageLabel = t("第 " + g.page + " 页", "p. " + g.page);
       const sourceLabel = g.companion ? t(" · 配套原创", " · Original practice song") : "";
       createChoice(
-        g.review ? "reviewSongs" : "chapterSongs",
+        g.shelf + "Songs",
         "gym",
         g.foe,
         tr(g.song.title),
@@ -970,6 +1011,11 @@
       if ($("sheet").open) closeDialog();
       partner = p;
       gymIndex = i;
+      const url = new URL(location.href);
+      if (url.searchParams.get("pages") === "45-50" && gym().shelf !== "midway") {
+        url.searchParams.delete("pages");
+        history.replaceState(history.state, "", url);
+      }
       save();
       reset();
     };

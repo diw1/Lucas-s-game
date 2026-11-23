@@ -4,7 +4,8 @@
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const artRoot = new URL("art/", scriptUrl);
   const images = new Map();
-  const wild = new Set(["eevee", "psyduck", "gengar", "lapras", "jigglypuff", "mareep", "cubone", "poliwag"]);
+  const wild = new Set(["eevee", "psyduck", "gengar", "lapras", "jigglypuff", "mareep", "cubone", "poliwag",
+    "butterfree", "machop", "doduo", "hoothoot", "ponyta"]);
   const elementOf = {
     pikachu: "electric",
     charmander: "fire",
@@ -18,12 +19,18 @@
     mareep: "electric",
     cubone: "ground",
     poliwag: "water",
+    butterfree: "flying",
+    machop: "fighting",
+    doduo: "flying",
+    hoothoot: "flying",
+    ponyta: "fire",
   };
   const trailColors = {
     ghost: ["#684c91", "#c5a1eb"],
     fire: ["#dd654c", "#ffc45b"],
     water: ["#4c9db5", "#b9f3eb"],
     ground: ["#956940", "#e4c88a"],
+    flying: ["#47899d", "#c5eee4"],
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const duration = { hit: 580, "ally-hit": 580, super: 850, win: 1250 };
