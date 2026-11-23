@@ -453,7 +453,7 @@
   function touchDown(source, midi) {
     if (phase !== "play" || demoStart !== null || held.has(source) || mode !== "touch") return;
     const now = performance.now();
-    tickSong(now);
+    tickSong(now, midi);
     if (phase !== "play") return;
     held.set(source, audio.press(midi));
     accept(midi, now);
@@ -514,7 +514,7 @@
     }
     updateReadout();
   }
-  function tickSong(now) {
+  function tickSong(now, incomingMidi) {
     if (phase !== "play") return;
     if (lastNoteEnd !== null) {
       if (now >= lastNoteEnd) finish();
@@ -523,11 +523,15 @@
     const s = slots[cursor];
     if (s.midi !== null || due === null) return;
     if (held.size && now >= due) restHeld = true;
-    if (!restHeld && now >= due + s.beats * beatMs()) advance(due + s.beats * beatMs());
+    const restEnd = due + s.beats * beatMs();
+    // Pitch detection and a player's attack can straddle the end of a counted rest.
+    const enteringOnPitch = incomingMidi !== undefined && slots[cursor + 1]?.midi === incomingMidi;
+    const grace = enteringOnPitch ? Math.min(110, beatMs() * 0.15) : 0;
+    if (!restHeld && now >= restEnd - grace) advance(restEnd);
   }
   function accept(midi, now) {
     if (phase !== "play" || demoStart !== null) return;
-    tickSong(now);
+    tickSong(now, midi);
     if (phase !== "play" || lastNoteEnd !== null) return;
     const s = slots[cursor];
     lastHeard = midi;
