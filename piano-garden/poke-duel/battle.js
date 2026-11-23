@@ -223,7 +223,8 @@
   let followTempo = saved.followTempo !== false;
   let liveBeatMs = 60000 / bpm;
   const beatSamples = [];
-  let lastAttack = null, bufferedAttack = null, retrying = false, missedNotes = 0;
+  let lastAttack = null, retrying = false, missedNotes = 0, manualSkips = 0;
+  const pendingAttacks = [];
   const gym = () => gyms[gymIndex];
   const ally = () => creatures[partner];
   const foe = () => creatures[gym().foe];
@@ -314,6 +315,7 @@
     beatSamples.length = 0;
     clearAttackHistory();
     missedNotes = 0;
+    manualSkips = 0;
     notesPlayed = 0;
     onBeat = 0;
     hp = maxAlly;
@@ -408,7 +410,7 @@
   }
   function clearAttackHistory() {
     lastAttack = null;
-    bufferedAttack = null;
+    pendingAttacks.length = 0;
     retrying = false;
   }
   function renderTempo() {
@@ -556,6 +558,9 @@
   function updateReadout() {
     const demoing = demoStart !== null;
     const s = slots[demoing ? Math.max(0, demoStep) : cursor];
+    const skip = $("skipUnheard");
+    skip.hidden = phase !== "play" || mode !== "mic" || demoing;
+    skip.disabled = !canSkipUnheard();
     $("turnLabel").textContent = t("小节 ", "BAR ") + (s.barIndex + 1) + " / " + totalBars;
     window.DuelScore.render({
       song: song(), barIndex: s.barIndex, eventInBar: s.eventInBar,
@@ -723,35 +728,141 @@
       renderTempo();
     }
     lastAttack = { time: now, beat: slot.start, midi: slot.midi };
-    bufferedAttack = null;
     retrying = false;
   }
   function plausibleBeat(ms) {
     return ms >= 60000 / maxBpm * 0.8 && ms <= 60000 / minBpm * 1.16;
   }
-  function canBuffer(midi, now) {
-    const current = slots[cursor], next = slots[cursor + 1], after = slots[cursor + 2];
-    return followTempo && lastAttack && next?.midi === midi && after && after.midi !== null &&
-      current.midi !== null && current.midi !== after.midi && next.midi !== after.midi &&
-      plausibleBeat(intervalBeat(next, now));
+  function nextPitched(index) {
+    while (index < slots.length && slots[index].midi === null) index++;
+    return index;
   }
-  function confirmOmission(midi, now) {
-    if (!bufferedAttack || midi !== slots[cursor + 2]?.midi) return;
-    const next = slots[cursor + 1];
-    const firstBeat = intervalBeat(next, bufferedAttack.time);
-    const secondBeat = (now - bufferedAttack.time) / next.beats;
-    if (!plausibleBeat(secondBeat) || secondBeat < firstBeat * 0.55 || secondBeat > firstBeat * 1.8) return;
-    const time = bufferedAttack.time;
-    missedNotes++;
+  function passSlot() {
+    if (slots[cursor].midi !== null) {
+      missedNotes++;
+      chain = 0;
+      shielded = false;
+    }
+    advance(due === null ? null : due + slots[cursor].beats * beatMs());
+  }
+  function canSkipUnheard() {
+    if (phase !== "play" || mode !== "mic" || lastNoteEnd !== null || manualSkips >= 2) return false;
+    // The last pitched note must actually be played, even when there are trailing rests.
+    return nextPitched(nextPitched(cursor) + 1) < slots.length;
+  }
+  function skipUnheard() {
+    if (!canSkipUnheard()) return;
+    const target = nextPitched(cursor);
+    manualSkips++;
+    clearAttackHistory();
+    while (cursor <= target) passSlot();
+    // The player is choosing where to resume. Start a fresh timing anchor there.
+    due = slots[cursor].midi === null ? performance.now() : null;
+    lastGrade = ["漏音未计分", "Missed note · no points"];
+    log("跳过一个漏听的音，从高亮处接着弹。", "One missed note skipped. Continue at the highlighted note.");
+    renderNumbers();
+    updateReadout();
+  }
+  const rateDifference = (a, b) => Math.abs(Math.log2(a / b));
+  function alignmentCost(rates, omissions) {
+    // A steady passage in a new tempo is stronger evidence than closeness
+    // to the preset. Prefer fewer omissions when the timing cannot decide.
+    let cost = omissions * 0.14;
+    for (let i = 0; i < rates.length; i++) {
+      cost += rateDifference(rates[i], beatMs()) * (followTempo && rates.length > 1 ? 0.35 : 1);
+      if (i) cost += rateDifference(rates[i], rates[i - 1]) * 1.1;
+    }
+    return cost;
+  }
+  function alignmentPaths(attacks, allowance) {
+    // At most three real onsets and two missing pitches. Rests occupy score time
+    // but never consume an attack. Compare musical intervals, not frame counts.
+    const paths = [];
+    function extend(startIndex, indices, missed, previous, rates) {
+      const attack = attacks[indices.length];
+      let index = nextPitched(startIndex);
+      for (let gap = 0; gap <= allowance - missed && index < slots.length; gap++, index = nextPitched(index + 1)) {
+        const slot = slots[index];
+        if (slot.midi !== attack.midi) continue;
+        const possibleRates = [previous ? (attack.time - previous.time) / (slot.start - previous.beat) : null];
+        // Early identical notes may already have been credited to an earlier copy.
+        // Keep that interpretation alive until a different pitch settles the location.
+        if (previous && !indices.length && gap) {
+          for (let k = nextPitched(startIndex); k < index && slots[k].midi === previous.midi; k = nextPitched(k + 1))
+            possibleRates.push((attack.time - previous.time) / (slot.start - slots[k].start));
+        }
+        const nextIndices = [...indices, index], omissions = missed + gap;
+        for (const rate of possibleRates) {
+          if (rate !== null && !plausibleBeat(rate)) continue;
+          if (rates.length && rateDifference(rate, rates.at(-1)) > 1.05) continue;
+          const nextRates = rate === null ? rates : [...rates, rate];
+          if (nextIndices.length === attacks.length)
+            paths.push({ indices: nextIndices, omissions, cost: alignmentCost(nextRates, omissions) });
+          else
+            extend(index + 1, nextIndices, omissions, { ...attack, beat: slot.start }, nextRates);
+        }
+      }
+    }
+    extend(cursor, [], 0, lastAttack, []);
+    return paths.sort((a, b) => a.cost - b.cost);
+  }
+  function deliverAlignment(path) {
+    const attacks = pendingAttacks.splice(0);
     retrying = false;
-    advance(due + slots[cursor].beats * beatMs());
-    playNote(time);
+    path.indices.forEach((target, i) => {
+      while (cursor < target) passSlot();
+      lastHeardSlot = slots[cursor];
+      playNote(attacks[i].time, true);
+    });
+  }
+  function followScore(midi, now) {
+    const mic = mode === "mic", s = slots[cursor];
+    // Keep fixed-tempo screen practice strictly sequential. Screen following
+    // retains its existing single-omission recovery after a player has started.
+    if (!mic && (!followTempo || !lastAttack || s.midi === null)) return false;
+    if (!pendingAttacks.length && s.midi === midi && (!mic || !lastAttack)) return false;
+    const previous = pendingAttacks.at(-1) || lastAttack;
+    if (previous?.midi === midi && now - previous.time < 75) return true;
+    pendingAttacks.push({ midi, time: now });
+    let paths = alignmentPaths(pendingAttacks, mic ? 2 : 1);
+    if (!paths.length && pendingAttacks.length > 1) {
+      pendingAttacks.splice(0, pendingAttacks.length - 1);
+      if (s.midi === midi) {
+        pendingAttacks.length = 0;
+        return false;
+      }
+      paths = alignmentPaths(pendingAttacks, mic ? 2 : 1);
+    }
+    const best = paths[0];
+    if (!best || (!mic && pendingAttacks.length === 1 && s.midi === midi) ||
+        (s.midi === null && best.indices[0] === nextPitched(cursor))) {
+      pendingAttacks.length = 0;
+      return false;
+    }
+    const count = pendingAttacks.length, target = best.indices.at(-1);
+    const other = paths.find((p) => p.indices.at(-1) !== target);
+    const decisive = !other || other.cost > best.cost + 0.20;
+    const unsettled = mic && followTempo && !beatSamples.length && other && lastAttack;
+    if (count === 1 && s.midi === midi && !unsettled && (!best.omissions || !decisive)) {
+      pendingAttacks.length = 0;
+      return false;
+    }
+    // A single final onset is enough only if it lands near the predicted cadence
+    // after a real preceding attack. Silence alone can never end a pitched bar.
+    const finalOnTime = mic && lastAttack && notesPlayed >= 2 && nextPitched(target + 1) === slots.length &&
+      Math.abs(now - lastAttack.time - (slots[target].start - lastAttack.beat) * beatMs()) <= beatMs() * 0.38;
+    if ((count > 1 && ((decisive && !unsettled) || count >= 3)) || (finalOnTime && decisive)) {
+      deliverAlignment(best);
+      return true;
+    }
+    lastGrade = ["正在对齐乐谱，接着弹", "Finding your place · keep playing"];
+    updateReadout();
+    return true;
   }
   function accept(midi, now) {
     if (phase !== "play" || demoStart !== null) return;
     tickSong(now, midi);
     if (phase !== "play" || lastNoteEnd !== null) return;
-    if (midi !== slots[cursor].midi) confirmOmission(midi, now);
     const s = slots[cursor];
     lastHeard = midi;
     lastHeardSlot = s;
@@ -761,9 +872,9 @@
       clearTimeout(button.flash);
       button.flash = setTimeout(() => button.classList.remove("pressed"), 200);
     }
+    if (followScore(midi, now)) return;
     if (s.midi === null || midi !== s.midi) {
       chain = 0;
-      bufferedAttack = canBuffer(midi, now) ? { time: now } : null;
       retrying = true;
       if (s.midi === null) {
         // A new attack during a rest restarts its full count.
@@ -779,19 +890,19 @@
     }
     playNote(now);
   }
-  function playNote(now) {
+  function playNote(now, aligned = false) {
     const s = slots[cursor], ms = beatMs();
     const delta = due === null ? Infinity : now - due;
     const previous = slots[cursor - 1];
     const tooEarly = followTempo ? lastAttack?.midi === s.midi && now - lastAttack.time < 75
       : previous && delta < -previous.beats * ms * 0.45;
-    if (tooEarly) {
-      bufferedAttack = null;
+    if (tooEarly && !aligned) {
       lastGrade = ["再数一拍，等音符到圆环", "A little early · wait for the ring"];
       updateReadout();
       return;
     }
     trackAttack(s, now);
+    manualSkips = 0;
     const timed = Math.abs(delta) <= ms * 0.35;
     if (timed) {
       chain++;
@@ -924,6 +1035,14 @@
     if (phase === "won") reset();
     pause();
     audio.listen({
+      isExpectedPitch: (midi) => {
+        if (phase !== "play" || mode !== "mic" || lastNoteEnd !== null) return false;
+        let index = nextPitched(cursor);
+        const reach = Math.min(5, 3 + pendingAttacks.length);
+        for (let i = 0; i < reach && index < slots.length; i++, index = nextPitched(index + 1))
+          if (slots[index].midi === midi) return true;
+        return false;
+      },
       onNote: (midi) => {
         if (mode === "mic") accept(midi, performance.now());
       },
@@ -1041,8 +1160,8 @@
     );
     paragraph(
       t(
-        "2.「跟着我弹」会按你弹奏的快慢移动谱面。漏了一个音时，继续弹，如果后面两个音能确定位置，谱面会接上。关闭跟随后可以按设定速度练准拍。休止时松开琴键和踏板。",
-        "2. Follow my playing moves the score at your pace. If one note is missed, two clear notes ahead can bring the score back to you. Turn it off to practise at the set tempo. Lift the keys and pedal for rests.",
+        "2.「跟着我弹」会按你弹奏的快慢移动谱面。关闭跟随后可以按设定速度练准拍。休止时松开琴键和踏板。",
+        "2. Follow my playing moves the score at your pace. Turn it off to practise at the set tempo. Lift the keys and pedal for rests.",
       ),
     );
     paragraph(
@@ -1053,8 +1172,8 @@
     );
     paragraph(
       t(
-        "麦克风在设备上识别单音。练习时可以随时暂停，或用屏幕琴键从同一个音继续。",
-        "Microphone recognition runs on your device, one note at a time. Pause whenever you like and resume at the same note on piano or screen keys.",
+        "麦克风在设备上识别单音。两种速度模式都可以在漏听一两个音后继续弹，谱面会按后续音和节奏寻找位置。若仍停在原处，点「跳过漏听的音」，每次跳一个，漏音不计分。漏听最后一个音时，请把高亮的尾音再弹一次。",
+        "The mic listens on your device. At either tempo setting, keep playing after one or two missed notes. The game uses your next pitches and their timing to find your place. If it stays stuck, choose Skip unheard note, one note at a time. Missed notes earn no points. If the last note is missed, play the highlighted final pitch again.",
       ),
     );
     const credits = document.createElement("a");
@@ -1102,7 +1221,7 @@
       notesPlayed + " notes · " + onBeat + " on beat · " + foe().name[1] + " is now a playable partner.",
     ));
     if (missedNotes) paragraph(t(
-      "跟随模式已接回乐谱，" + missedNotes + " 个漏音未计分。",
+      "已接回乐谱，" + missedNotes + " 个漏音未计分。",
       "The score rejoined you. " + missedNotes + (missedNotes === 1 ? " missed note" : " missed notes") + " received no points.",
     ));
     paragraph(t("回到书上 · ", "At the piano · ") + tr(gym().bench));
@@ -1146,6 +1265,7 @@
     } else apply();
   }
   $("mic").addEventListener("click", useMic);
+  $("skipUnheard").addEventListener("click", skipUnheard);
   $("screen").addEventListener("click", () => {
     if (phase === "play") {
       pause();

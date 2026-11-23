@@ -37,6 +37,7 @@
           <svg id="songStaff" class="song-staff" role="img" focusable="false"></svg>
           <div class="play-actions"><button class="primary" type="button" id="mic"><span class="mic-icon" aria-hidden="true">●</span> <span id="micLabel"></span></button>
             <button class="ghost" type="button" id="demo"></button><button class="secondary" type="button" id="screen"></button>
+            <button class="ghost" type="button" id="skipUnheard" hidden data-zh="跳过漏听的音" data-en="Skip unheard note">跳过漏听的音</button>
           </div><p id="inputState" class="input-state"></p>
           <div class="tempo-panel" role="group" aria-labelledby="tempoLabel">
             <div class="tempo-setting">
@@ -83,10 +84,10 @@
     <footer>Pokémon Piano League <span>·</span> <span data-zh="非官方同人游戏" data-en="Unofficial fan game">非官方同人游戏</span></footer>
   </main>
   <dialog id="sheet"><div class="sheet-head"><h2 id="sheetTitle"></h2><button id="dismiss" class="close" type="button" aria-label="Close">×</button></div><div id="sheetBody"></div><div id="sheetActions"></div></dialog>
-  <script defer src="../firefly/audio.js?v=live-tempo-1"></script><script defer src="../firefly/lessons.js"></script>
+  <script defer src="../firefly/audio.js?v=mic-recovery-1"></script><script defer src="../firefly/lessons.js"></script>
   <script defer src="arena.js?v=live-tempo-1"></script>
   <script defer src="songs.js?v=full-song-1"></script><script defer src="chapter-songs.js?v=ff1078-50"></script><script defer src="shepherd.js?v=ff1078-50"></script>
   <script defer src="midway-songs.js?v=ff1078-45"></script><script defer src="pony.js?v=ff1078-45"></script>
-  <script defer src="score.js?v=live-tempo-1"></script><script defer src="battle.js?v=live-tempo-1"></script>
+  <script defer src="score.js?v=live-tempo-1"></script><script defer src="battle.js?v=mic-recovery-1"></script>
 </body>
 </html>

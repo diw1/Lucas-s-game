@@ -103,7 +103,7 @@
     const maxLag = Math.min(Math.floor(samples.length / 2) - 1, Math.ceil(rate / 69));
     const windowSize = samples.length - maxLag;
     const difference = new Float32Array(maxLag + 1);
-    return function read(samplesIn) {
+    return function read(samplesIn, threshold = 0.14) {
       for (let i = 0; i < samples.length; i++) {
         let sum = 0;
         for (let j = 0; j < stride; j++) sum += samplesIn[i * stride + j];
@@ -119,7 +119,7 @@
         totalDifference += sum;
         difference[lag] = totalDifference > 0 ? sum * lag / totalDifference : 1;
         const middle = lag - 1;
-        if (middle < minLag || difference[middle] > 0.14 || difference[lag] <= difference[middle]) continue;
+        if (middle < minLag || difference[middle] > threshold || difference[lag] <= difference[middle]) continue;
         const left = difference[middle - 1];
         const right = difference[lag];
         const curvature = left - 2 * difference[middle] + right;
@@ -139,8 +139,8 @@
     let quietSince = null;
     let lastAttack = -Infinity;
     let renewedAt = null;
-    return function update(note, level, recentFloor, now) {
-      if (level < 0.0035) {
+    return function update(note, level, recentFloor, now, floor) {
+      if (level < floor * 0.875) {
         if (quietSince === null) quietSince = now;
         if (now - quietSince >= 45) {
           active = null;
@@ -153,14 +153,15 @@
       // Wait for the pitch window to catch up before calling it a repeated note.
       if (renewedAt !== null && now - renewedAt > 90) renewedAt = null;
       if (active !== null && renewedAt === null && now - lastAttack >= 68 &&
-          level > Math.max(0.005, recentFloor * 1.36, recentFloor + 0.0025)) {
+          level > Math.max(floor * 1.25, recentFloor * 1.36, recentFloor + floor * 0.625)) {
         renewedAt = now;
       }
       if (note !== candidate || note === null) {
         candidate = note;
         candidateSince = now;
       }
-      if (level < 0.004 || note === null || now - candidateSince < 14) return null;
+      const stabilityMs = level < 0.004 ? 32 : 14;
+      if (level < floor || note === null || now - candidateSince < stabilityMs) return null;
       if (note === active && (renewedAt === null || now - renewedAt < 32)) return null;
       active = note;
       lastAttack = now;
@@ -197,7 +198,7 @@
     return "The microphone couldn't start. Try again, or use the screen keys.";
   }
 
-  async function listen({ onNote = () => {}, onState = () => {} } = {}) {
+  async function listen({ onNote = () => {}, onState = () => {}, isExpectedPitch } = {}) {
     stopListening();
     const session = { onState, timer: 0 };
     mic = session;
@@ -238,6 +239,9 @@
       }
       let gate = makeNoteGate();
       let wasMuted = false;
+      // The score can corroborate soft piano attacks. Require a clearer pitch
+      // and a longer stable reading below the ordinary microphone threshold.
+      const floor = isExpectedPitch ? 0.00125 : 0.004;
       function sample() {
         if (mic !== session) return;
         // Capture successive strikes even on a display rendering at 30 fps.
@@ -255,7 +259,10 @@
         const end = buffer.length;
         const level = rmsAt(end);
         const recentFloor = Math.min(rmsAt(end - span), rmsAt(end - Math.round(span * 1.5)), rmsAt(end - 2 * span));
-        const note = gate(level >= 0.004 ? readPitch(buffer) : null, level, recentFloor, now);
+        const quiet = level < 0.004;
+        const pitch = level >= floor ? readPitch(buffer, quiet ? 0.09 : 0.14) : null;
+        const credible = pitch !== null && (!quiet || isExpectedPitch?.(pitch));
+        const note = gate(credible ? pitch : null, level, recentFloor, now, floor);
         if (note !== null) onNote(note);
       }
       sample();
