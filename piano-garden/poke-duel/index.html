@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e8">
+  <link rel="icon" href="art/pikachu.png">
+  <link rel="stylesheet" href="duel.css">
+  <title>宝可梦钢琴道馆 · Pokémon Piano League</title>
+</head>
+<body>
+  <header class="topbar"><nav class="wrap topnav">
+    <a href="../../index.html" class="home"><span class="ball" aria-hidden="true"></span><strong data-zh="Lucas 的游戏厅" data-en="Lucas’s arcade">Lucas 的游戏厅</strong></a>
+    <span class="division" aria-hidden="true">/</span><span class="wordmark">PIANO LEAGUE</span>
+    <div class="nav-actions"><button type="button" id="help" data-zh="玩法" data-en="How to play">玩法</button><button type="button" id="lang">English</button></div>
+  </nav></header>
+  <main class="wrap">
+    <header class="mast"><div><h1 data-zh="宝可梦钢琴道馆" data-en="Pokémon Piano League">宝可梦钢琴道馆</h1>
+      <p data-zh="你的钢琴就是控制器。跟着节奏弹，指挥搭档出招。" data-en="Your piano is the controller. Play on the beat to command your partner.">你的钢琴就是控制器。跟着节奏弹，指挥搭档出招。</p></div>
+      <button type="button" class="case-button" id="openCase"><span class="badge-mark" aria-hidden="true">✦</span><span data-zh="我的徽章" data-en="My badges">我的徽章</span> <b id="caseCount">0 / 3</b></button>
+    </header>
+    <div class="layout">
+      <section class="console" aria-label="Battle">
+        <div class="arena-top"><span id="zoneLabel"></span><span id="turnLabel"></span></div>
+        <div class="arena">
+          <canvas id="arenaCanvas" width="560" height="256" aria-label="Pokémon battle"></canvas>
+          <div class="hud foe"><div><strong id="foeName"></strong><span class="role" data-zh="对手" data-en="Rival">对手</span></div><div class="hp-row"><b>HP</b><span class="hp-track"><i id="foeBar"></i></span><small id="foeHp"></small></div></div>
+          <div class="hud ally"><div><strong id="allyName"></strong><span class="role" data-zh="搭档" data-en="Partner">搭档</span></div><div class="hp-row"><b>HP</b><span class="hp-track"><i id="allyBar"></i></span><small id="allyHp"></small></div></div>
+          <div id="moveSplash" hidden></div>
+        </div>
+        <div class="battle-log"><span class="log-arrow" aria-hidden="true">▶</span><p id="log" role="status"></p><span id="combo"></span></div>
+        <section class="controller" aria-labelledby="controlTitle">
+          <div class="controller-heading"><h2 id="controlTitle"></h2><span id="tempoReadout"></span></div>
+          <div id="lane" aria-label="节奏轨道"><div class="rail"></div><div id="laneTicks"></div><div class="hit-ring" aria-hidden="true"></div><div id="beats"></div></div>
+          <div class="cue-row"><strong id="cue"></strong><span id="heard" aria-live="polite"></span></div>
+          <div id="keyboard" aria-label="Piano keyboard"></div>
+          <div class="play-actions"><button class="primary" type="button" id="mic"><span class="mic-icon" aria-hidden="true">●</span> <span id="micLabel"></span></button>
+            <button class="secondary" type="button" id="screen"></button><button class="ghost" type="button" id="demo"></button>
+          </div><p id="inputState" class="input-state"></p>
+        </section>
+      </section>
+      <aside class="side">
+        <details class="setup" id="setup" open><summary><span data-zh="训练家准备区" data-en="Trainer setup">训练家准备区</span><span aria-hidden="true">⌄</span></summary>
+          <div class="setup-body"><h3 data-zh="选择搭档" data-en="Choose a partner">选择搭档</h3><div id="partners"></div>
+            <h3 data-zh="选择道馆" data-en="Choose a gym">选择道馆</h3><div id="gyms"></div>
+            <label class="speed" for="tempo"><span data-zh="练习速度" data-en="Practice tempo">练习速度</span><select id="tempo"><option value="60">60 BPM</option><option value="80">80 BPM</option><option value="100">100 BPM</option></select></label>
+          </div></details>
+        <div class="move-card"><div><h3 data-zh="搭档招式" data-en="Partner move">搭档招式</h3><b id="moveName"></b></div><p id="moveInfo"></p><div id="charge" aria-label="Power"></div></div>
+        <a class="book-link" href="../firefly/index.html" data-zh="回《萤火琴谷》练书上的技巧 ↗" data-en="Practise the book skills in Firefly Vale ↗">回《萤火琴谷》练书上的技巧 ↗</a>
+      </aside>
+    </div>
+    <footer>Pokémon Piano League <span>·</span> <span data-zh="非官方同人游戏" data-en="Unofficial fan game">非官方同人游戏</span></footer>
+  </main>
+  <dialog id="sheet"><div class="sheet-head"><h2 id="sheetTitle"></h2><button id="dismiss" class="close" type="button" aria-label="Close">×</button></div><div id="sheetBody"></div><div id="sheetActions"></div></dialog>
+  <script defer src="../firefly/audio.js"></script><script defer src="../firefly/lessons.js"></script>
+  <script defer src="arena.js"></script><script defer src="battle.js"></script>
+</body>
+</html>

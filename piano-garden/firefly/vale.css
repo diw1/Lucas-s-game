@@ -55,6 +55,10 @@ main.wrap { padding-bottom: 32px; }
 .home:hover { text-decoration: underline; text-underline-offset: 3px; }
 .home .ico { width: 17px; height: 17px; }
 .nav-sep { color: #9eaa97; }
+.duel-link { margin-left: auto; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.duel-link + #language { margin-left: 0; }
+html:lang(en) .duel-link [lang=zh], html:lang(zh) .duel-link [lang=en], body[data-standalone] .duel-link { display: none; }
+@media (max-width: 470px) { .nav .crumb, .nav .nav-sep { display: none; } }
 .crumb { color: var(--muted); font-weight: 550; }
 .language {
   margin-left: auto;
