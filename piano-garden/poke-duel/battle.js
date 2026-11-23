@@ -53,23 +53,24 @@
       name: ["常青草地", "Viridian Meadow"],
       badge: ["回声徽章", "Echo Badge"],
       foe: "eevee",
-      counter: 13,
     },
     {
       id: "drums",
       name: ["溪畔道馆", "Brookside Gym"],
       badge: ["静拍徽章", "Stillbeat Badge"],
       foe: "psyduck",
-      counter: 15,
     },
     {
       id: "spell",
       name: ["月影道馆", "Moonshade Gym"],
       badge: ["半音徽章", "Half-step Badge"],
       foe: "gengar",
-      counter: 18,
     },
-  ].map((g) => ({ ...g, lesson: window.FireflyLessons.find((l) => l.id === g.id) }));
+  ].map((g) => ({
+    ...g,
+    lesson: window.FireflyLessons.find((l) => l.id === g.id),
+    song: window.DuelSongs[g.id],
+  }));
   const shortcut = {
     a: 60,
     w: 61,
@@ -87,7 +88,6 @@
   };
   const whites = [60, 62, 64, 65, 67, 69, 71, 72];
   const sharpNames = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
-  const flatNames = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
   const storeKey = "lucas.pokemon-piano.v1";
   let saved = {};
   try {
@@ -109,28 +109,24 @@
   const foe = () => creatures[gym().foe];
   const beatMs = () => 60000 / bpm;
   const bookPage = () => gym().lesson.page;
-  const rounds = () => gym().lesson.rounds;
+  const song = () => gym().song;
   const maxAlly = 66,
     maxFoe = 90;
-  let phase, turn, cursor, slots, due, hp, enemyHp, chain, power, errors, protectedTurn, pendingCounter;
-  let lastHeard,
+  let phase, cursor, slots, due, hp, enemyHp, chain, power, shielded;
+  let totalBars, totalNotes, notesPlayed, onBeat, lastNoteEnd, pausedTailBeats;
+  let lastHeard, lastHeardSlot,
     lastGrade,
     logMessage,
     inputMessage,
     mode,
-    micState = "off",
-    micError = "";
+    micState = "off";
   let restHeld = false,
     demoStart = null,
     demoStep = -1,
     demoVersion = 0,
     lastPaint = 0,
     lastCue = "";
-  let nextTurnAt = 0,
-    counterAt = 0,
-    counterShown = false,
-    splashTimer,
-    resultTimer;
+  let demoVoice, demoReleaseAt, splashTimer, resultTimer;
   const held = new Map(),
     keyElements = new Map();
   function save() {
@@ -141,9 +137,10 @@
       );
     } catch {}
   }
-  const phrase = () => rounds()[turn % rounds().length];
-  function pitch(midi, full = false) {
-    const name = (phrase().accidentals === "flat" ? flatNames : sharpNames)[midi % 12];
+  function pitch(midi, full = false, slot = slots?.[cursor]) {
+    if (slot?.midi === midi && slot.spelling)
+      return full ? slot.spelling : slot.spelling.replace(/[0-9]+$/, "");
+    const name = sharpNames[midi % 12];
     return name + (full ? Math.floor(midi / 12) - 1 : "");
   }
   const log = (zh, en) => {
@@ -159,24 +156,24 @@
     held.clear();
     for (const b of keyElements.values()) b.classList.remove("pressed");
   }
-  function loadPhrase() {
-    cursor = 0;
-    due = null;
-    restHeld = false;
-    errors = 0;
-    protectedTurn = false;
+  function loadSong() {
+    slots = [];
+    totalBars = 0;
+    totalNotes = 0;
     let start = 0;
-    slots = phrase().notes.map((midi, i) => {
-      const item = { midi, start, beats: phrase().beats[i] };
-      start += item.beats;
-      return item;
+    song().sections.forEach((section, sectionIndex) => {
+      for (const bar of section.bars) {
+        bar.forEach(([midi, beats, spelling], eventInBar) => {
+          slots.push({ midi, beats, spelling, start, sectionIndex, barIndex: totalBars, eventInBar });
+          start += beats;
+          if (midi !== null) totalNotes++;
+        });
+        totalBars++;
+      }
     });
-    fillLane();
   }
   function reset() {
-    demoVersion++;
-    demoStart = null;
-    demoStep = -1;
+    stopDemo();
     clearTimeout(splashTimer);
     clearTimeout(resultTimer);
     $("moveSplash").hidden = true;
@@ -185,21 +182,27 @@
     stopTones();
     mode = "touch";
     micState = "off";
-    micError = "";
-    turn = 0;
+    cursor = 0;
+    due = null;
+    restHeld = false;
+    shielded = false;
+    lastNoteEnd = null;
+    pausedTailBeats = null;
+    notesPlayed = 0;
+    onBeat = 0;
     hp = maxAlly;
     enemyHp = maxFoe;
     chain = 0;
     power = 0;
-    pendingCounter = false;
     lastHeard = null;
     lastGrade = "";
-    loadPhrase();
+    loadSong();
     log("野生的" + foe().name[0] + "出现了！", "A wild " + foe().name[1] + " appeared!");
     noteStatus(
       "把设备放在钢琴旁，也可以点屏幕琴键。",
       "Place your device beside the piano, or play the screen keys.",
     );
+    paintArena();
     renderAll();
   }
   function paintArena() {
@@ -244,10 +247,10 @@
         "gyms",
         "gym",
         g.foe,
-        tr(g.name),
+        tr(g.song.title),
         t(
-          "第 " + g.lesson.page + " 页 · " + g.lesson.skill,
-          "p. " + g.lesson.page + " · " + g.lesson.skillEn,
+          creatures[g.foe].name[0] + " · 第 " + g.lesson.page + " 页",
+          creatures[g.foe].name[1] + " · p. " + g.lesson.page,
         ),
         gymIndex === i,
         () => changeSetup(partner, i),
@@ -257,8 +260,8 @@
     $("caseCount").textContent = earned.size + " / 3";
     $("moveName").textContent = tr(ally().special);
     $("moveInfo").textContent = t(
-      "踩准 4 个音，自动使出" + ally().special[0] + "。",
-      "Hit 4 notes on the beat to unleash " + ally().special[1] + ".",
+      "踩准 4 个音就能使出" + ally().special[0] + "。弹完整首，再来一次终结技！",
+      "Four on-beat notes unleash " + ally().special[1] + ". Finish the song for a knockout!",
     );
   }
   function renderNumbers() {
@@ -276,7 +279,6 @@
       { length: 4 },
       (_, i) => '<i class="pip' + (i < power ? " on" : "") + '"></i>',
     ).join("");
-    $("turnLabel").textContent = t("回合 ", "TURN ") + String(turn + 1).padStart(2, "0");
   }
   function renderControls() {
     const live = micState === "listening",
@@ -290,18 +292,18 @@
           : t("用真琴出战", "Play with my piano");
     $("mic").setAttribute("aria-pressed", String(live || asking));
     $("screen").textContent =
-      phase === "won" || phase === "lost"
+      phase === "won"
         ? t("再战一次", "Rematch")
-        : phase === "play" || phase === "counter"
+        : phase === "play"
           ? t("暂停对战", "Pause battle")
           : phase === "paused"
             ? t("屏幕琴键继续", "Resume on screen")
             : t("屏幕琴键试玩", "Use screen keys");
     $("screen").disabled = asking;
     $("demo").textContent =
-      demoStart !== null ? t("停止示范", "Stop demo") : t("♪ 听示范", "♪ Hear phrase");
-    $("demo").disabled = asking || phase === "won" || phase === "lost";
-    $("tempo").disabled = phase === "play" || phase === "counter" || demoStart !== null || asking;
+      demoStart !== null ? t("停止示范", "Stop demo") : t("♪ 听整首示范", "♪ Hear the whole song");
+    $("demo").disabled = asking || phase === "won";
+    $("tempo").disabled = phase === "play" || demoStart !== null || asking;
     $("tempoReadout").textContent = "♩ " + bpm + " BPM";
     $("controlTitle").textContent = t("节奏轨道", "Rhythm track");
   }
@@ -320,7 +322,6 @@
     renderSetup();
     renderNumbers();
     renderControls();
-    paintArena();
     fillLane();
     updateReadout();
     drawLane(performance.now());
@@ -333,7 +334,7 @@
       token.className = "beat" + (s.midi === null ? " rest" : "");
       const name = document.createElement("b"),
         length = document.createElement("small");
-      name.textContent = s.midi === null ? t("休", "Rest") : pitch(s.midi);
+      name.textContent = s.midi === null ? t("休", "Rest") : pitch(s.midi, false, s);
       length.textContent = s.beats + t("拍", "b");
       token.append(name, length);
       s.el = token;
@@ -351,6 +352,8 @@
       demo = demoStart !== null;
     let position = here.start;
     if (demo) position = Math.max(-1, (now - demoStart) / beatMs());
+    else if (phase === "play" && lastNoteEnd !== null)
+      position += here.beats - Math.max(0, (lastNoteEnd - now) / beatMs());
     else if (phase === "play" && due !== null) {
       const offset = (now - due) / beatMs();
       position += Math.min(here.midi === null && !restHeld ? here.beats : 0, offset);
@@ -358,8 +361,10 @@
     const step = 15;
     slots.forEach((s, i) => {
       const left = 16 + (s.start - position) * step;
+      const visible = left >= -7 && left <= 108;
+      if (s.el.hidden === visible) s.el.hidden = !visible;
+      if (!visible) return;
       s.el.style.left = left + "%";
-      s.el.style.visibility = left < -7 || left > 108 ? "hidden" : "";
       s.el.classList.toggle("current", i === (demo ? demoStep : cursor));
       s.el.classList.toggle("past", i < (demo ? demoStep : cursor));
     });
@@ -367,8 +372,11 @@
       tick.style.left = 16 + (n - 2 - (position % 1)) * step + "%";
     });
     $("lane").dataset.timed = String((phase === "play" && due !== null) || demo);
-    if (here.midi === null && phase === "play" && !demo) {
-      const count = restHeld
+    if (phase === "play" && !demo && (here.midi === null || lastNoteEnd !== null)) {
+      const count = lastNoteEnd !== null
+        ? t("尾音 · 数 ", "Final note · count ") +
+          Math.max(1, Math.min(here.beats, here.beats - Math.ceil((lastNoteEnd - now) / beatMs()) + 1)) + "/" + here.beats
+        : restHeld
         ? t("松开琴键", "Release the keys")
         : due === null || now < due
           ? t("准备休止", "Rest coming")
@@ -384,22 +392,27 @@
   }
   function updateReadout() {
     const demoing = demoStart !== null;
-    const s = slots[demoing ? Math.max(0, demoStep) : cursor] || slots[0];
+    const s = slots[demoing ? Math.max(0, demoStep) : cursor];
+    $("turnLabel").textContent = t("小节 ", "BAR ") + (s.barIndex + 1) + " / " + totalBars;
+    window.DuelScore.render({
+      song: song(), barIndex: s.barIndex, eventInBar: s.eventInBar,
+      language, demo: demoing, complete: phase === "won",
+    });
     for (const [m, b] of keyElements) {
+      const spelling = s.midi === m ? s : slots.find((slot) => slot.midi === m);
       b.classList.toggle(
         "target",
         s.midi === m && (phase === "play" || phase === "ready" || phase === "paused" || demoing),
       );
-      b.setAttribute("aria-label", pitch(m, true));
+      b.setAttribute("aria-label", pitch(m, true, spelling));
       if (!whites.includes(m))
-        b.querySelector("span").textContent = phrase().notes.includes(m) ? pitch(m) : "";
+        b.querySelector("span").textContent = spelling ? pitch(m, false, spelling) : "";
     }
     let label;
     if (demoing) label = t("示范中 · 跟着听", "Demo · listen along");
-    else if (phase === "counter") label = t("对手回合…", "Rival’s turn…");
-    else if (phase === "won" || phase === "lost")
-      label =
-        phase === "won" ? t("道馆挑战成功！", "Gym cleared!") : t("搭档正在休息", "Partner is resting");
+    else if (phase === "won") label = t("全曲完成！", "Song complete!");
+    else if (lastNoteEnd !== null || pausedTailBeats !== null)
+      label = t("尾音数满 " + s.beats + " 拍", "Count out the final " + s.beats + " beats");
     else if (s.midi !== null)
       label = (cursor === 0 ? t("从 ", "Start on ") : t("接下来 ", "Next: ")) + pitch(s.midi, true);
     else label = t("休止", "Rest");
@@ -409,7 +422,7 @@
       lastHeard === null
         ? ""
         : (mode === "mic" ? t("听到 ", "Heard ") : t("弹下 ", "Played ")) +
-          pitch(lastHeard, true) +
+          pitch(lastHeard, true, lastHeardSlot) +
           (lastGrade ? " · " + tr(lastGrade) : "");
   }
   function flash(kind, words) {
@@ -417,13 +430,13 @@
     const splash = $("moveSplash");
     clearTimeout(splashTimer);
     splash.textContent = words;
-    splash.dataset.kind = kind;
+    splash.dataset.kind = kind === "win" ? "super" : kind;
     splash.hidden = false;
     splashTimer = setTimeout(
       () => {
         splash.hidden = true;
       },
-      kind === "super" ? 900 : 410,
+      kind === "win" ? 1300 : kind === "super" ? 900 : 410,
     );
   }
   function release(source) {
@@ -434,13 +447,13 @@
     }
     if (restHeld && held.size === 0 && phase === "play" && slots[cursor]?.midi === null) {
       restHeld = false;
-      due = performance.now();
+      due = Math.max(due ?? 0, performance.now());
     }
   }
   function touchDown(source, midi) {
     if (phase !== "play" || demoStart !== null || held.has(source) || mode !== "touch") return;
     const now = performance.now();
-    restDone(now);
+    tickSong(now);
     if (phase !== "play") return;
     held.set(source, audio.press(midi));
     accept(midi, now);
@@ -474,113 +487,95 @@
       $("keyboard").append(b);
     }
   }
-  function settle() {
-    pendingCounter = true;
-    counterShown = false;
-    phase = "counter";
-    due = null;
-    chain = 0;
-    const now = performance.now();
-    counterAt = now + 550;
-    nextTurnAt = now + 1420;
-    renderNumbers();
-    renderControls();
-    updateReadout();
-  }
-  function counterAttack() {
-    if (counterShown) return;
-    counterShown = true;
-    const damage = protectedTurn ? 0 : gym().counter + 3 * Math.min(errors, 4);
-    hp = Math.max(0, hp - damage);
-    log(
-      damage
-        ? foe().name[0] + "还击，搭档失去 " + damage + " HP。"
-        : "节奏护盾挡住了" + foe().name[0] + "的还击！",
-      damage
-        ? foe().name[1] + " strikes back for " + damage + " HP."
-        : "Your rhythm shield blocked " + foe().name[1] + "!",
-    );
-    if (damage) window.DuelArena.effect("ally-hit");
-    renderNumbers();
-    if (!hp) finish(false);
-  }
-  function continueTurn() {
-    pendingCounter = false;
-    turn++;
-    phase = "play";
-    loadPhrase();
-    log(
-      "下一回合！从 " + pitch(slots[0].midi, true) + " 开始。",
-      "Next turn! Start on " + pitch(slots[0].midi, true) + ".",
-    );
-    renderNumbers();
-    renderControls();
-    updateReadout();
-  }
-  function restDone(now) {
-    const s = slots[cursor];
-    if (!s || s.midi !== null || due === null) return;
-    if (held.size && now >= due) restHeld = true;
-    if (!restHeld && now >= due + s.beats * beatMs()) {
-      due += s.beats * beatMs();
-      cursor++;
-      if (cursor === slots.length) settle();
-      else updateReadout();
+  function advance(nextDue) {
+    const previous = slots[cursor];
+    if (cursor === slots.length - 1) {
+      finish();
+      return;
     }
+    cursor++;
+    due = nextDue;
+    restHeld = false;
+    if (previous.sectionIndex !== slots[cursor].sectionIndex) {
+      const name = song().sections[slots[cursor].sectionIndex].title;
+      if (shielded) {
+        log("节奏护盾挡住了还击！接着弹「" + name[0] + "」。",
+          "Rhythm shield blocked the counter! Keep playing “" + name[1] + "”.");
+      } else {
+        // A counter adds drama at a phrase boundary, but never cuts a song short.
+        hp = Math.max(1, hp - 8);
+        window.DuelArena.effect("ally-hit");
+        log(foe().name[0] + "还击！带着搭档继续弹「" + name[0] + "」。",
+          foe().name[1] + " counters! Keep playing “" + name[1] + "”.");
+      }
+      shielded = false;
+      chain = 0;
+      renderNumbers();
+    }
+    updateReadout();
+  }
+  function tickSong(now) {
+    if (phase !== "play") return;
+    if (lastNoteEnd !== null) {
+      if (now >= lastNoteEnd) finish();
+      return;
+    }
+    const s = slots[cursor];
+    if (s.midi !== null || due === null) return;
+    if (held.size && now >= due) restHeld = true;
+    if (!restHeld && now >= due + s.beats * beatMs()) advance(due + s.beats * beatMs());
   }
   function accept(midi, now) {
     if (phase !== "play" || demoStart !== null) return;
-    restDone(now);
-    if (phase !== "play") return;
+    tickSong(now);
+    if (phase !== "play" || lastNoteEnd !== null) return;
     const s = slots[cursor];
     lastHeard = midi;
+    lastHeardSlot = s;
     const button = keyElements.get(midi);
     if (button) {
       button.classList.add("pressed");
       clearTimeout(button.flash);
       button.flash = setTimeout(() => button.classList.remove("pressed"), 200);
     }
-    if (s.midi === null) {
+    if (s.midi === null || midi !== s.midi) {
       chain = 0;
-      errors++;
-      due = now;
-      restHeld = held.size > 0;
-      lastGrade = ["休止时留白", "Leave the rest quiet"];
+      if (s.midi === null) {
+        // A new attack during a rest restarts its full count.
+        due = Math.max(due ?? now, now);
+        restHeld = held.size > 0;
+        lastGrade = ["休止时留白", "Leave the rest quiet"];
+      } else {
+        lastGrade = ["再试 " + pitch(s.midi, true), "Try " + pitch(s.midi, true)];
+      }
       renderNumbers();
       updateReadout();
       return;
     }
-    if (midi !== s.midi) {
-      chain = 0;
-      errors++;
-      lastGrade = ["试试 " + pitch(s.midi, true), "Try " + pitch(s.midi, true)];
-      renderNumbers();
+    const ms = beatMs();
+    const delta = due === null ? Infinity : now - due;
+    const previous = slots[cursor - 1];
+    if (previous && delta < -previous.beats * ms * 0.45) {
+      lastGrade = ["再数一拍，等音符到圆环", "A little early · wait for the ring"];
       updateReadout();
       return;
     }
-    const ms = beatMs(),
-      delta = due === null ? null : now - due;
-    if (delta !== null && delta < -ms * 0.44) {
-      lastGrade = ["早了一点，等圆环", "A little early · wait for the ring"];
-      updateReadout();
-      return;
-    }
-    const timed = delta !== null && Math.abs(delta) <= ms * 0.35;
+    const timed = Math.abs(delta) <= ms * 0.35;
     if (timed) {
       chain++;
+      onBeat++;
       power++;
-      if (chain >= 2) protectedTurn = true;
+      if (chain >= 2) shielded = true;
     } else chain = 0;
     const special = power >= 4;
     if (special) power = 0;
-    const end = cursor === slots.length - 1;
-    const damage = 3 + (timed ? 2 : 0) + (end ? 12 : 0) + (special ? 12 : 0);
-    enemyHp = Math.max(0, enemyHp - damage);
-    lastGrade = special
-      ? ["大招！", "Super move!"]
-      : timed
-        ? ["合拍！", "On beat!"]
-        : ["音高正确", "Right note"];
+    notesPlayed++;
+    // Reserve the last fraction of HP for the final cadence, at every tempo.
+    const remaining = maxFoe - Math.round((maxFoe - 12) * notesPlayed / totalNotes);
+    const damage = enemyHp - remaining;
+    enemyHp = remaining;
+    lastGrade = special ? ["大招！", "Super move!"]
+      : timed ? ["合拍！", "On beat!"] : ["音高正确", "Right note"];
     const move = special ? ally().special : ally().move;
     log(
       ally().name[0] + "使出" + move[0] + "！  −" + damage + " HP",
@@ -588,70 +583,71 @@
     );
     flash(special ? "super" : "hit", special ? tr(move) + "!" : "−" + damage);
     renderNumbers();
-    if (!enemyHp) {
-      finish(true);
+    if (cursor === slots.length - 1) {
+      lastNoteEnd = now + s.beats * ms;
+      updateReadout();
       return;
     }
-    if (end) {
-      settle();
-      return;
-    }
-    const anchor = timed ? due : now;
-    due = anchor + s.beats * ms;
-    cursor++;
-    updateReadout();
+    // Musical time follows the player; only small timing jitter is snapped to the grid.
+    const anchor = Math.abs(delta) <= ms * 0.12 ? due : now;
+    advance(anchor + s.beats * ms);
   }
-  function finish(won) {
-    phase = won ? "won" : "lost";
-    pendingCounter = false;
+  function finish() {
+    phase = "won";
+    lastNoteEnd = null;
+    pausedTailBeats = null;
+    enemyHp = 0;
     audio.stopListening();
     stopTones();
-    if (won) {
-      earned.add(gym().id);
-      save();
-      window.DuelArena.effect("win");
-    }
+    earned.add(gym().id);
+    save();
+    flash("win", tr(ally().special) + "!");
     log(
-      won ? foe().name[0] + "愿意加入你的队伍！" : "搭档需要休息，准备好了可以再来一场。",
-      won ? foe().name[1] + " joined your team!" : "Your partner needs a rest. Try a rematch when ready.",
+      "全曲完成！" + ally().name[0] + "的" + ally().special[0] + "击败了" + foe().name[0] + "！",
+      "Song complete! " + ally().name[1] + " defeats " + foe().name[1] + " with " + ally().special[1] + "!",
     );
     noteStatus("下一场可以选择新的搭档或道馆。", "Choose a partner or a gym for your next battle.");
     renderAll();
     resultTimer = setTimeout(() => {
-      if ((phase === "won" || phase === "lost") && !$("sheet").open) openResult(won);
-    }, 700);
+      if (phase === "won" && !$("sheet").open) openResult();
+    }, 1450);
+  }
+  function freezeClock() {
+    if (phase !== "play") return;
+    if (lastNoteEnd !== null) {
+      pausedTailBeats = Math.max(0, (lastNoteEnd - performance.now()) / beatMs());
+      lastNoteEnd = null;
+    }
+    phase = "paused";
+    due = null;
+    restHeld = false;
   }
   function pause() {
     stopDemo();
-    if (phase === "play" || phase === "counter") phase = "paused";
+    freezeClock();
     audio.stopListening();
     stopTones();
-    due = null;
-    restHeld = false;
     if (phase === "paused") {
       log("对战已暂停。", "Battle paused.");
-      noteStatus(
-        "点真琴或屏幕琴键继续这一场。",
-        "Resume this battle with the microphone or screen keys.",
-      );
+      noteStatus("点真琴或屏幕琴键，从当前音继续。", "Resume at this note with your piano or screen keys.");
     }
     renderControls();
     updateReadout();
+    drawLane(performance.now());
   }
   function start(kind) {
-    if (phase === "won" || phase === "lost") reset();
+    if (phase === "won") reset();
     stopDemo();
     mode = kind;
-    if (pendingCounter) {
-      phase = "counter";
-      counterAt = performance.now() + 300;
-      nextTurnAt = counterAt + 750;
-    } else {
-      phase = "play";
-      due = slots[cursor].midi === null ? performance.now() : null;
-      restHeld = false;
-      log("轮到" + ally().name[0] + "了！", "It’s " + ally().name[1] + "’s turn!");
+    phase = "play";
+    const now = performance.now();
+    due = slots[cursor].midi === null ? now : null;
+    if (pausedTailBeats !== null) {
+      lastNoteEnd = now + pausedTailBeats * beatMs();
+      pausedTailBeats = null;
     }
+    restHeld = false;
+    log("轮到" + ally().name[0] + "了！", "It’s " + ally().name[1] + "’s turn!");
     noteStatus(
       kind === "mic" ? "拾音中 · 一次弹一个音，先松开延音踏板。" : "点击琴键，或用电脑 A–K 与上排黑键。",
       kind === "mic"
@@ -660,6 +656,7 @@
     );
     renderControls();
     updateReadout();
+    drawLane(now);
   }
   function explainMic(detail) {
     if (/access is off/i.test(detail))
@@ -687,7 +684,7 @@
       pause();
       return;
     }
-    if (phase === "won" || phase === "lost") reset();
+    if (phase === "won") reset();
     pause();
     audio.listen({
       onNote: (midi) => {
@@ -699,28 +696,35 @@
           noteStatus("请允许浏览器使用麦克风。", "Allow microphone access in your browser.");
         if (status === "listening") start("mic");
         if (status === "error") {
-          if (phase === "play" || phase === "counter") phase = "paused";
-          micError = detail || "";
-          noteStatus(...explainMic(micError));
+          freezeClock();
+          noteStatus(...explainMic(detail || ""));
         }
-        if (status === "off" && mode === "mic" && (phase === "play" || phase === "counter"))
-          phase = "paused";
+        if (status === "off" && mode === "mic") freezeClock();
         renderControls();
         updateReadout();
       },
     });
   }
   function stopDemo() {
+    if (demoVoice) demoVoice();
+    demoVoice = null;
     demoVersion++;
     demoStart = null;
     demoStep = -1;
   }
+  function endDemo() {
+    stopDemo();
+    noteStatus(
+      phase === "paused" ? "可以接着弹刚才的小节。" : "准备好了，点真琴或屏幕琴键，自己从头弹一遍。",
+      phase === "paused" ? "Resume at the bar where you paused." : "Ready? Play the song from the start on piano or screen keys.",
+    );
+    renderControls();
+    updateReadout();
+    drawLane(performance.now());
+  }
   async function demo() {
     if (demoStart !== null) {
-      stopDemo();
-      renderControls();
-      updateReadout();
-      drawLane(performance.now());
+      endDemo();
       return;
     }
     pause();
@@ -730,10 +734,10 @@
     demoStart = performance.now() + 240;
     demoStep = -1;
     noteStatus(
-      audible ? "跟着轨道听一遍，再自己弹。" : "声音暂时不可用，可以跟着轨道看一遍。",
+      audible ? "跟着乐谱听完整首，可以随时停止。" : "声音暂时不可用，可以跟着乐谱看一遍。",
       audible
-        ? "Listen along with the track, then try it yourself."
-        : "Audio unavailable. Watch the track for the phrase.",
+        ? "Follow the score through the whole song. Stop whenever you’re ready."
+        : "Audio unavailable. Watch the score for the full song.",
     );
     renderControls();
     updateReadout();
@@ -743,29 +747,29 @@
     if (document.hidden || now - lastPaint < 30) return;
     lastPaint = now;
     if (demoStart !== null) {
+      if (demoVoice && now >= demoReleaseAt) {
+        demoVoice();
+        demoVoice = null;
+      }
       const position = (now - demoStart) / beatMs(),
         last = slots[slots.length - 1];
       if (position >= last.start + last.beats) {
-        stopDemo();
-        renderControls();
-        updateReadout();
-        drawLane(now);
+        endDemo();
         return;
       }
       const index = slots.findLastIndex((s) => s.start <= position);
       if (index >= 0 && index !== demoStep) {
         demoStep = index;
         const s = slots[index];
-        if (s.midi !== null) audio.tone(s.midi, s.beats * beatMs() * 0.00078);
+        if (demoVoice) demoVoice();
+        demoVoice = s.midi === null ? null : audio.press(s.midi);
+        demoReleaseAt = demoStart + (s.start + s.beats * 0.88) * beatMs();
         updateReadout();
       }
       drawLane(now);
     } else if (phase === "play") {
-      restDone(now);
+      tickSong(now);
       drawLane(now);
-    } else if (phase === "counter") {
-      if (now >= counterAt && !counterShown) counterAttack();
-      if (phase === "counter" && now >= nextTurnAt) continueTurn();
     }
   }
   function showDialog(title, type) {
@@ -794,26 +798,26 @@
     showDialog(t("用钢琴指挥对战", "Battle with your piano"), "help");
     paragraph(
       t(
-        "1. 选择搭档和道馆，点「用真琴出战」，允许麦克风。第一个音可以自己决定什么时候弹。",
-        "1. Choose your partner and gym, select Play with my piano and allow the mic. Start the first note whenever you’re ready.",
+        "1. 选一首曲子和搭档。可以先听整首示范，再点「用真琴出战」允许麦克风。准备好再弹第一个音。",
+        "1. Choose a song and partner. Listen to the whole demo if you like, then select Play with my piano and allow the mic. Start when ready.",
       ),
     );
     paragraph(
       t(
-        "2. 音符从右向左滑。音名到圆环时弹下对应的琴键。弹对就攻击，合拍会蓄能；同一句连中两拍还能挡住对手的还击。",
-        "2. Notes travel from right to left. Play the matching key when its name reaches the ring. Correct notes attack, on-beat notes charge power, and two consecutive on-beat hits in a phrase block the counterattack.",
+        "2. 跟着高亮的音符弹。每弹对一个音，对手就会掉血。弹错了，在原处重试。休止时松开琴键和踏板，跟着屏幕数拍。",
+        "2. Play the highlighted note to wear down your rival. If you miss, try that note again. Lift the key and pedal for rests and follow the count.",
       ),
     );
     paragraph(
       t(
-        "3. 蓄满四格自动放大招。错音会加强对手下一次还击，节奏护盾可以全挡下来。击败对手后，它就能成为你下一场的搭档。",
-        "3. Four charges trigger the special move. Missed pitches strengthen the next counterattack, which a rhythm shield can block. Defeat a rival to recruit it for the next battle.",
+        "3. 音符到达圆环时弹下，连中两次可以挡住乐段结束时的还击。累计合拍四次自动放大招。接着往下弹，完整弹完曲子就会发动终结技，击败并招募对手。",
+        "3. Play as the note reaches the ring. Two consecutive on-beat notes shield against the next section counter. Four on-beat hits unleash a special. Finish the song to knock out and recruit your rival.",
       ),
     );
     paragraph(
       t(
-        "麦克风在设备上识别单音。休止时松开琴键和踏板，跟着屏幕数拍。游戏里的乐句是对应书页的原创练习。",
-        "The mic detects single notes on this device. Release the key and pedal for rests and follow the count. The game phrases are original exercises for the indicated book pages.",
+        "麦克风在设备上识别单音。练习时可以随时暂停，或用屏幕琴键从同一个音继续。",
+        "Microphone recognition runs on your device, one note at a time. Pause whenever you like and resume at the same note on piano or screen keys.",
       ),
     );
     const credits = document.createElement("a");
@@ -845,49 +849,32 @@
     }
     dialogButton(t("回到道馆", "Back to gym"), closeDialog, true);
   }
-  function openResult(won) {
-    showDialog(
-      won
-        ? t("获得" + gym().badge[0] + "！", gym().badge[1] + " earned!")
-        : t("再来挑战", "Try another battle"),
-      "result",
+  function openResult() {
+    showDialog(t("获得" + gym().badge[0] + "！", gym().badge[1] + " earned!"), "result");
+    const img = document.createElement("img");
+    img.src = "art/" + gym().foe + ".png";
+    img.alt = "";
+    img.className = "reward-sprite";
+    $("sheetBody").append(img);
+    paragraph(t(
+      "你弹完了《" + song().title[0] + "》的全部 " + totalBars + " 小节，击败了" + foe().name[0] + "！",
+      "You played all " + totalBars + " bars of “" + song().title[1] + "” and defeated " + foe().name[1] + "!",
+    ));
+    paragraph(t(
+      notesPlayed + " 个音符 · " + onBeat + " 次合拍 · " + foe().name[0] + "加入了可选搭档。",
+      notesPlayed + " notes · " + onBeat + " on beat · " + foe().name[1] + " is now a playable partner.",
+    ));
+    paragraph(t("回到书上 · ", "At the piano · ") + tr([gym().lesson.bench, gym().lesson.benchEn]));
+    dialogButton(
+      t("带" + foe().name[0] + "出战", "Team up with " + foe().name[1]),
+      () => {
+        closeDialog();
+        partner = gym().foe;
+        save();
+        reset();
+      },
+      true,
     );
-    if (won) {
-      const img = document.createElement("img");
-      img.src = "art/" + gym().foe + ".png";
-      img.alt = "";
-      img.className = "reward-sprite";
-      $("sheetBody").append(img);
-      paragraph(tr(foe().name) + t("加入了可选搭档。", " is now a playable partner."));
-      paragraph(t("回到书上 · ", "At the piano · ") + tr([gym().lesson.bench, gym().lesson.benchEn]));
-      dialogButton(
-        t("带" + foe().name[0] + "出战", "Team up with " + foe().name[1]),
-        () => {
-          closeDialog();
-          partner = gym().foe;
-          save();
-          reset();
-        },
-        true,
-      );
-    } else {
-      paragraph(
-        t(
-          "可以放慢到 60 BPM，先听示范，再让搭档上场。",
-          "Try 60 BPM, listen to the demo, then send your partner back in.",
-        ),
-      );
-      dialogButton(
-        t("慢速再试", "Try at 60 BPM"),
-        () => {
-          closeDialog();
-          bpm = 60;
-          save();
-          reset();
-        },
-        true,
-      );
-    }
     dialogButton(t("回到道馆", "Back to gym"), closeDialog);
   }
   function changeSetup(p, i) {
@@ -899,7 +886,7 @@
       save();
       reset();
     };
-    if (phase === "play" || phase === "paused" || phase === "counter") {
+    if (phase === "play" || phase === "paused") {
       pause();
       showDialog(t("重新开始这场对战？", "Start a fresh battle?"), "switch");
       paragraph(
@@ -914,7 +901,7 @@
   }
   $("mic").addEventListener("click", useMic);
   $("screen").addEventListener("click", () => {
-    if (phase === "play" || phase === "counter") {
+    if (phase === "play") {
       pause();
       return;
     }

@@ -24,7 +24,7 @@
     gengar: "ghost",
   };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const duration = { hit: 580, "ally-hit": 580, super: 850, win: 1150 };
+  const duration = { hit: 580, "ally-hit": 580, super: 850, win: 1250 };
   let canvas,
     ctx,
     frame = 0,
@@ -166,37 +166,49 @@
     let t = 0,
       action = animation?.kind;
     if (animation) t = clamp((performance.now() - animation.time) / duration[action]);
-    const fromAlly = action !== "ally-hit",
-      striking = action && action !== "win";
+    const fromAlly = action !== "ally-hit";
+    const finale = action === "win";
+    const powerful = finale || action === "super";
+    // Leave the second half of the finale for the rival to faint.
+    const strikeTime = finale ? clamp(t / 0.55) : t;
     const start = fromAlly ? [148, 173] : [391, 100],
       end = fromAlly ? [408, 107] : [129, 179];
-    const lunge = striking && !reducedMotion.matches ? Math.sin(Math.PI * clamp(t / 0.38)) * 9 : 0;
-    const jolt = striking && t > 0.56 && t < 0.87 && !reducedMotion.matches ? Math.sin(t * 72) * 4 : 0;
-    const flash = striking && t > 0.57 && t < 0.83 && Math.floor(t * 19) % 2 === 0;
+    const lunge = action && !reducedMotion.matches ? Math.sin(Math.PI * clamp(strikeTime / 0.38)) * 9 : 0;
+    const jolt = action && strikeTime > 0.56 && strikeTime < 0.87 && !reducedMotion.matches ? Math.sin(strikeTime * 72) * 4 : 0;
+    const flash = action && strikeTime > 0.57 && strikeTime < 0.83 && Math.floor(strikeTime * 19) % 2 === 0;
     const foeImage = getImage(battle.foe),
       allyImage = getImage(battle.player + "-back");
-    shadow(409, 144, 31);
+    const faintProgress = finale ? clamp((t - 0.43) / 0.32) : Number(battle.fainted);
+    const sink = reducedMotion.matches ? Number(faintProgress === 1) : faintProgress;
+    if (sink < 1) {
+      shadow(409, 144, 31 * (1 - sink));
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(300, 0, 225, 144);
+      ctx.clip();
+      sprite(foeImage, 409 + (fromAlly ? jolt : -lunge), 144 + 150 * sink, 1.8, fromAlly && flash);
+      ctx.restore();
+    }
     shadow(129, 231, 49);
-    sprite(foeImage, 409 + (fromAlly ? jolt : -lunge), 144, 1.8, fromAlly && flash);
     sprite(allyImage, 129 + (fromAlly ? lunge : -jolt), 233, 2.65, !fromAlly && flash);
-    if (striking && !reducedMotion.matches) {
+    if (action && !reducedMotion.matches) {
       beam(
         animation.element || elementOf[fromAlly ? battle.player : battle.foe],
         ...start,
         ...end,
-        t,
-        action === "super",
+        strikeTime,
+        powerful,
       );
-      impact(...end, action === "super", (t - 0.57) / 0.33);
+      impact(...end, powerful, (strikeTime - 0.57) / 0.33);
     }
-    if (action === "win") {
+    if (finale && t > 0.57) {
       for (let i = 0; i < 13; i++) {
         const x = 129 + Math.cos(i * 2.4) * (23 + i * 3);
         const y = 107 + ((i * 19) % 63) - (reducedMotion.matches ? 0 : t * 19);
         const size = 2 + 3 * Math.max(0, Math.sin(Math.PI * t));
         sparkle(x, y, size, i % 2 ? "#fff8cb" : "#f3bc5b");
       }
-    } else if (striking && reducedMotion.matches && t > 0.35 && t < 0.85) sparkle(...end, 6, "#fff5bd");
+    } else if (action && reducedMotion.matches && strikeTime > 0.35 && strikeTime < 0.85) sparkle(...end, 6, "#fff5bd");
   }
   function tick(now) {
     frame = 0;
@@ -224,20 +236,18 @@
       player: trainers.has(player) ? player : "pikachu",
       foe: wild.has(foe) ? foe : "eevee",
       zone: Math.max(0, Math.min(2, Math.floor(Number(zone) || 0))),
+      fainted: false,
     };
-    if (
-      battle &&
-      (battle.player !== next.player || battle.foe !== next.foe || battle.zone !== next.zone)
-    ) {
-      cancelAnimationFrame(frame);
-      frame = 0;
-      animation = null;
-    }
+    cancelAnimationFrame(frame);
+    frame = 0;
+    animation = null;
     battle = next;
     paint();
   }
   function effect(kind, element) {
-    if (!Object.hasOwn(duration, kind) || !battle || !ctx || document.hidden) return;
+    if (!Object.hasOwn(duration, kind) || !battle || !ctx) return;
+    if (kind === "win") battle.fainted = true;
+    if (document.hidden) return;
     animation = { kind, element, time: performance.now() };
     if (!frame) frame = requestAnimationFrame(tick);
   }
