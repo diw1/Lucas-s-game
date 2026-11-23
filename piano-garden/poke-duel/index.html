@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f2e8">
   <link rel="icon" href="art/pikachu.png">
-  <link rel="stylesheet" href="duel.css?v=ff1078-50">
+  <link rel="stylesheet" href="duel.css?v=live-tempo-1">
   <title>宝可梦钢琴道馆 · Pokémon Piano League</title>
 </head>
 <body>
@@ -38,9 +38,24 @@
           <div class="play-actions"><button class="primary" type="button" id="mic"><span class="mic-icon" aria-hidden="true">●</span> <span id="micLabel"></span></button>
             <button class="ghost" type="button" id="demo"></button><button class="secondary" type="button" id="screen"></button>
           </div><p id="inputState" class="input-state"></p>
+          <div class="tempo-panel" role="group" aria-labelledby="tempoLabel">
+            <div class="tempo-setting">
+              <label id="tempoLabel" for="tempo" data-zh="设定速度" data-en="Set tempo">设定速度</label>
+              <span id="tempoReadout"></span>
+            </div>
+            <div class="tempo-adjust">
+              <button type="button" id="tempoMinus"><span aria-hidden="true">−</span><span class="sr-only" data-zh="减慢 5 BPM" data-en="Slow down by 5 BPM">减慢 5 BPM</span></button>
+              <input id="tempo" type="range" min="40" max="240" step="1" value="120" dir="ltr">
+              <button type="button" id="tempoPlus"><span aria-hidden="true">+</span><span class="sr-only" data-zh="加快 5 BPM" data-en="Speed up by 5 BPM">加快 5 BPM</span></button>
+            </div>
+            <div class="tempo-follow">
+              <label for="followTempo"><input id="followTempo" type="checkbox" checked><span data-zh="跟着我弹" data-en="Follow my playing">跟着我弹</span></label>
+              <span id="followReadout"></span>
+            </div>
+          </div>
         </section>
         <section class="controller" aria-labelledby="controlTitle">
-          <div class="controller-heading"><h2 id="controlTitle"></h2><span id="tempoReadout"></span></div>
+          <div class="controller-heading"><h2 id="controlTitle"></h2></div>
           <div id="lane" aria-label="节奏轨道"><div class="rail"></div><div id="laneTicks"></div><div class="hit-ring" aria-hidden="true"></div><div id="beats"></div></div>
           <div class="cue-row"><strong id="cue"></strong><span id="heard" aria-live="polite"></span></div>
           <div id="keyboard" aria-label="Piano keyboard"></div>
@@ -59,7 +74,6 @@
                 <div class="song-list" id="reviewSongs"></div>
               </details>
             </div>
-            <label class="speed" for="tempo"><span data-zh="练习速度" data-en="Practice tempo">练习速度</span><select id="tempo"><option value="60">60 BPM</option><option value="80">80 BPM</option><option value="100">100 BPM</option></select></label>
           </div></details>
         <div class="move-card"><div><h3 data-zh="搭档招式" data-en="Partner move">搭档招式</h3><b id="moveName"></b></div><p id="moveInfo"></p><div id="charge" aria-label="Power"></div></div>
         <a class="book-link" href="https://cloud.pianoadventures.com/products/piano-adventures-level-1-lesson-book-play-along-audio/" target="_blank" rel="noopener noreferrer" data-zh="听 FF1078 课本的官方配套音频 ↗" data-en="Listen to the FF1078 book recordings ↗">听 FF1078 课本的官方配套音频 ↗</a>
@@ -69,10 +83,10 @@
     <footer>Pokémon Piano League <span>·</span> <span data-zh="非官方同人游戏" data-en="Unofficial fan game">非官方同人游戏</span></footer>
   </main>
   <dialog id="sheet"><div class="sheet-head"><h2 id="sheetTitle"></h2><button id="dismiss" class="close" type="button" aria-label="Close">×</button></div><div id="sheetBody"></div><div id="sheetActions"></div></dialog>
-  <script defer src="../firefly/audio.js"></script><script defer src="../firefly/lessons.js"></script>
-  <script defer src="arena.js?v=ff1078-45"></script>
+  <script defer src="../firefly/audio.js?v=live-tempo-1"></script><script defer src="../firefly/lessons.js"></script>
+  <script defer src="arena.js?v=live-tempo-1"></script>
   <script defer src="songs.js?v=full-song-1"></script><script defer src="chapter-songs.js?v=ff1078-50"></script><script defer src="shepherd.js?v=ff1078-50"></script>
   <script defer src="midway-songs.js?v=ff1078-45"></script><script defer src="pony.js?v=ff1078-45"></script>
-  <script defer src="score.js?v=ff1078-50"></script><script defer src="battle.js?v=ff1078-45"></script>
+  <script defer src="score.js?v=live-tempo-1"></script><script defer src="battle.js?v=live-tempo-1"></script>
 </body>
 </html>

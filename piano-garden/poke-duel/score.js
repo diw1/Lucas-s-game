@@ -131,9 +131,12 @@
     staffPage = { from, count, width, language };
   }
 
-  function render(state) {
-    current = state;
+  function render(state, resized = false) {
     const { song, barIndex, eventInBar, language, demo, complete } = state;
+    const barChanged = !current || current.song !== song || current.barIndex !== barIndex ||
+      current.language !== language || current.complete !== complete;
+    if (!resized && !barChanged && current.eventInBar === eventInBar && current.demo === demo) return;
+    current = state;
     const en = language === "en", lang = en ? 1 : 0;
     if (score !== song) {
       score = song;
@@ -154,21 +157,25 @@
     const active = bars[bar];
     const position = en ? "Bar " + (bar + 1) + " of " + bars.length : "第 " + (bar + 1) + " / " + bars.length + " 小节";
     $("songCard").dataset.demo = String(Boolean(demo));
-    $("songTitle").textContent = song.title[lang];
-    $("songCredit").textContent = song.credit[lang];
-    $("scoreBar").textContent = complete ? (en ? "Song complete" : "全曲完成") : position;
-    $("scoreSection").textContent = active.section.title[lang];
-    const progress = $("scoreProgress");
-    progress.setAttribute("aria-valuemax", bars.length);
-    progress.setAttribute("aria-valuenow", complete ? bars.length : bar);
-    progress.setAttribute("aria-valuetext", $("scoreBar").textContent);
-    Array.from(progress.children).forEach((mark, i) => {
-      mark.className = complete || i < bar ? "played" : i === bar ? "current" : "";
-    });
-    const width = Math.max(200, Math.floor(staff.getBoundingClientRect().width));
+    if (barChanged) {
+      $("songTitle").textContent = song.title[lang];
+      $("songCredit").textContent = song.credit[lang];
+      $("scoreBar").textContent = complete ? (en ? "Song complete" : "全曲完成") : position;
+      $("scoreSection").textContent = active.section.title[lang];
+      const progress = $("scoreProgress");
+      progress.setAttribute("aria-valuemax", bars.length);
+      progress.setAttribute("aria-valuenow", complete ? bars.length : bar);
+      progress.setAttribute("aria-valuetext", $("scoreBar").textContent);
+      Array.from(progress.children).forEach((mark, i) => {
+        mark.className = complete || i < bar ? "played" : i === bar ? "current" : "";
+      });
+    }
+    const width = resized || !staffPage ? Math.max(200, Math.floor(staff.getBoundingClientRect().width)) : staffPage.width;
     const fit = Math.max(1, Math.floor((width - 54) / minBarWidth));
-    const count = Math.min(bars.length, width >= 490 ? 3 : 2, fit);
-    const from = Math.min(bar, bars.length - count);
+    // Keep the notes still while playing a line, as on a printed score.
+    const lineLength = Math.min(width >= 490 ? 3 : 2, fit);
+    const from = Math.floor(bar / lineLength) * lineLength;
+    const count = Math.min(lineLength, bars.length - from);
     if (!staffPage || staffPage.from !== from || staffPage.width !== width || staffPage.count !== count || staffPage.language !== language) {
       drawStaff(width, from, count, language);
     }
@@ -191,6 +198,6 @@
     staff.setAttribute("aria-label", position + " · " + meter + " · " + melody.join(en ? ", " : "，"));
   }
 
-  window.addEventListener("resize", () => { if (current) render(current); });
+  window.addEventListener("resize", () => { if (current) render(current, true); });
   window.DuelScore = { render };
 })();

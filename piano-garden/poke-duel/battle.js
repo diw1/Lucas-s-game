@@ -217,16 +217,22 @@
     : 0;
   if (new URLSearchParams(location.search).get("pages") === "45-50" && gyms[gymIndex].shelf !== "midway")
     gymIndex = gyms.findIndex((g) => g.shelf === "midway");
-  let bpm = [60, 80, 100].includes(saved.bpm) ? saved.bpm : 80;
+  const minBpm = 40, maxBpm = 240;
+  const limitBpm = (n) => Math.max(minBpm, Math.min(maxBpm, n));
+  let bpm = Number.isInteger(saved.bpm) ? limitBpm(saved.bpm) : 120;
+  let followTempo = saved.followTempo !== false;
+  let liveBeatMs = 60000 / bpm;
+  const beatSamples = [];
+  let lastAttack = null, bufferedAttack = null, retrying = false, missedNotes = 0;
   const gym = () => gyms[gymIndex];
   const ally = () => creatures[partner];
   const foe = () => creatures[gym().foe];
-  const beatMs = () => 60000 / bpm;
+  const beatMs = () => demoStart !== null ? 60000 / bpm : liveBeatMs;
   const song = () => gym().song;
   const maxAlly = 66,
     maxFoe = 90;
   let phase, cursor, slots, due, hp, enemyHp, chain, power, shielded;
-  let totalBars, totalNotes, hasEighths, notesPlayed, onBeat, lastNoteEnd, pausedTailBeats;
+  let totalBars, totalNotes, hasEighths, notesPlayed, onBeat, lastNoteEnd, pausedTailBeats, pausedRestOffset;
   let lastHeard, lastHeardSlot,
     lastGrade,
     logMessage,
@@ -246,7 +252,7 @@
     try {
       localStorage.setItem(
         storeKey,
-        JSON.stringify({ libraryVersion, language, partner, gym: gym().id, bpm, badges: [...earned] }),
+        JSON.stringify({ libraryVersion, language, partner, gym: gym().id, bpm, followTempo, badges: [...earned] }),
       );
     } catch {}
   }
@@ -303,6 +309,11 @@
     shielded = false;
     lastNoteEnd = null;
     pausedTailBeats = null;
+    pausedRestOffset = null;
+    liveBeatMs = 60000 / bpm;
+    beatSamples.length = 0;
+    clearAttackHistory();
+    missedNotes = 0;
     notesPlayed = 0;
     onBeat = 0;
     hp = maxAlly;
@@ -372,7 +383,6 @@
         () => changeSetup(partner, i),
       ).append(mark);
     });
-    $("tempo").value = String(bpm);
     $("caseCount").textContent = earned.size + " / " + gyms.length;
     $("moveName").textContent = tr(ally().special);
     $("moveInfo").textContent = t(
@@ -395,6 +405,44 @@
       { length: 4 },
       (_, i) => '<i class="pip' + (i < power ? " on" : "") + '"></i>',
     ).join("");
+  }
+  function clearAttackHistory() {
+    lastAttack = null;
+    bufferedAttack = null;
+    retrying = false;
+  }
+  function renderTempo() {
+    $("tempo").value = String(bpm);
+    $("tempoReadout").textContent = bpm + " BPM";
+    $("tempoMinus").disabled = bpm === minBpm;
+    $("tempoPlus").disabled = bpm === maxBpm;
+    $("followTempo").checked = followTempo;
+    const measured = Math.round(60000 / liveBeatMs);
+    $("followReadout").textContent = followTempo && beatSamples.length && phase === "play"
+      ? t("实测 " + measured + " BPM", "Playing at " + measured + " BPM") : "";
+  }
+  function setTempo(nextBpm, nextFollow = followTempo) {
+    if (!Number.isFinite(nextBpm)) return;
+    nextBpm = limitBpm(Math.round(nextBpm));
+    if (nextBpm === bpm && nextFollow === followTempo) return;
+    const now = performance.now(), oldBeat = beatMs();
+    bpm = nextBpm;
+    followTempo = nextFollow;
+    liveBeatMs = 60000 / bpm;
+    beatSamples.length = 0;
+    clearAttackHistory();
+    // Move deadlines around this instant so a half-finished beat stays half-finished.
+    const ratio = beatMs() / oldBeat;
+    const rebase = (time) => now + (time - now) * ratio;
+    if (due !== null) due = rebase(due);
+    if (lastNoteEnd !== null) lastNoteEnd = rebase(lastNoteEnd);
+    if (demoStart !== null) {
+      demoStart = rebase(demoStart);
+      if (demoVoice) demoReleaseAt = rebase(demoReleaseAt);
+    }
+    save();
+    renderTempo();
+    drawLane(now);
   }
   function renderControls() {
     const live = micState === "listening",
@@ -419,8 +467,7 @@
     $("demo").textContent =
       demoStart !== null ? t("停止示范", "Stop demo") : t("♪ 听整首示范", "♪ Hear the whole song");
     $("demo").disabled = asking || phase === "won";
-    $("tempo").disabled = phase === "play" || demoStart !== null || asking;
-    $("tempoReadout").textContent = "♩ " + bpm + " BPM";
+    renderTempo();
     $("controlTitle").textContent = t("节奏轨道", "Rhythm track");
   }
   function renderAll() {
@@ -542,7 +589,7 @@
           (lastGrade ? " · " + tr(lastGrade) : "");
   }
   function flash(kind, words) {
-    window.DuelArena.effect(kind, ally().type);
+    window.DuelArena.effect(kind, ally().type, slots[cursor].beats * beatMs());
     const splash = $("moveSplash");
     clearTimeout(splashTimer);
     splash.textContent = words;
@@ -651,12 +698,60 @@
     // Pitch detection and a player's attack can straddle the end of a counted rest.
     const enteringOnPitch = incomingMidi !== undefined && slots[cursor + 1]?.midi === incomingMidi;
     const grace = enteringOnPitch ? Math.min(110, beatMs() * 0.15) : 0;
-    if (!restHeld && now >= restEnd - grace) advance(restEnd);
+    if (restHeld) return;
+    if (now >= restEnd - grace) {
+      advance(restEnd);
+    } else if (followTempo && enteringOnPitch && lastAttack && !retrying) {
+      // A faster performance can reach the rest's exit before the displayed target.
+      // Use the full written note-to-note interval, including all the silent beats.
+      const arrivalBeat = intervalBeat(slots[cursor + 1], now);
+      const minimum = Math.max(60000 / maxBpm * 0.85, liveBeatMs * (beatSamples.length ? 0.68 : 0.38));
+      if (arrivalBeat >= minimum) advance(now);
+    }
+  }
+  function intervalBeat(slot, now) {
+    return lastAttack ? (now - lastAttack.time) / (slot.start - lastAttack.beat) : NaN;
+  }
+  function trackAttack(slot, now) {
+    const sample = intervalBeat(slot, now);
+    if (followTempo && !retrying && plausibleBeat(sample)) {
+      beatSamples.push(sample);
+      if (beatSamples.length > 3) beatSamples.shift();
+      const sorted = [...beatSamples].sort((a, b) => a - b);
+      const median = sorted.length === 2 ? (sorted[0] + sorted[1]) / 2 : sorted[Math.floor(sorted.length / 2)];
+      liveBeatMs = Math.max(60000 / maxBpm, Math.min(60000 / minBpm, median));
+      renderTempo();
+    }
+    lastAttack = { time: now, beat: slot.start, midi: slot.midi };
+    bufferedAttack = null;
+    retrying = false;
+  }
+  function plausibleBeat(ms) {
+    return ms >= 60000 / maxBpm * 0.8 && ms <= 60000 / minBpm * 1.16;
+  }
+  function canBuffer(midi, now) {
+    const current = slots[cursor], next = slots[cursor + 1], after = slots[cursor + 2];
+    return followTempo && lastAttack && next?.midi === midi && after && after.midi !== null &&
+      current.midi !== null && current.midi !== after.midi && next.midi !== after.midi &&
+      plausibleBeat(intervalBeat(next, now));
+  }
+  function confirmOmission(midi, now) {
+    if (!bufferedAttack || midi !== slots[cursor + 2]?.midi) return;
+    const next = slots[cursor + 1];
+    const firstBeat = intervalBeat(next, bufferedAttack.time);
+    const secondBeat = (now - bufferedAttack.time) / next.beats;
+    if (!plausibleBeat(secondBeat) || secondBeat < firstBeat * 0.55 || secondBeat > firstBeat * 1.8) return;
+    const time = bufferedAttack.time;
+    missedNotes++;
+    retrying = false;
+    advance(due + slots[cursor].beats * beatMs());
+    playNote(time);
   }
   function accept(midi, now) {
     if (phase !== "play" || demoStart !== null) return;
     tickSong(now, midi);
     if (phase !== "play" || lastNoteEnd !== null) return;
+    if (midi !== slots[cursor].midi) confirmOmission(midi, now);
     const s = slots[cursor];
     lastHeard = midi;
     lastHeardSlot = s;
@@ -668,6 +763,8 @@
     }
     if (s.midi === null || midi !== s.midi) {
       chain = 0;
+      bufferedAttack = canBuffer(midi, now) ? { time: now } : null;
+      retrying = true;
       if (s.midi === null) {
         // A new attack during a rest restarts its full count.
         due = Math.max(due ?? now, now);
@@ -680,14 +777,21 @@
       updateReadout();
       return;
     }
-    const ms = beatMs();
+    playNote(now);
+  }
+  function playNote(now) {
+    const s = slots[cursor], ms = beatMs();
     const delta = due === null ? Infinity : now - due;
     const previous = slots[cursor - 1];
-    if (previous && delta < -previous.beats * ms * 0.45) {
+    const tooEarly = followTempo ? lastAttack?.midi === s.midi && now - lastAttack.time < 75
+      : previous && delta < -previous.beats * ms * 0.45;
+    if (tooEarly) {
+      bufferedAttack = null;
       lastGrade = ["再数一拍，等音符到圆环", "A little early · wait for the ring"];
       updateReadout();
       return;
     }
+    trackAttack(s, now);
     const timed = Math.abs(delta) <= ms * 0.35;
     if (timed) {
       chain++;
@@ -712,13 +816,13 @@
     flash(special ? "super" : "hit", special ? tr(move) + "!" : "−" + damage);
     renderNumbers();
     if (cursor === slots.length - 1) {
-      lastNoteEnd = now + s.beats * ms;
+      lastNoteEnd = now + s.beats * beatMs();
       updateReadout();
       return;
     }
     // Musical time follows the player; only small timing jitter is snapped to the grid.
-    const anchor = Math.abs(delta) <= ms * 0.12 ? due : now;
-    advance(anchor + s.beats * ms);
+    const anchor = !followTempo && Math.abs(delta) <= ms * 0.12 ? due : now;
+    advance(anchor + s.beats * beatMs());
   }
   function finish() {
     phase = "won";
@@ -742,10 +846,14 @@
   }
   function freezeClock() {
     if (phase !== "play") return;
+    const now = performance.now();
     if (lastNoteEnd !== null) {
-      pausedTailBeats = Math.max(0, (lastNoteEnd - performance.now()) / beatMs());
+      pausedTailBeats = Math.max(0, (lastNoteEnd - now) / beatMs());
       lastNoteEnd = null;
     }
+    if (slots[cursor].midi === null && due !== null)
+      pausedRestOffset = restHeld ? 0 : (due - now) / beatMs();
+    clearAttackHistory();
     phase = "paused";
     due = null;
     restHeld = false;
@@ -769,7 +877,8 @@
     mode = kind;
     phase = "play";
     const now = performance.now();
-    due = slots[cursor].midi === null ? now : null;
+    due = slots[cursor].midi === null ? now + (pausedRestOffset ?? 0) * beatMs() : null;
+    pausedRestOffset = null;
     if (pausedTailBeats !== null) {
       lastNoteEnd = now + pausedTailBeats * beatMs();
       pausedTailBeats = null;
@@ -932,8 +1041,8 @@
     );
     paragraph(
       t(
-        "2. 跟着高亮的音符弹。每弹对一个音，对手就会掉血。弹错了，在原处重试。休止时松开琴键和踏板，跟着屏幕数拍。",
-        "2. Play the highlighted note to wear down your rival. If you miss, try that note again. Lift the key and pedal for rests and follow the count.",
+        "2.「跟着我弹」会按你弹奏的快慢移动谱面。漏了一个音时，继续弹，如果后面两个音能确定位置，谱面会接上。关闭跟随后可以按设定速度练准拍。休止时松开琴键和踏板。",
+        "2. Follow my playing moves the score at your pace. If one note is missed, two clear notes ahead can bring the score back to you. Turn it off to practise at the set tempo. Lift the keys and pedal for rests.",
       ),
     );
     paragraph(
@@ -992,6 +1101,10 @@
       notesPlayed + " 个音符 · " + onBeat + " 次合拍 · " + foe().name[0] + "加入了可选搭档。",
       notesPlayed + " notes · " + onBeat + " on beat · " + foe().name[1] + " is now a playable partner.",
     ));
+    if (missedNotes) paragraph(t(
+      "跟随模式已接回乐谱，" + missedNotes + " 个漏音未计分。",
+      "The score rejoined you. " + missedNotes + (missedNotes === 1 ? " missed note" : " missed notes") + " received no points.",
+    ));
     paragraph(t("回到书上 · ", "At the piano · ") + tr(gym().bench));
     dialogButton(
       t("带" + foe().name[0] + "出战", "Team up with " + foe().name[1]),
@@ -1046,14 +1159,10 @@
   $("help").addEventListener("click", openHelp);
   $("openCase").addEventListener("click", openCase);
   $("dismiss").addEventListener("click", closeDialog);
-  $("tempo").addEventListener("change", () => {
-    const v = Number($("tempo").value);
-    if ([60, 80, 100].includes(v)) {
-      bpm = v;
-      save();
-      renderControls();
-    }
-  });
+  $("tempo").addEventListener("input", () => setTempo(Number($("tempo").value)));
+  $("tempoMinus").addEventListener("click", () => setTempo(bpm - 5));
+  $("tempoPlus").addEventListener("click", () => setTempo(bpm + 5));
+  $("followTempo").addEventListener("change", () => setTempo(bpm, $("followTempo").checked));
   $("lang").addEventListener("click", () => {
     language = t("en", "zh");
     save();

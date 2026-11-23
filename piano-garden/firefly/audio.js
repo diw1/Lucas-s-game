@@ -137,27 +137,34 @@
     let candidate = null;
     let candidateSince = 0;
     let quietSince = null;
-    let previousLevel = 0;
     let lastAttack = -Infinity;
-    let renewedAt = -Infinity;
-    return function update(note, level, now) {
+    let renewedAt = null;
+    return function update(note, level, recentFloor, now) {
       if (level < 0.0035) {
         if (quietSince === null) quietSince = now;
-        if (now - quietSince >= 55) active = null;
+        if (now - quietSince >= 45) {
+          active = null;
+          renewedAt = null;
+        }
       } else {
         quietSince = null;
       }
-      if (level > 0.009 && level > previousLevel * 1.85 && now - lastAttack > 150) renewedAt = now;
-      previousLevel += 0.25 * (level - previousLevel);
+      // A fresh hammer attack can rise from the previous note's ringing tail.
+      // Wait for the pitch window to catch up before calling it a repeated note.
+      if (renewedAt !== null && now - renewedAt > 90) renewedAt = null;
+      if (active !== null && renewedAt === null && now - lastAttack >= 68 &&
+          level > Math.max(0.005, recentFloor * 1.36, recentFloor + 0.0025)) {
+        renewedAt = now;
+      }
       if (note !== candidate || note === null) {
         candidate = note;
         candidateSince = now;
       }
-      if (level < 0.004 || note === null || now - candidateSince < 23) return null;
-      if (note === active && now - renewedAt >= 55) return null;
+      if (level < 0.004 || note === null || now - candidateSince < 14) return null;
+      if (note === active && (renewedAt === null || now - renewedAt < 32)) return null;
       active = note;
       lastAttack = now;
-      renewedAt = -Infinity;
+      renewedAt = null;
       return note;
     };
   }
@@ -165,7 +172,7 @@
   function finish(session, status, detail) {
     if (mic !== session) return;
     mic = undefined;
-    cancelAnimationFrame(session.frame);
+    clearTimeout(session.timer);
     if (session.source) session.source.disconnect();
     if (session.analyser) session.analyser.disconnect();
     if (session.stream) {
@@ -192,7 +199,7 @@
 
   async function listen({ onNote = () => {}, onState = () => {} } = {}) {
     stopListening();
-    const session = { onState, frame: 0 };
+    const session = { onState, timer: 0 };
     mic = session;
     onState("requesting");
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -223,11 +230,19 @@
       session.source.connect(analyser);
       const buffer = new Float32Array(analyser.fftSize);
       const readPitch = makePitchReader(ctx.sampleRate, buffer.length);
+      const span = Math.min(Math.round(ctx.sampleRate * 0.012), Math.floor(buffer.length / 3));
+      function rmsAt(end) {
+        let sum = 0;
+        for (let i = end - span; i < end; i++) sum += buffer[i] * buffer[i];
+        return Math.sqrt(sum / span);
+      }
       let gate = makeNoteGate();
       let wasMuted = false;
-      function sample(now) {
+      function sample() {
         if (mic !== session) return;
-        session.frame = requestAnimationFrame(sample);
+        // Capture successive strikes even on a display rendering at 30 fps.
+        session.timer = setTimeout(sample, 12);
+        const now = performance.now();
         if (now < ignoreSpeakerUntil || heldVoices.size > 0) {
           wasMuted = true;
           return;
@@ -237,14 +252,13 @@
           wasMuted = false;
         }
         analyser.getFloatTimeDomainData(buffer);
-        const tail = Math.min(buffer.length, Math.round(ctx.sampleRate * 0.015));
-        let sum = 0;
-        for (let i = buffer.length - tail; i < buffer.length; i++) sum += buffer[i] * buffer[i];
-        const level = Math.sqrt(sum / tail);
-        const note = gate(level >= 0.004 ? readPitch(buffer) : null, level, now);
+        const end = buffer.length;
+        const level = rmsAt(end);
+        const recentFloor = Math.min(rmsAt(end - span), rmsAt(end - Math.round(span * 1.5)), rmsAt(end - 2 * span));
+        const note = gate(level >= 0.004 ? readPitch(buffer) : null, level, recentFloor, now);
         if (note !== null) onNote(note);
       }
-      session.frame = requestAnimationFrame(sample);
+      sample();
       onState("listening");
       return true;
     } catch (error) {

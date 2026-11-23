@@ -168,7 +168,7 @@
     else rect(0, 0, 560, 256, "#a9c78b");
     let t = 0,
       action = animation?.kind;
-    if (animation) t = clamp((performance.now() - animation.time) / duration[action]);
+    if (animation) t = clamp((performance.now() - animation.time) / animation.duration);
     const fromAlly = action !== "ally-hit";
     const finale = action === "win";
     const powerful = finale || action === "super";
@@ -216,7 +216,7 @@
   function tick(now) {
     frame = 0;
     if (!animation) return;
-    if (now - animation.time >= duration[animation.kind] || document.hidden) {
+    if (now - animation.time >= animation.duration || document.hidden) {
       animation = null;
       paint();
       return;
@@ -247,11 +247,14 @@
     battle = next;
     paint();
   }
-  function effect(kind, element) {
+  function effect(kind, element, noteMs = Infinity) {
     if (!Object.hasOwn(duration, kind) || !battle || !ctx) return;
     if (kind === "win") battle.fainted = true;
     if (document.hidden) return;
-    animation = { kind, element, time: performance.now() };
+    const length = kind === "hit" || kind === "super"
+      ? Math.min(duration[kind], Math.max(100, noteMs * 0.9))
+      : duration[kind];
+    animation = { kind, element, time: performance.now(), duration: length };
     if (!frame) frame = requestAnimationFrame(tick);
   }
   document.addEventListener("visibilitychange", () => {

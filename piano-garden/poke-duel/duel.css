@@ -31,7 +31,7 @@ button, summary { cursor: pointer; }
 button { color: inherit; touch-action: manipulation; }
 button:disabled { opacity: .58; cursor: default; }
 button, a, summary { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, summary:focus-visible, a:focus-visible, select:focus-visible {
+button:focus-visible, summary:focus-visible, a:focus-visible, input:focus-visible {
   outline: 3px solid #197b94;
   outline-offset: 3px;
 }
@@ -41,7 +41,7 @@ a { color: inherit; }
 .wrap { width: min(1120px, calc(100% - 52px)); margin-inline: auto; }
 .topbar { color: #fefbf1; background: var(--ink); border-bottom: 3px solid #b33c3b; }
 .topnav, .home, .nav-actions, .mast, .case-button, .arena-top, .hp-row, .battle-log,
-.controller-heading, .cue-row, .play-actions, .speed, .setup summary, .sheet-head, #sheetActions { display: flex; align-items: center; }
+.controller-heading, .cue-row, .play-actions, .setup summary, .sheet-head, #sheetActions { display: flex; align-items: center; }
 .topnav { min-height: 47px; gap: 13px; }
 .home { gap: 8px; text-decoration: none; font-size: .84rem; letter-spacing: .01em; }
 .ball { position: relative; width: 21px; height: 21px; flex: none; border-radius: 50%; border: 2px solid #f3f3da; background: linear-gradient(#ef5655 0 42%,#21333c 43% 57%,#fff8e2 58%); }
@@ -123,7 +123,33 @@ h1 { font-size: clamp(1.82rem,3.6vw,2.95rem); font-weight: 850; letter-spacing: 
 .controller-heading, .cue-row { justify-content: space-between; gap: 8px; }
 .controller-heading { margin-bottom: 7px; }
 .controller-heading h2 { font-size: 1.08rem; letter-spacing: -.015em; }
-#tempoReadout { color: var(--teal); font: 750 .73rem/1.25 var(--mono); }
+.tempo-panel {
+  display: grid;
+  grid-template-columns: max-content minmax(0,1fr);
+  align-items: center;
+  column-gap: 16px;
+  margin-top: 9px;
+  padding: 4px 10px;
+  border: 1px solid #bccbbc;
+  border-radius: 6px;
+  background: #eff4e9;
+}
+.tempo-setting { display: grid; gap: 1px; color: #304d44; }
+#tempoLabel { font: 700 .75rem/1.2 var(--body); }
+#tempoReadout { color: var(--teal); font: 780 .97rem/1.3 var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tempo-adjust, .tempo-follow, .tempo-follow label { display: flex; align-items: center; }
+.tempo-adjust { min-width: 0; gap: 6px; }
+.tempo-adjust button {
+  flex: 0 0 40px; min-height: 40px; padding: 0; border-radius: 5px; border: 1px solid #97b2a3;
+  border-bottom-width: 2px; background: #fffdf4; color: #23574b; font: 750 1.3rem/1 var(--body);
+}
+.tempo-adjust button:hover:enabled { background: #dbead9; }
+#tempo { flex: 1 1 0; min-width: 0; height: 40px; margin: 0; accent-color: var(--teal); cursor: pointer; }
+.tempo-follow { grid-column: 1 / -1; justify-content: space-between; gap: 8px; min-height: 34px; }
+.tempo-follow label { min-height: 34px; gap: 7px; color: #254b41; font-size: .83rem; font-weight: 700; cursor: pointer; }
+#followTempo { width: 18px; height: 18px; margin: 0; accent-color: var(--teal); cursor: pointer; }
+#followReadout { color: #36584b; font-size: .75rem; line-height: 1.2; text-align: end; font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 #lane { position: relative; isolation: isolate; background: #192c36; height: 62px; overflow: hidden; border: 2px solid #21333c; border-radius: 5px; }
 .rail { position: absolute; width: 100%; height: 2px; top: calc(50% - 1px); background: #728d8e; }
 #laneTicks, #beats { position: absolute; inset: 0; pointer-events: none; }
@@ -176,8 +202,6 @@ h1 { font-size: clamp(1.82rem,3.6vw,2.95rem); font-weight: 850; letter-spacing: 
 .gym-text strong { font: 770 .92rem/1.22 var(--face); }
 .gym-text small { font-size: .72rem; line-height: 1.3; color: var(--muted); }
 .gym-mark { display: block; margin-left: auto; font-weight: 800; color: #9a583c; }
-.speed { justify-content: space-between; gap: 8px; margin-top: 11px; padding-top: 11px; border-top: 1px solid #d6d8c9; font-size: .82rem; font-weight: 700; }
-.speed select { min-height: 32px; border: 1px solid #9faea7; border-radius: 4px; padding: 2px 5px; color: #274743; background: var(--card); font: 650 .77rem/1.3 var(--mono); }
 .move-card { padding: 13px 14px; }
 .move-card > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 #moveName { color: #704d19; font: 800 1rem/1.25 var(--face); }
@@ -318,6 +342,8 @@ dialog::backdrop { background: #0b1729ad; }
   #scoreBar { font-size: .78rem; }
   #scoreSection, #songCredit { font-size: .68rem; }
   .score-progress { margin-top: 6px; }
+  .tempo-panel { column-gap: 8px; margin-top: 7px; padding-inline: 7px; }
+  .tempo-adjust { gap: 3px; }
   .controller-heading { margin-bottom: 5px; }
   .controller-heading h2 { font-size: .96rem; }
   #lane { height: 51px; }
