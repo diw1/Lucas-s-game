@@ -132,6 +132,20 @@ h1 {
   background: linear-gradient(180deg, #fffbed, #e8f6da);
 }
 
+.game-card.starfall-card {
+  background: #102638;
+  color: #fff4d8;
+}
+
+.game-card.starfall-card img {
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.game-card.starfall-card strong {
+  color: #daebee;
+}
+
 .game-card.block {
   background: linear-gradient(180deg, #fffbed, #e9e2d7);
 }

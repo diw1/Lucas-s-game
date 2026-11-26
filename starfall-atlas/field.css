@@ -1,0 +1,95 @@
+.sff {
+  color:#ede9de; width:100%; min-width:0; font-family:inherit; line-height:1.45;
+  --sf-field-fg:#f1eddf; --sf-field-quiet:#b5c3c3; --sf-field-gold:#edc77c;
+  --sf-field-panel:#13252a; --sf-field-line:#475a59;
+}
+.sff *, .sff *::before, .sff *::after {box-sizing:border-box;}
+.sff [hidden] {display:none!important;}
+.sff button {font:inherit;touch-action:manipulation;cursor:pointer;letter-spacing:normal;}
+.sff button:disabled {cursor:default;opacity:.45;}
+.sff button:focus-visible, .sff summary:focus-visible {outline:2px solid #ffe69f;outline-offset:3px;}
+.sff .sff-head {margin:0 0 1rem;max-width:58rem;text-align:left;}
+.sff .sff-eyeline {display:flex;align-items:center;gap:.62rem;color:var(--sf-field-gold);font-size:.69rem;line-height:1.2;font-weight:600;letter-spacing:.10em;}
+.sff .sff-rule {display:inline-block;width:1.7rem;height:1px;background:linear-gradient(90deg,#8e7044,#f3d097);}
+.sff .sff-title {color:var(--sf-field-fg);font-family:Georgia,"Noto Serif SC","Songti SC",serif;font-size:clamp(1.36rem,3vw,2.15rem);font-weight:600;line-height:1.2;letter-spacing:0;margin:.32rem 0 .42rem;}
+.sff .sff-intro {margin:0;max-width:76ch;color:#d4dcd4;font-size:.94rem;line-height:1.55;}
+.sff .sff-layout {display:grid;grid-template-columns:minmax(0,1.85fr) minmax(13rem,1fr);gap:clamp(.6rem,1.6vw,1.18rem);align-items:start;}
+.sff .sff-left {min-width:0;}
+.sff .sff-map,.sff .sff-finale {
+  position:relative;isolation:isolate;overflow:hidden;aspect-ratio:3/2;border:1px solid #928567;border-radius:.72rem .27rem;
+  background:#172529;box-shadow:0 8px 25px #040b1640;
+}
+.sff .sff-map::after,.sff .sff-finale::after {content:"";position:absolute;inset:4px;border:1px solid #ead8a83c;pointer-events:none;border-radius:.45rem .12rem;}
+.sff .sff-plate {display:block;width:100%;height:100%;object-fit:cover;max-width:none;}
+.sff button.sff-map-pin {
+  position:absolute;transform:translate(-50%,-112%);display:grid;place-items:center;border:1.5px solid #fff0bd;border-radius:50%;padding:0;
+  color:#ffedb8;background:#182829e8;text-shadow:0 1px 3px #172223;width:2.2rem;height:2.2rem;min-width:0;min-height:0;
+  box-shadow:0 0 0 3px #17252964,0 3px 8px #081414bd,inset 0 0 0 3px #4a53509c;font:700 1rem/1 Georgia,serif;
+}
+.sff .sff-map-pin::after {content:"";position:absolute;left:50%;bottom:-5px;width:1px;height:4px;background:#fff0bd;}
+.sff .sff-map-pin.sff-pin-below {transform:translate(-50%,12%);}
+.sff .sff-map-pin.sff-pin-below::after {bottom:auto;top:-5px;}
+.sff .sff-map-pin.sff-seen {background:#284e44f0;border-color:#b9d8ae;}
+.sff .sff-map-pin.sff-active {background:#f4d494;color:#182b2a;text-shadow:none;box-shadow:0 0 0 3px #fff1b87a,0 3px 9px #0c191ad9;}
+.sff .sff-index {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:.45rem;gap:.3rem;}
+.sff button.sff-index-item {
+  padding:.36rem .48rem;display:flex;align-items:center;gap:.45rem;min-width:0;min-height:2rem;line-height:1.2;text-align:left;
+  border:1px solid #3d5555;border-radius:.28rem;background:#12282ce8;color:#d7e1db;font-size:.78rem;
+}
+.sff .sff-index-item b,.sff .sff-letter,.sff .sff-detail-badge {
+  font:700 .78rem/1 Georgia,serif;color:#f0cd87;background:#3a4539;border:1px solid #827b5c;border-radius:50%;
+  width:1.35rem;height:1.35rem;display:inline-grid;place-items:center;flex:0 0 auto;
+}
+.sff .sff-check {margin-left:auto;color:#c8dca1;}
+.sff .sff-index-item.sff-selected {border-color:#b9a16c; }
+.sff .sff-note,.sff .sff-panel {
+  padding:clamp(.78rem,1.5vw,1.12rem);border:1px solid var(--sf-field-line);border-radius:.55rem .23rem;
+  background:radial-gradient(ellipse at 100% 0%,#324a486e,transparent 70%),linear-gradient(135deg,#1a3135,#122429);
+  text-align:left;color:var(--sf-field-fg);min-width:0;
+}
+.sff .sff-note {display:flex;flex-direction:column;align-items:flex-start;}
+.sff .sff-note h4,.sff .sff-panel h4 {font:600 1.13rem/1.3 Georgia,"Noto Serif SC",serif;letter-spacing:0;color:var(--sf-field-fg);margin:.32rem 0 .48rem;}
+.sff .sff-note p,.sff .sff-testimony p {color:#d2ddd6;font-size:.88rem;line-height:1.6;margin:0;}
+.sff .sff-big-glass {display:grid;place-items:center;margin:.25rem 0 .62rem;width:3.6rem;height:3.6rem;border:1px solid #9f9070;border-radius:50%;color:#f2d291;font:2.6rem/1 Georgia,serif;background:radial-gradient(circle,#354744,#142d30);box-shadow:inset 0 0 0 4px #213236,inset 0 0 0 5px #746f54;}
+.sff .sff-kicker {color:#cbb68c;font-size:.67rem;font-weight:650;line-height:1.15;letter-spacing:.10em;}
+.sff .sff-detail {position:relative;width:100%;aspect-ratio:2.3;overflow:hidden;background-size:255% auto;background-repeat:no-repeat;background-color:#132526;border:1px solid #817b62;border-radius:.35rem .12rem;margin:0 0 .75rem;}
+.sff .sff-detail-badge {position:absolute;left:.42rem;bottom:.38rem;background:#193835e6;}
+.sff .sff-face {object-fit:cover;object-position:center 36%;width:4.6rem;aspect-ratio:1;border:1px solid #a49166;border-radius:50%;margin:0 0 .65rem;}
+.sff .sff-controls {display:flex;align-items:center;gap:.55rem;justify-content:space-between;flex-wrap:wrap;margin-top:.85rem;}
+.sff button.sff-primary,.sff button.sff-secondary {
+  display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:.38rem;padding:.53rem .8rem;min-height:2.5rem;
+  font-size:.85rem;font-weight:650;line-height:1.2;border:1px solid #b7a16c;background:linear-gradient(130deg,#f2d79f,#d3ab69);color:#1c2927;
+}
+.sff button.sff-secondary {border-color:#5e746d;background:#1c3536;color:#e0e5da;}
+.sff .sff-secondary img {height:1.55rem;width:1.55rem;object-fit:cover;border-radius:50%;border:1px solid #b3a67c;}
+.sff .sff-progress {font-size:.76rem;color:var(--sf-field-quiet);font-variant-numeric:tabular-nums;}
+.sff .sff-report {display:grid;grid-template-columns:1fr 1.2fr;gap:.75rem;align-items:start;}
+.sff .sff-option,.sff .sff-evidence {display:flex;align-items:center;flex-wrap:wrap;text-align:left;width:100%;gap:.42rem;border:1px solid #49605d;border-radius:.38rem;background:#11282d;color:#dedfd6;margin:.45rem 0 0;padding:.55rem .65rem;line-height:1.34;font-size:.86rem;}
+.sff .sff-option[aria-pressed=true],.sff .sff-evidence[aria-pressed=true] {border-color:#dbbe82;background:#35453b;}
+.sff .sff-radio,.sff .sff-checkbox {font-size:1rem;line-height:1;color:#e9cb8e;}
+.sff .sff-checkbox {margin-left:auto;}
+.sff .sff-evidence-note {flex-basis:100%;font-size:.75rem;line-height:1.48;color:#bccdc4;font-weight:normal;}
+.sff .sff-testimony {padding:.8rem 0 0;color:#d6c39a;font-size:.82rem;}
+.sff .sff-testimony summary {cursor:pointer;}
+.sff .sff-testimony p {margin:.35rem 0 0;}
+.sff .sff-response {padding:.55rem .7rem;background:#3c3830;border:1px solid #92815d;border-radius:.4rem;margin:.75rem 0 0;color:#f2ddba;line-height:1.45;font-size:.86rem;text-align:left;}
+.sff .sff-finale {max-height:23rem;aspect-ratio:2.25;}
+.sff .sff-medal {position:absolute;right:.9rem;bottom:.85rem;border-radius:50%;width:3.8rem;height:3.8rem;display:grid;place-items:center;font:2.2rem/1 Georgia,serif;background:#2a4035;color:#f9db8f;border:3px double #ecd89f;box-shadow:0 2px 12px #101a15aa;}
+.sff .sff-result {font-size:.92rem;font-weight:650;color:var(--sf-field-gold);}
+@media(hover:hover) {
+  .sff .sff-map-pin:hover {outline:2px solid #edcf8f;outline-offset:2px;}
+  .sff button.sff-index-item:hover,.sff .sff-option:hover,.sff .sff-evidence:not(:disabled):hover,.sff .sff-secondary:hover {border-color:#c9ac77;background:#304341;}
+  .sff .sff-primary:not(:disabled):hover {filter:brightness(1.08);}
+}
+@media(max-width:650px) {
+  .sff .sff-layout,.sff .sff-report {grid-template-columns:1fr;}
+  .sff .sff-title {font-size:1.35rem;}.sff .sff-intro {font-size:.85rem;}
+  .sff .sff-head {margin-bottom:.65rem;}.sff .sff-note {display:block;min-height:5rem;}
+  .sff .sff-note::after {content:"";display:block;clear:both;}
+  .sff .sff-note.sff-unopened .sff-big-glass,.sff .sff-face {float:left;width:3rem;height:3rem;margin:0 .65rem .3rem 0;}
+  .sff .sff-detail {float:left;width:34%;min-width:5.4rem;max-width:9.7rem;aspect-ratio:1.5;margin:0 .65rem .25rem 0;}
+  .sff .sff-note h4 {margin:.02rem 0 .15rem;font-size:1rem;}.sff .sff-note p {font-size:.79rem;line-height:1.48;}
+  .sff .sff-controls {gap:.37rem;}.sff .sff-controls .sff-progress {order:3;flex-basis:100%;}
+  .sff button.sff-map-pin {width:2rem;height:2rem;font-size:.9rem;}
+  .sff .sff-index-item {font-size:.72rem;}
+}
